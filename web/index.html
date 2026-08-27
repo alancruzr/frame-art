@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Frame Art — ver en tu espacio</title>
+  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
+</head>
+<body>
+  <h1 id="title">Frame Art</h1>
+  <p>iPhone: AR Quick Look (USDZ). Android: Scene Viewer / WebXR (GLB).</p>
+  <model-viewer id="viewer" src="model.glb" ios-src="model.usdz" alt="Obra de Frame Art" ar ar-modes="webxr scene-viewer quick-look" ar-placement="wall" camera-controls>
+    <button slot="ar-button">Ver en mi espacio</button>
+  </model-viewer>
+  <p>Sirve esta carpeta por HTTPS (GitHub Pages) y coloca model.glb y model.usdz junto a index.html.</p>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const title = params.get('title') || 'Frame Art';
+    const glb = params.get('glb') || 'model.glb';
+    const usdz = params.get('usdz') || 'model.usdz';
+    document.title = title + ' — Frame Art';
+    document.getElementById('title').textContent = title;
+    const viewer = document.getElementById('viewer');
+    viewer.src = glb;
+    viewer.setAttribute('ios-src', usdz);
+    viewer.setAttribute('alt', title);
+  </script>
+</body>
+</html>
