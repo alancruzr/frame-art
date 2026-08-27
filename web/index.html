@@ -4,26 +4,190 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Frame Art — ver en tu espacio</title>
+  <meta name="description" content="Un enlace para ver la obra en AR: Quick Look en iPhone, Scene Viewer / model-viewer en Android.">
   <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: Canvas;
+      --fg: CanvasText;
+      --muted: color-mix(in srgb, CanvasText 55%, Canvas);
+      --accent: #4f6b4f;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      height: 100%;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+    }
+    header {
+      padding: 1rem 1.25rem 0.5rem;
+    }
+    h1 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin: 0 0 0.25rem;
+    }
+    p.lead {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+    model-viewer {
+      width: 100%;
+      height: min(72vh, 640px);
+      background: color-mix(in srgb, Canvas 92%, CanvasText 8%);
+    }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      padding: 1rem 1.25rem 2rem;
+    }
+    a.btn, button.btn {
+      appearance: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      padding: 0.6rem 1rem;
+      border-radius: 10px;
+      border: 1px solid color-mix(in srgb, CanvasText 18%, Canvas);
+      background: var(--accent);
+      color: #fff;
+      text-decoration: none;
+      font: inherit;
+      font-weight: 600;
+    }
+    a.btn.secondary {
+      background: transparent;
+      color: var(--fg);
+    }
+    .note {
+      padding: 0 1.25rem 2rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.45;
+    }
+    .missing {
+      margin: 1.5rem 1.25rem;
+      padding: 1rem;
+      border-radius: 12px;
+      border: 1px dashed color-mix(in srgb, CanvasText 25%, Canvas);
+    }
+    /* model-viewer AR button */
+    #ar-button {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 0.7rem 1.1rem;
+      font: inherit;
+      font-weight: 600;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: 16px;
+      min-height: 44px;
+    }
+    .ios-ar {
+      /* Apple requires a child img inside rel=ar anchors */
+      display: none;
+    }
+  </style>
 </head>
 <body>
-  <h1 id="title">Frame Art</h1>
-  <p>iPhone: AR Quick Look (USDZ). Android: Scene Viewer / WebXR (GLB).</p>
-  <model-viewer id="viewer" src="model.glb" ios-src="model.usdz" alt="Obra de Frame Art" ar ar-modes="webxr scene-viewer quick-look" ar-placement="wall" camera-controls>
-    <button slot="ar-button">Ver en mi espacio</button>
+  <header>
+    <h1 id="title">Frame Art</h1>
+    <p class="lead" id="lead">Abre este enlace en el teléfono. iPhone usa AR Quick Look (USDZ). Android usa Scene Viewer o WebXR (GLB).</p>
+  </header>
+
+  <model-viewer
+    id="viewer"
+    src="model.glb"
+    ios-src="model.usdz"
+    alt="Obra de Frame Art"
+    ar
+    ar-modes="webxr scene-viewer quick-look"
+    ar-placement="wall"
+    camera-controls
+    touch-action="pan-y"
+    shadow-intensity="0.4"
+    exposure="1"
+  >
+    <button id="ar-button" slot="ar-button">Ver en mi espacio</button>
   </model-viewer>
-  <p>Sirve esta carpeta por HTTPS (GitHub Pages) y coloca model.glb y model.usdz junto a index.html.</p>
+
+  <!-- Fallback nativo por plataforma si model-viewer no lanza AR -->
+  <div class="actions">
+    <a id="ios-ar" class="btn ios-ar" rel="ar" href="model.usdz">
+      <img alt="" width="1" height="1" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7">
+      Ver en Quick Look (iPhone)
+    </a>
+    <a id="android-ar" class="btn secondary" href="#">Ver en Scene Viewer (Android)</a>
+  </div>
+
+  <p class="note">
+    El cliente no instala Frame Art. Este visor público es el enlace único:
+    Safari en iOS abre Quick Look con el USDZ (<code>rel="ar"</code> / <code>ios-src</code>);
+    Chrome en Android abre WebXR o Scene Viewer con el GLB
+    (<code>ar-modes="webxr scene-viewer quick-look"</code>, <code>ar-placement="wall"</code>).
+    Sirve la carpeta <code>web/</code> por HTTPS (GitHub Pages).
+  </p>
+  <div id="missing" class="missing" hidden>
+    Faltan <code>model.glb</code> y/o <code>model.usdz</code> junto a esta página.
+    Copia los archivos exportados por la app iOS a esta carpeta, o pasa
+    <code>?glb=archivo.glb&amp;usdz=archivo.usdz&amp;title=Mi%20obra</code>.
+  </div>
+
   <script>
-    const params = new URLSearchParams(location.search);
-    const title = params.get('title') || 'Frame Art';
-    const glb = params.get('glb') || 'model.glb';
-    const usdz = params.get('usdz') || 'model.usdz';
-    document.title = title + ' — Frame Art';
-    document.getElementById('title').textContent = title;
-    const viewer = document.getElementById('viewer');
-    viewer.src = glb;
-    viewer.setAttribute('ios-src', usdz);
-    viewer.setAttribute('alt', title);
+    (function () {
+      const params = new URLSearchParams(location.search);
+      const title = params.get("title") || "Frame Art";
+      const glb = params.get("glb") || "model.glb";
+      const usdz = params.get("usdz") || "model.usdz";
+      const poster = params.get("poster");
+      const placement = params.get("placement") || "wall";
+
+      document.title = title + " — Frame Art";
+      document.getElementById("title").textContent = title;
+
+      const viewer = document.getElementById("viewer");
+      viewer.src = glb;
+      viewer.setAttribute("ios-src", usdz);
+      viewer.setAttribute("alt", title);
+      viewer.setAttribute("ar-placement", placement);
+      if (poster) viewer.setAttribute("poster", poster);
+
+      const ios = document.getElementById("ios-ar");
+      ios.href = usdz;
+
+      const glbURL = new URL(glb, location.href).href;
+      const fallback = new URL(location.href);
+      const intent =
+        "intent://arvr.google.com/scene-viewer/1.2?file=" +
+        encodeURIComponent(glbURL) +
+        "&mode=ar_preferred&title=" + encodeURIComponent(title) +
+        "&enable_vertical_placement=" + (placement === "wall" ? "true" : "false") +
+        "#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;S.browser_fallback_url=" +
+        encodeURIComponent(fallback.toString()) +
+        ";end;";
+      document.getElementById("android-ar").href = intent;
+
+      const ua = navigator.userAgent || "";
+      const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+      const isAndroid = /Android/i.test(ua);
+      ios.style.display = isIOS ? "inline-flex" : "none";
+      if (!isAndroid) {
+        document.getElementById("android-ar").style.display = "none";
+      }
+
+      viewer.addEventListener("error", function () {
+        document.getElementById("missing").hidden = false;
+      });
+    })();
   </script>
 </body>
 </html>
