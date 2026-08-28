@@ -18,22 +18,36 @@ struct ArtworkDetailView: View {
                     .listRowInsets(EdgeInsets())
             }
 
-            Section("Datos") {
+            Section {
                 TextField("Título", text: $piece.title)
-                Stepper(value: $piece.widthCentimeters, in: 10...400, step: 1) {
-                    LabeledContent("Ancho") {
-                        Text("\(Int(piece.widthCentimeters)) cm")
+                if piece.kind == .scan3D {
+                    LabeledContent("Tamaño") {
+                        Text("Del escaneo")
                     }
-                }
-                if let image = ArtworkFileStore.loadImage(for: piece), image.size.width > 0 {
-                    let height = piece.widthCentimeters * (image.size.height / image.size.width)
-                    LabeledContent("Alto estimado") {
-                        Text("\(Int(height.rounded())) cm")
+                } else {
+                    Stepper(value: $piece.widthCentimeters, in: 10...400, step: 1) {
+                        LabeledContent("Ancho real") {
+                            Text("\(Int(piece.widthCentimeters)) cm")
+                        }
                     }
-                    .foregroundStyle(.secondary)
+                    if let image = ArtworkFileStore.loadImage(for: piece), image.size.width > 0 {
+                        let height = piece.widthCentimeters * (image.size.height / image.size.width)
+                        LabeledContent("Alto estimado") {
+                            Text("\(Int(height.rounded())) cm")
+                        }
+                        .foregroundStyle(.secondary)
+                    }
                 }
                 LabeledContent("Tipo") {
                     Text(piece.kind.title)
+                }
+            } header: {
+                Text("Datos")
+            } footer: {
+                if piece.kind == .scan3D {
+                    Text("El escaneo ya trae su tamaño.")
+                } else {
+                    Text("El cliente verá este tamaño real en su pared.")
                 }
             }
 
@@ -49,37 +63,37 @@ struct ArtworkDetailView: View {
             }
 
             Section {
-                if let usdzURL {
+                if let usdzURL, let glbURL {
+                    ShareLink(
+                        items: [usdzURL, glbURL],
+                        preview: SharePreview(piece.title, image: Image(systemName: "square.and.arrow.up"))
+                    ) {
+                        Label("Compartir con el cliente", systemImage: "square.and.arrow.up")
+                            .frame(minHeight: 44, alignment: .leading)
+                    }
+                } else if let usdzURL {
                     ShareLink(
                         item: usdzURL,
                         preview: SharePreview(piece.title, image: Image(systemName: "cube.transparent"))
                     ) {
-                        Label("Compartir para iPhone", systemImage: "square.and.arrow.up")
+                        Label("Compartir con el cliente", systemImage: "square.and.arrow.up")
                             .frame(minHeight: 44, alignment: .leading)
                     }
                 }
 
-                if let glbURL {
-                    ShareLink(
-                        item: glbURL,
-                        preview: SharePreview(piece.title, image: Image(systemName: "square.stack.3d.up"))
-                    ) {
-                        Label("Compartir para Android", systemImage: "square.and.arrow.up")
-                            .frame(minHeight: 44, alignment: .leading)
-                    }
-                } else if piece.kind == .scan3D {
-                    Text("Este escaneo se comparte como USDZ (iPhone). El GLB es para pinturas exportadas desde una foto.")
+                if piece.kind == .scan3D, glbURL == nil {
+                    Text("Este escaneo es USDZ (iPhone). Aún no hay GLB para Android.")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }
 
                 if isExporting {
-                    ProgressView("Preparando archivos…")
+                    ProgressView("Preparando la obra para AR…")
                 }
             } header: {
                 Text("Cliente")
             } footer: {
-                Text("El cliente no instala Frame Studio. En iPhone el USDZ abre Quick Look; en Android el GLB abre Scene Viewer. El visor de GitHub Pages es solo la cáscara: hay que adjuntar estos archivos o subirlos junto a la página.")
+                Text("iPhone abre el USDZ (Quick Look). Android abre el GLB (Scene Viewer). El cliente no instala Frame Studio.")
             }
         }
         .navigationTitle(piece.title.isEmpty ? "Obra" : piece.title)

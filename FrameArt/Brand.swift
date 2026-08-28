@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 enum FrameStudioBrand {
     static let hunter = Color(red: 0.12, green: 0.24, blue: 0.17)
@@ -13,5 +14,13 @@ extension View {
             .buttonStyle(.glassProminent)
             .controlSize(.large)
             .tint(FrameStudioBrand.hunter)
+    }
+}
+
+
+enum FrameStudioSettings {
+    static func open() {
+        guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
+        UIApplication.shared.open(url)
     }
 }

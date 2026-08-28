@@ -1,3 +1,4 @@
+import AVFoundation
 import PhotosUI
 import SwiftData
 import SwiftUI
@@ -27,7 +28,7 @@ struct AddArtworkView: View {
             Section {
                 if cameraAvailable {
                     Button {
-                        showCamera = true
+                        openCamera()
                     } label: {
                         Label("Tomar foto", systemImage: "camera")
                             .frame(minHeight: 44, alignment: .leading)
@@ -38,19 +39,19 @@ struct AddArtworkView: View {
                         .frame(minHeight: 44, alignment: .leading)
                 }
                 PhotosPicker(selection: $pickerItem, matching: .images) {
-                    Label("Elegir de la galería", systemImage: "photo.on.rectangle")
+                    Label("Elegir de Fotos", systemImage: "photo.on.rectangle")
                         .frame(minHeight: 44, alignment: .leading)
                 }
                 Button {
                     showFileImporter = true
                 } label: {
-                    Label("Importar archivo", systemImage: "folder")
+                    Label("Importar escaneo 3D (USDZ o Reality)", systemImage: "cube.transparent")
                         .frame(minHeight: 44, alignment: .leading)
                 }
             } header: {
                 Text("Origen")
             } footer: {
-                Text("Foto de una pintura, o un escaneo USDZ / Reality desde Archivos.")
+                Text("Foto de una pintura, o un escaneo 3D desde Archivos.")
             }
 
             if let selectedImage {
@@ -74,12 +75,29 @@ struct AddArtworkView: View {
                 }
             }
 
-            Section("Obra") {
+            Section {
                 TextField("Título", text: $title)
-                Stepper(value: $widthCentimeters, in: 10...400, step: 1) {
-                    LabeledContent("Ancho") {
-                        Text("\(Int(widthCentimeters)) cm")
+                if kind != .scan3D {
+                    Stepper(value: $widthCentimeters, in: 10...400, step: 1) {
+                        LabeledContent("Ancho real") {
+                            Text("\(Int(widthCentimeters)) cm")
+                        }
                     }
+                    if let selectedImage, selectedImage.size.width > 0 {
+                        let height = widthCentimeters * (selectedImage.size.height / selectedImage.size.width)
+                        LabeledContent("Alto estimado") {
+                            Text("\(Int(height.rounded())) cm")
+                        }
+                        .foregroundStyle(.secondary)
+                    }
+                }
+            } header: {
+                Text("Obra")
+            } footer: {
+                if kind == .scan3D {
+                    Text("El escaneo ya trae su tamaño.")
+                } else {
+                    Text("Este ancho es el tamaño en la pared. Mide el lado más ancho del marco.")
                 }
             }
         }
@@ -115,7 +133,7 @@ struct AddArtworkView: View {
             get: { errorMessage != nil },
             set: { if !$0 { errorMessage = nil } }
         )) {
-            Button("Aceptar", role: .cancel) {}
+            Button("Aceptar") {}
         } message: {
             Text(errorMessage ?? "")
         }
@@ -123,6 +141,15 @@ struct AddArtworkView: View {
 
     private var canSave: Bool {
         selectedImage != nil || importedUSDZ != nil
+    }
+
+    private func openCamera() {
+        switch AVCaptureDevice.authorizationStatus(for: .video) {
+        case .denied, .restricted:
+            FrameStudioSettings.open()
+        default:
+            showCamera = true
+        }
     }
 
     private func loadPickerItem(_ item: PhotosPickerItem?) async {

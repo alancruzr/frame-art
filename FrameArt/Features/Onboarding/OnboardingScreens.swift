@@ -1,5 +1,4 @@
 import AVFoundation
-import Photos
 import SwiftUI
 
 struct WelcomeScreen: View {
@@ -46,7 +45,6 @@ struct WelcomeScreen: View {
 struct GoalScreen: View {
     var store: OnboardingStore
     @State private var selectedID: String?
-    @State private var advanceTask: Task<Void, Never>?
 
     private let options: [OnboardingChoice] = [
         OnboardingChoice(id: "painting", title: "Pintura", systemImage: "photo.artframe", iconColor: FrameStudioBrand.gold),
@@ -55,31 +53,30 @@ struct GoalScreen: View {
     ]
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                Text("¿Qué vas a compartir primero?")
-                    .font(.largeTitle.bold())
-                    .fixedSize(horizontal: false, vertical: true)
+        VStack(spacing: 0) {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    Text("¿Qué vas a compartir primero?")
+                        .font(.largeTitle.bold())
+                        .fixedSize(horizontal: false, vertical: true)
 
-                OnboardingChoiceStack(options: options, selectedID: selectedID) { option in
-                    select(option.id)
+                    OnboardingChoiceStack(options: options, selectedID: selectedID) { option in
+                        selectedID = option.id
+                    }
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding()
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding()
-        }
-        .onDisappear {
-            advanceTask?.cancel()
-        }
-    }
 
-    private func select(_ id: String) {
-        selectedID = id
-        advanceTask?.cancel()
-        advanceTask = Task {
-            try? await Task.sleep(for: .milliseconds(300))
-            guard !Task.isCancelled else { return }
-            store.next()
+            Button {
+                store.next()
+            } label: {
+                Text("Continuar")
+                    .frame(maxWidth: .infinity, minHeight: 44)
+            }
+            .primaryButtonStyle()
+            .disabled(selectedID == nil)
+            .padding()
         }
     }
 }
@@ -87,7 +84,6 @@ struct GoalScreen: View {
 struct PainScreen: View {
     var store: OnboardingStore
     @State private var selectedID: String?
-    @State private var advanceTask: Task<Void, Never>?
 
     private let options: [OnboardingChoice] = [
         OnboardingChoice(id: "size", title: "El tamaño real", systemImage: "ruler", iconColor: FrameStudioBrand.gold),
@@ -96,89 +92,70 @@ struct PainScreen: View {
     ]
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                Text("¿Qué se pierde con una foto?")
-                    .font(.largeTitle.bold())
-                    .fixedSize(horizontal: false, vertical: true)
+        VStack(spacing: 0) {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    Text("¿Qué se pierde con una foto?")
+                        .font(.largeTitle.bold())
+                        .fixedSize(horizontal: false, vertical: true)
 
-                OnboardingChoiceStack(options: options, selectedID: selectedID) { option in
-                    select(option.id)
+                    OnboardingChoiceStack(options: options, selectedID: selectedID) { option in
+                        selectedID = option.id
+                    }
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding()
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding()
-        }
-        .onDisappear {
-            advanceTask?.cancel()
-        }
-    }
 
-    private func select(_ id: String) {
-        selectedID = id
-        advanceTask?.cancel()
-        advanceTask = Task {
-            try? await Task.sleep(for: .milliseconds(300))
-            guard !Task.isCancelled else { return }
-            store.next()
+            Button {
+                store.next()
+            } label: {
+                Text("Continuar")
+                    .frame(maxWidth: .infinity, minHeight: 44)
+            }
+            .primaryButtonStyle()
+            .disabled(selectedID == nil)
+            .padding()
         }
     }
 }
 
 struct PermissionsScreen: View {
     var store: OnboardingStore
-    @State private var cameraGranted = false
-    @State private var photosGranted = false
+    @State private var cameraStatus: AVAuthorizationStatus = .notDetermined
+
+    private var cameraGranted: Bool { cameraStatus == .authorized }
+    private var cameraBlocked: Bool { cameraStatus == .denied || cameraStatus == .restricted }
 
     var body: some View {
         VStack(spacing: 0) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
-                    Text("Cámara y fotos")
+                    Text("Cámara")
                         .font(.largeTitle.bold())
                         .fixedSize(horizontal: false, vertical: true)
 
-                    Text("Para fotografiar la obra y elegirla de la galería. Puedes hacerlo después en Ajustes.")
+                    Text("Para fotografiar la obra y verla en AR. Las fotos se eligen con el selector del sistema. Puedes hacerlo después en Ajustes.")
                         .font(.body)
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
 
-                    VStack(spacing: 12) {
-                        Button {
-                            Task { await requestCamera() }
-                        } label: {
-                            Label {
-                                Text("Cámara")
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                            } icon: {
-                                Image(systemName: cameraGranted ? "checkmark.circle.fill" : "camera")
-                                    .foregroundStyle(cameraGranted ? FrameStudioBrand.gold : FrameStudioBrand.sapphire)
-                            }
-                            .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                    Button {
+                        Task { await handleCameraTap() }
+                    } label: {
+                        Label {
+                            Text(cameraBlocked ? "Abrir Ajustes" : "Cámara")
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        } icon: {
+                            Image(systemName: cameraGranted ? "checkmark.circle.fill" : (cameraBlocked ? "gear" : "camera"))
+                                .foregroundStyle(cameraGranted ? FrameStudioBrand.gold : FrameStudioBrand.sapphire)
                         }
-                        .buttonStyle(.bordered)
-                        .controlSize(.large)
-                        .accessibilityLabel("Cámara")
-                        .accessibilityValue(cameraGranted ? "Permitido" : "No permitido")
-
-                        Button {
-                            Task { await requestPhotos() }
-                        } label: {
-                            Label {
-                                Text("Fotos")
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                            } icon: {
-                                Image(systemName: photosGranted ? "checkmark.circle.fill" : "photo.on.rectangle")
-                                    .foregroundStyle(photosGranted ? FrameStudioBrand.gold : FrameStudioBrand.sapphire)
-                            }
-                            .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
-                        }
-                        .buttonStyle(.bordered)
-                        .controlSize(.large)
-                        .accessibilityLabel("Fotos")
-                        .accessibilityValue(photosGranted ? "Permitido" : "No permitido")
+                        .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
                     }
-
+                    .buttonStyle(.bordered)
+                    .controlSize(.large)
+                    .accessibilityLabel(cameraBlocked ? "Abrir Ajustes" : "Cámara")
+                    .accessibilityValue(cameraGranted ? "Permitido" : "No permitido")
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding()
@@ -194,24 +171,20 @@ struct PermissionsScreen: View {
             .padding()
         }
         .onAppear {
-            refreshAuthorization()
+            cameraStatus = AVCaptureDevice.authorizationStatus(for: .video)
         }
     }
 
-    private func refreshAuthorization() {
-        cameraGranted = AVCaptureDevice.authorizationStatus(for: .video) == .authorized
-        let photos = PHPhotoLibrary.authorizationStatus(for: .readWrite)
-        photosGranted = photos == .authorized || photos == .limited
-    }
-
-    private func requestCamera() async {
-        let granted = await AVCaptureDevice.requestAccess(for: .video)
-        cameraGranted = granted
-    }
-
-    private func requestPhotos() async {
-        let status = await PHPhotoLibrary.requestAuthorization(for: .readWrite)
-        photosGranted = status == .authorized || status == .limited
+    private func handleCameraTap() async {
+        switch AVCaptureDevice.authorizationStatus(for: .video) {
+        case .notDetermined:
+            let granted = await AVCaptureDevice.requestAccess(for: .video)
+            cameraStatus = granted ? .authorized : .denied
+        case .denied, .restricted:
+            FrameStudioSettings.open()
+        default:
+            cameraStatus = AVCaptureDevice.authorizationStatus(for: .video)
+        }
     }
 }
 
