@@ -7,11 +7,11 @@ enum FrameStudioBrand {
 }
 
 extension View {
-    /// HIG: system `borderedProminent` with gold as tint only — no custom chrome.
+    /// System prominent button. Hunter tint for contrast in light and dark.
     func primaryButtonStyle() -> some View {
         self
-            .buttonStyle(.borderedProminent)
+            .buttonStyle(.glassProminent)
             .controlSize(.large)
-            .tint(FrameStudioBrand.gold)
+            .tint(FrameStudioBrand.hunter)
     }
 }

@@ -179,9 +179,6 @@ struct PermissionsScreen: View {
                         .accessibilityValue(photosGranted ? "Permitido" : "No permitido")
                     }
 
-                    Text("Puedes hacerlo después en Ajustes.")
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding()

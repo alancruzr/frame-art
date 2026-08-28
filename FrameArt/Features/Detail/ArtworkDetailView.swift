@@ -42,14 +42,20 @@ struct ArtworkDetailView: View {
                     showAR = true
                 } label: {
                     Label("Ver en mi espacio", systemImage: "cube.transparent")
+                        .frame(minHeight: 44, alignment: .leading)
                 }
+            } footer: {
+                Text("Coloca la obra en una pared con ARKit. Hace falta un iPhone o iPad real.")
+            }
 
+            Section {
                 if let usdzURL {
                     ShareLink(
                         item: usdzURL,
                         preview: SharePreview(piece.title, image: Image(systemName: "cube.transparent"))
                     ) {
-                        Label("Compartir USDZ (iPhone)", systemImage: "square.and.arrow.up")
+                        Label("Compartir para iPhone", systemImage: "square.and.arrow.up")
+                            .frame(minHeight: 44, alignment: .leading)
                     }
                 }
 
@@ -58,23 +64,22 @@ struct ArtworkDetailView: View {
                         item: glbURL,
                         preview: SharePreview(piece.title, image: Image(systemName: "square.stack.3d.up"))
                     ) {
-                        Label("Compartir GLB (Android)", systemImage: "square.and.arrow.up")
+                        Label("Compartir para Android", systemImage: "square.and.arrow.up")
+                            .frame(minHeight: 44, alignment: .leading)
                     }
                 } else if piece.kind == .scan3D {
-                    Text("Este escaneo 3D es USDZ (iPhone). El visor público con GLB es para pinturas exportadas desde una foto.")
+                    Text("Este escaneo se comparte como USDZ (iPhone). El GLB es para pinturas exportadas desde una foto.")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
-                }
-
-                ShareLink(item: publicViewerURL) {
-                    Label("Enlace del visor público", systemImage: "link")
                 }
 
                 if isExporting {
                     ProgressView("Preparando archivos…")
                 }
+            } header: {
+                Text("Cliente")
             } footer: {
-                Text("El visor https://alancruzr.github.io/frame-art/ abre Quick Look en iPhone y Scene Viewer en Android. Sube el USDZ y el GLB junto a esa página (o pásalos en la query). Los archivos sueltos sirven para Mensajes, WhatsApp y Archivos.")
+                Text("El cliente no instala Frame Studio. En iPhone el USDZ abre Quick Look; en Android el GLB abre Scene Viewer. El visor de GitHub Pages es solo la cáscara: hay que adjuntar estos archivos o subirlos junto a la página.")
             }
         }
         .navigationTitle(piece.title.isEmpty ? "Obra" : piece.title)
@@ -95,16 +100,6 @@ struct ArtworkDetailView: View {
         }
     }
 
-    private var publicViewerURL: URL {
-        var components = URLComponents(string: "https://alancruzr.github.io/frame-art/")!
-        var items: [URLQueryItem] = []
-        if !piece.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            items.append(URLQueryItem(name: "title", value: piece.title))
-        }
-        components.queryItems = items.isEmpty ? nil : items
-        return components.url!
-    }
-
     private var exportToken: String {
         "\(piece.id.uuidString)-\(piece.widthCentimeters)-\(piece.title)"
     }
@@ -116,6 +111,7 @@ struct ArtworkDetailView: View {
                 .resizable()
                 .scaledToFit()
                 .frame(maxHeight: 280)
+                .accessibilityLabel("Imagen de \(piece.title.isEmpty ? "la obra" : piece.title)")
         } else {
             ContentUnavailableView(
                 piece.kind.title,

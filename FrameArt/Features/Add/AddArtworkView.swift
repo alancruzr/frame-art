@@ -6,6 +6,7 @@ import UniformTypeIdentifiers
 
 struct AddArtworkView: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.dismiss) private var dismiss
 
     @State private var title = ""
     @State private var widthCentimeters: Double = 60
@@ -16,35 +17,40 @@ struct AddArtworkView: View {
     @State private var showCamera = false
     @State private var showFileImporter = false
     @State private var errorMessage: String?
-    @State private var didSave = false
+
+    private var cameraAvailable: Bool {
+        UIImagePickerController.isSourceTypeAvailable(.camera)
+    }
 
     var body: some View {
         Form {
-            Section("Obra") {
-                TextField("Título", text: $title)
-                Stepper(value: $widthCentimeters, in: 10...400, step: 1) {
-                    LabeledContent("Ancho") {
-                        Text("\(Int(widthCentimeters)) cm")
-                    }
-                }
-            }
-
-            Section("Origen") {
-                PhotosPicker(selection: $pickerItem, matching: .images) {
-                    Label("Elegir de la galería", systemImage: "photo.on.rectangle")
-                }
-                if UIImagePickerController.isSourceTypeAvailable(.camera) {
+            Section {
+                if cameraAvailable {
                     Button {
                         showCamera = true
                     } label: {
                         Label("Tomar foto", systemImage: "camera")
+                            .frame(minHeight: 44, alignment: .leading)
                     }
+                } else {
+                    Label("Cámara no disponible en este dispositivo", systemImage: "camera")
+                        .foregroundStyle(.secondary)
+                        .frame(minHeight: 44, alignment: .leading)
+                }
+                PhotosPicker(selection: $pickerItem, matching: .images) {
+                    Label("Elegir de la galería", systemImage: "photo.on.rectangle")
+                        .frame(minHeight: 44, alignment: .leading)
                 }
                 Button {
                     showFileImporter = true
                 } label: {
                     Label("Importar archivo", systemImage: "folder")
+                        .frame(minHeight: 44, alignment: .leading)
                 }
+            } header: {
+                Text("Origen")
+            } footer: {
+                Text("Foto de una pintura, o un escaneo USDZ / Reality desde Archivos.")
             }
 
             if let selectedImage {
@@ -55,6 +61,7 @@ struct AddArtworkView: View {
                         .frame(maxHeight: 240)
                         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                         .listRowInsets(EdgeInsets())
+                        .accessibilityLabel("Vista previa de la pintura")
                     Text(ArtworkKind.paintingPhoto.title)
                         .foregroundStyle(.secondary)
                 }
@@ -67,16 +74,30 @@ struct AddArtworkView: View {
                 }
             }
 
-            Section {
-                Button("Guardar obra") {
+            Section("Obra") {
+                TextField("Título", text: $title)
+                Stepper(value: $widthCentimeters, in: 10...400, step: 1) {
+                    LabeledContent("Ancho") {
+                        Text("\(Int(widthCentimeters)) cm")
+                    }
+                }
+            }
+        }
+        .navigationTitle("Nueva obra")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .cancellationAction) {
+                Button("Cancelar") {
+                    dismiss()
+                }
+            }
+            ToolbarItem(placement: .confirmationAction) {
+                Button("Guardar") {
                     save()
                 }
                 .disabled(!canSave)
-            } footer: {
-                Text("Se exportan USDZ (iPhone) y GLB (Android) para compartir el mismo visor público.")
             }
         }
-        .navigationTitle("Nueva")
         .onChange(of: pickerItem) { _, item in
             Task { await loadPickerItem(item) }
         }
@@ -97,11 +118,6 @@ struct AddArtworkView: View {
             Button("Aceptar", role: .cancel) {}
         } message: {
             Text(errorMessage ?? "")
-        }
-        .alert("Obra guardada", isPresented: $didSave) {
-            Button("Aceptar", role: .cancel) {}
-        } message: {
-            Text("La encuentras en la pestaña Obras.")
         }
     }
 
@@ -183,20 +199,10 @@ struct AddArtworkView: View {
             }
             modelContext.insert(piece)
             try modelContext.save()
-            resetForm()
-            didSave = true
+            dismiss()
         } catch {
             ArtworkFileStore.deleteFiles(for: piece)
             errorMessage = error.localizedDescription
         }
-    }
-
-    private func resetForm() {
-        title = ""
-        widthCentimeters = 60
-        pickerItem = nil
-        selectedImage = nil
-        importedUSDZ = nil
-        kind = .paintingPhoto
     }
 }
