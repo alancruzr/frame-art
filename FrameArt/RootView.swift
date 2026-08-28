@@ -15,6 +15,8 @@ struct RootView: View {
                 }
             }
         }
+        // iOS 26: system tab bar collapses on scroll. Do not paint a custom tab background.
+        .tabBarMinimizeBehavior(.onScrollDown)
     }
 }
 

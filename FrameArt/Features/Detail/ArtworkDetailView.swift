@@ -66,11 +66,15 @@ struct ArtworkDetailView: View {
                         .foregroundStyle(.secondary)
                 }
 
+                ShareLink(item: publicViewerURL) {
+                    Label("Enlace del visor público", systemImage: "link")
+                }
+
                 if isExporting {
                     ProgressView("Preparando archivos…")
                 }
             } footer: {
-                Text("Un solo enlace público (web/index.html en GitHub Pages) abre Quick Look en iPhone y Scene Viewer / model-viewer en Android. Los archivos sueltos sirven para Mensajes, WhatsApp y Archivos.")
+                Text("El visor https://alancruzr.github.io/frame-art/ abre Quick Look en iPhone y Scene Viewer en Android. Sube el USDZ y el GLB junto a esa página (o pásalos en la query). Los archivos sueltos sirven para Mensajes, WhatsApp y Archivos.")
             }
         }
         .navigationTitle(piece.title.isEmpty ? "Obra" : piece.title)
@@ -89,6 +93,16 @@ struct ArtworkDetailView: View {
         } message: {
             Text(errorMessage ?? "")
         }
+    }
+
+    private var publicViewerURL: URL {
+        var components = URLComponents(string: "https://alancruzr.github.io/frame-art/")!
+        var items: [URLQueryItem] = []
+        if !piece.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            items.append(URLQueryItem(name: "title", value: piece.title))
+        }
+        components.queryItems = items.isEmpty ? nil : items
+        return components.url!
     }
 
     private var exportToken: String {

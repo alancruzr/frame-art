@@ -23,6 +23,10 @@
 		FA000000000000000000007F /* ArtworkDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA000000000000000000007E /* ArtworkDetailView.swift */; };
 		FA0000000000000000000081 /* ArtworkARView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0000000000000000000080 /* ArtworkARView.swift */; };
 		FA0000000000000000000083 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FA0000000000000000000082 /* Assets.xcassets */; };
+		FA0000000000000000000085 /* Brand.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0000000000000000000084 /* Brand.swift */; };
+		FA0000000000000000000087 /* OnboardingStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0000000000000000000086 /* OnboardingStore.swift */; };
+		FA0000000000000000000089 /* OnboardingContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0000000000000000000088 /* OnboardingContainerView.swift */; };
+		FA000000000000000000008B /* OnboardingScreens.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA000000000000000000008A /* OnboardingScreens.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -43,6 +47,10 @@
 		FA000000000000000000007E /* ArtworkDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArtworkDetailView.swift; sourceTree = "<group>"; };
 		FA0000000000000000000080 /* ArtworkARView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArtworkARView.swift; sourceTree = "<group>"; };
 		FA0000000000000000000082 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		FA0000000000000000000084 /* Brand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Brand.swift; sourceTree = "<group>"; };
+		FA0000000000000000000086 /* OnboardingStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingStore.swift; sourceTree = "<group>"; };
+		FA0000000000000000000088 /* OnboardingContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingContainerView.swift; sourceTree = "<group>"; };
+		FA000000000000000000008A /* OnboardingScreens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingScreens.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -77,6 +85,7 @@
 			children = (
 				FA0000000000000000000064 /* FrameArtApp.swift */,
 				FA0000000000000000000066 /* RootView.swift */,
+				FA0000000000000000000084 /* Brand.swift */,
 				FA0000000000000000000014 /* Models */,
 				FA0000000000000000000015 /* Storage */,
 				FA0000000000000000000016 /* Export */,
@@ -117,6 +126,7 @@
 		FA0000000000000000000017 /* Features */ = {
 			isa = PBXGroup;
 			children = (
+				FA000000000000000000001C /* Onboarding */,
 				FA0000000000000000000018 /* Gallery */,
 				FA0000000000000000000019 /* Add */,
 				FA000000000000000000001A /* Detail */,
@@ -157,6 +167,16 @@
 				FA0000000000000000000080 /* ArtworkARView.swift */,
 			);
 			path = AR;
+			sourceTree = "<group>";
+		};
+		FA000000000000000000001C /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				FA0000000000000000000086 /* OnboardingStore.swift */,
+				FA0000000000000000000088 /* OnboardingContainerView.swift */,
+				FA000000000000000000008A /* OnboardingScreens.swift */,
+			);
+			path = Onboarding;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -244,6 +264,10 @@
 				FA000000000000000000007D /* ArtworkUTTypes.swift in Sources */,
 				FA000000000000000000007F /* ArtworkDetailView.swift in Sources */,
 				FA0000000000000000000081 /* ArtworkARView.swift in Sources */,
+				FA0000000000000000000085 /* Brand.swift in Sources */,
+				FA0000000000000000000087 /* OnboardingStore.swift in Sources */,
+				FA0000000000000000000089 /* OnboardingContainerView.swift in Sources */,
+				FA000000000000000000008B /* OnboardingScreens.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -320,11 +344,12 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = "Frame Art";
+				INFOPLIST_KEY_CFBundleDisplayName = "Frame Studio";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.graphics-design";
-				INFOPLIST_KEY_NSCameraUsageDescription = "Frame Art usa la cámara para fotografiar tus pinturas y para la vista previa en AR.";
-				INFOPLIST_KEY_NSPhotoLibraryPickerUsageDescription = "Frame Art usa el selector de fotos para añadir una pintura.";
-				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Frame Art usa tu fototeca para importar fotos de pinturas.";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Frame Studio usa la cámara para fotografiar tus pinturas y para la vista previa en AR.";
+				INFOPLIST_KEY_NSPhotoLibraryPickerUsageDescription = "Frame Studio usa el selector de fotos para añadir una pintura.";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Frame Studio guarda exportaciones de tus obras cuando las compartes.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Frame Studio usa tu fototeca para importar fotos de pinturas.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -355,11 +380,12 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = "Frame Art";
+				INFOPLIST_KEY_CFBundleDisplayName = "Frame Studio";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.graphics-design";
-				INFOPLIST_KEY_NSCameraUsageDescription = "Frame Art usa la cámara para fotografiar tus pinturas y para la vista previa en AR.";
-				INFOPLIST_KEY_NSPhotoLibraryPickerUsageDescription = "Frame Art usa el selector de fotos para añadir una pintura.";
-				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Frame Art usa tu fototeca para importar fotos de pinturas.";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Frame Studio usa la cámara para fotografiar tus pinturas y para la vista previa en AR.";
+				INFOPLIST_KEY_NSPhotoLibraryPickerUsageDescription = "Frame Studio usa el selector de fotos para añadir una pintura.";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Frame Studio guarda exportaciones de tus obras cuando las compartes.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Frame Studio usa tu fototeca para importar fotos de pinturas.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
