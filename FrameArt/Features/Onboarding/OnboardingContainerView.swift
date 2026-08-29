@@ -28,12 +28,12 @@ struct OnboardingContainerView: View {
                         }
                     }
                     ToolbarItem(placement: .principal) {
-                        ProgressView(value: Double(store.step + 1), total: 4)
+                        ProgressView(value: Double(store.step + 1), total: 5)
                             .progressViewStyle(.linear)
                             .frame(maxWidth: 140)
                             .tint(FrameStudioBrand.gold)
                             .accessibilityLabel("Progreso")
-                            .accessibilityValue("Paso \(store.step + 1) de 4")
+                            .accessibilityValue("Paso \(store.step + 1) de 5")
                     }
                     ToolbarItem(placement: .topBarTrailing) {
                         Button("Saltar") {
@@ -51,8 +51,10 @@ struct OnboardingContainerView: View {
         case 0:
             WelcomeScreen(store: store)
         case 1:
-            GoalScreen(store: store)
+            ProfileScreen(store: store)
         case 2:
+            GoalScreen(store: store)
+        case 3:
             PainScreen(store: store)
         default:
             PermissionsScreen(store: store)

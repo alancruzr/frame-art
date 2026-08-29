@@ -27,6 +27,7 @@
 		FA0000000000000000000087 /* OnboardingStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0000000000000000000086 /* OnboardingStore.swift */; };
 		FA0000000000000000000089 /* OnboardingContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0000000000000000000088 /* OnboardingContainerView.swift */; };
 		FA000000000000000000008B /* OnboardingScreens.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA000000000000000000008A /* OnboardingScreens.swift */; };
+		FA000000000000000000008D /* ArtistProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA000000000000000000008C /* ArtistProfile.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -51,6 +52,7 @@
 		FA0000000000000000000086 /* OnboardingStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingStore.swift; sourceTree = "<group>"; };
 		FA0000000000000000000088 /* OnboardingContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingContainerView.swift; sourceTree = "<group>"; };
 		FA000000000000000000008A /* OnboardingScreens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingScreens.swift; sourceTree = "<group>"; };
+		FA000000000000000000008C /* ArtistProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArtistProfile.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -86,6 +88,7 @@
 				FA0000000000000000000064 /* FrameArtApp.swift */,
 				FA0000000000000000000066 /* RootView.swift */,
 				FA0000000000000000000084 /* Brand.swift */,
+				FA000000000000000000008C /* ArtistProfile.swift */,
 				FA0000000000000000000014 /* Models */,
 				FA0000000000000000000015 /* Storage */,
 				FA0000000000000000000016 /* Export */,
@@ -268,6 +271,7 @@
 				FA0000000000000000000087 /* OnboardingStore.swift in Sources */,
 				FA0000000000000000000089 /* OnboardingContainerView.swift in Sources */,
 				FA000000000000000000008B /* OnboardingScreens.swift in Sources */,
+				FA000000000000000000008D /* ArtistProfile.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

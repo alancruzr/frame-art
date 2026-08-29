@@ -7,6 +7,7 @@ struct ArtworkListView: View {
     @State private var query = ""
     @State private var showAdd = false
     @State private var pendingDelete: ArtworkPiece?
+    @State private var profile = ArtistProfile.shared
 
     private var filtered: [ArtworkPiece] {
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -55,7 +56,7 @@ struct ArtworkListView: View {
                 }
             }
         }
-        .navigationTitle("Obras")
+        .navigationTitle(profile.hasStudioName ? profile.displayName : "Obras")
         .searchable(text: $query, prompt: "Buscar obras")
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
