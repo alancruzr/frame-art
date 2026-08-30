@@ -8,6 +8,8 @@ struct ArtworkListView: View {
     @State private var showAdd = false
     @State private var pendingDelete: ArtworkPiece?
     @State private var profile = ArtistProfile.shared
+    @State private var router = DeepLinkRouter.shared
+    @State private var openedPiece: ArtworkPiece?
 
     private var filtered: [ArtworkPiece] {
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -68,6 +70,20 @@ struct ArtworkListView: View {
                 .accessibilityLabel("Añadir obra")
             }
         }
+        .navigationDestination(isPresented: Binding(
+            get: { openedPiece != nil },
+            set: { if !$0 { openedPiece = nil; router.consumeArtistPiece() } }
+        )) {
+            if let openedPiece {
+                ArtworkDetailView(piece: openedPiece)
+            }
+        }
+        .onChange(of: router.artistPieceID) { _, id in
+            openArtistPiece(id: id)
+        }
+        .onAppear {
+            openArtistPiece(id: router.artistPieceID)
+        }
         .sheet(isPresented: $showAdd) {
             NavigationStack {
                 AddArtworkView()
@@ -95,14 +111,25 @@ struct ArtworkListView: View {
         }
     }
 
+    private func openArtistPiece(id: UUID?) {
+        guard let id else { return }
+        openedPiece = pieces.first(where: { $0.id == id })
+    }
+
     private func accessibilityLabel(for piece: ArtworkPiece) -> String {
         let name = piece.title.isEmpty ? "Sin título" : piece.title
         return "\(name), \(piece.kind.title), \(Int(piece.widthCentimeters)) centímetros"
     }
 
     private func delete(_ piece: ArtworkPiece) {
+        let studio = ArtistProfile.shared.slug
+        let artwork = piece.publicSlug
         ArtworkFileStore.deleteFiles(for: piece)
         modelContext.delete(piece)
+        guard !studio.isEmpty, !artwork.isEmpty else { return }
+        Task {
+            await ArtworkPublisher.unpublishBestEffort(studio: studio, artwork: artwork)
+        }
     }
 }
 

@@ -1,18 +1,27 @@
 import Foundation
 import UIKit
 
-/// Minimal glTF 2.0 / GLB writer for a textured vertical plane.
+/// Minimal glTF 2.0 / GLB writer for a textured 8 mm slab (not a zero-thickness plane).
 /// Scene Viewer, WebXR and `<model-viewer>` consume this on Android and the web.
 enum GLBExporter {
+    static let thicknessMeters: Float = 0.008
+
     static func exportPainting(
         image: UIImage,
         widthCentimeters: Double,
+        heightCentimeters: Double,
         title: String,
         to destination: URL
     ) throws {
         let prepared = image.normalizedUpright().resized(maxDimension: 2048)
         let widthM = Float(widthCentimeters / 100.0)
-        let heightM = widthM * Float(prepared.size.height / max(prepared.size.width, 1))
+        let heightCm: Double = {
+            if heightCentimeters >= 1 { return heightCentimeters }
+            let aspect = Double(prepared.size.height / max(prepared.size.width, 1))
+            guard aspect > 0 else { return widthCentimeters }
+            return (widthCentimeters * aspect).rounded()
+        }()
+        let heightM = Float(max(heightCm, 2) / 100.0)
 
         guard let jpeg = prepared.jpegData(compressionQuality: 0.9) else {
             throw ExportError.imageEncodingFailed
@@ -22,6 +31,7 @@ enum GLBExporter {
             jpeg: jpeg,
             halfWidth: widthM / 2,
             halfHeight: heightM / 2,
+            halfThick: thicknessMeters / 2,
             title: title
         )
         if FileManager.default.fileExists(atPath: destination.path) {
@@ -34,6 +44,7 @@ enum GLBExporter {
         jpeg: Data,
         halfWidth: Float,
         halfHeight: Float,
+        halfThick: Float,
         title: String
     ) throws -> Data {
         var bin = Data()
@@ -45,33 +56,49 @@ enum GLBExporter {
             }
         }
 
-        // POSITION: BL, BR, TR, TL  (Y-up, normal +Z)
+        let hw = halfWidth
+        let hh = halfHeight
+        let ht = halfThick
+
+        // 6 faces × 4 verts (front, right, back, left, top, bottom). Y-up, painting on ±Z.
         let positions: [Float] = [
-            -halfWidth, -halfHeight, 0,
-             halfWidth, -halfHeight, 0,
-             halfWidth,  halfHeight, 0,
-            -halfWidth,  halfHeight, 0,
+            -hw, -hh,  ht,   hw, -hh,  ht,   hw,  hh,  ht,  -hw,  hh,  ht,
+             hw, -hh,  ht,   hw, -hh, -ht,   hw,  hh, -ht,   hw,  hh,  ht,
+             hw, -hh, -ht,  -hw, -hh, -ht,  -hw,  hh, -ht,   hw,  hh, -ht,
+            -hw, -hh, -ht,  -hw, -hh,  ht,  -hw,  hh,  ht,  -hw,  hh, -ht,
+            -hw,  hh,  ht,   hw,  hh,  ht,   hw,  hh, -ht,  -hw,  hh, -ht,
+            -hw, -hh, -ht,   hw, -hh, -ht,   hw, -hh,  ht,  -hw, -hh,  ht,
         ]
         appendFloats(positions)
 
-        // NORMAL
-        appendFloats([
-            0, 0, 1,
-            0, 0, 1,
-            0, 0, 1,
-            0, 0, 1,
-        ])
+        let normals: [Float] = [
+            0, 0, 1,  0, 0, 1,  0, 0, 1,  0, 0, 1,
+            1, 0, 0,  1, 0, 0,  1, 0, 0,  1, 0, 0,
+            0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1,
+            -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0,
+            0, 1, 0,  0, 1, 0,  0, 1, 0,  0, 1, 0,
+            0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0,
+        ]
+        appendFloats(normals)
 
-        // TEXCOORD_0 — glTF origin is top-left
-        appendFloats([
-            0, 1,
-            1, 1,
-            1, 0,
-            0, 0,
-        ])
+        // glTF UV origin is top-left. Front/back get the painting; edges get a dark corner.
+        var uvs: [Float] = []
+        let faceUV: [[Float]] = [
+            [0, 1, 1, 1, 1, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [1, 1, 0, 1, 0, 0, 1, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+        ]
+        for uv in faceUV { uvs.append(contentsOf: uv) }
+        appendFloats(uvs)
 
-        // INDICES uint16, two triangles, CCW from +Z
-        let indices: [UInt16] = [0, 1, 2, 0, 2, 3]
+        var indices: [UInt16] = []
+        for face in 0..<6 {
+            let b = UInt16(face * 4)
+            indices.append(contentsOf: [b, b + 1, b + 2, b, b + 2, b + 3])
+        }
         for i in indices.indices {
             var little = indices[i].littleEndian
             Swift.withUnsafeBytes(of: &little) { bin.append(contentsOf: $0) }
@@ -85,6 +112,11 @@ enum GLBExporter {
         while bin.count % 4 != 0 {
             bin.append(0)
         }
+
+        let posLen = 24 * 3 * 4
+        let nrmLen = 24 * 3 * 4
+        let uvLen = 24 * 2 * 4
+        let idxLen = 36 * 2
 
         let json: [String: Any] = [
             "asset": [
@@ -127,24 +159,24 @@ enum GLBExporter {
             ]],
             "buffers": [["byteLength": bin.count]],
             "bufferViews": [
-                ["buffer": 0, "byteOffset": 0, "byteLength": 48, "target": 34962],
-                ["buffer": 0, "byteOffset": 48, "byteLength": 48, "target": 34962],
-                ["buffer": 0, "byteOffset": 96, "byteLength": 32, "target": 34962],
-                ["buffer": 0, "byteOffset": 128, "byteLength": 12, "target": 34963],
+                ["buffer": 0, "byteOffset": 0, "byteLength": posLen, "target": 34962],
+                ["buffer": 0, "byteOffset": posLen, "byteLength": nrmLen, "target": 34962],
+                ["buffer": 0, "byteOffset": posLen + nrmLen, "byteLength": uvLen, "target": 34962],
+                ["buffer": 0, "byteOffset": posLen + nrmLen + uvLen, "byteLength": idxLen, "target": 34963],
                 ["buffer": 0, "byteOffset": imageOffset, "byteLength": jpeg.count],
             ],
             "accessors": [
                 [
                     "bufferView": 0,
                     "componentType": 5126,
-                    "count": 4,
+                    "count": 24,
                     "type": "VEC3",
-                    "min": [Double(-halfWidth), Double(-halfHeight), 0.0],
-                    "max": [Double(halfWidth), Double(halfHeight), 0.0],
+                    "min": [Double(-hw), Double(-hh), Double(-ht)],
+                    "max": [Double(hw), Double(hh), Double(ht)],
                 ],
-                ["bufferView": 1, "componentType": 5126, "count": 4, "type": "VEC3"],
-                ["bufferView": 2, "componentType": 5126, "count": 4, "type": "VEC2"],
-                ["bufferView": 3, "componentType": 5123, "count": 6, "type": "SCALAR"],
+                ["bufferView": 1, "componentType": 5126, "count": 24, "type": "VEC3"],
+                ["bufferView": 2, "componentType": 5126, "count": 24, "type": "VEC2"],
+                ["bufferView": 3, "componentType": 5123, "count": 36, "type": "SCALAR"],
             ],
         ]
 

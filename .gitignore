@@ -35,3 +35,30 @@ Icon?
 *.swp
 *~
 .idea/
+
+# Secrets (never commit)
+FrameArt/Secrets.generated.swift
+.env
+
+# Node
+node_modules/
+
+.mesh-src/
+
+# Local Netlify folder
+.netlify
+
+# Finder duplicate copies
+* 2.swift
+* 2.html
+* 2.glb
+* 2.usdz
+.gitignore 2
+
+# Local artwork previews (live copies live in Netlify Blobs)
+web/model.usdz
+web/model.glb
+web/poster.jpg
+web/poster.png
+web/o/
+scripts/__pycache__/

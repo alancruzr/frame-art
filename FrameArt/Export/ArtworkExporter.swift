@@ -14,15 +14,19 @@ enum ArtworkExporter {
             }
             let usdzURL = ArtworkFileStore.fileURL(for: piece, named: usdzFileName)
             let glbURL = ArtworkFileStore.fileURL(for: piece, named: glbFileName)
+            let aspect = Double(image.size.height / max(image.size.width, 1))
+            let height = piece.resolvedHeightCentimeters(aspect: aspect)
             try USDZExporter.exportPainting(
                 image: image,
                 widthCentimeters: piece.widthCentimeters,
+                heightCentimeters: height,
                 title: piece.title,
                 to: usdzURL
             )
             try GLBExporter.exportPainting(
                 image: image,
                 widthCentimeters: piece.widthCentimeters,
+                heightCentimeters: height,
                 title: piece.title,
                 to: glbURL
             )

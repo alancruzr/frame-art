@@ -1,30 +1,50 @@
 import Foundation
+import SceneKit
 import UIKit
 
-/// Builds a Quick Look–ready USDZ (textured vertical plane).
+/// Builds a Quick Look–ready USDZ: a thin textured slab (not a zero-thickness plane).
 ///
-/// RealityKit `Entity.write(to:)` (iOS 18+) writes `.reality`, not USDZ.
-/// This exporter follows the Pixar USDZ spec: uncompressed ZIP, 64-byte
-/// aligned file payloads, USDA first, JPEG texture second.
+/// Primary path: SceneKit `SCNScene.write(to:)` so Apple’s exporter emits a valid USDZ.
+/// Fallback: handmade USDA ZIP with an 8 mm box (painting on +Z) if SceneKit write fails.
 enum USDZExporter {
+    static let thicknessMeters: Double = 0.008
+
     static func exportPainting(
         image: UIImage,
         widthCentimeters: Double,
+        heightCentimeters: Double,
         title: String,
         to destination: URL
     ) throws {
         let prepared = image.normalizedUpright().resized(maxDimension: 2048)
         let widthM = widthCentimeters / 100.0
-        let heightM = widthM * (prepared.size.height / max(prepared.size.width, 1))
+        let heightCm: Double = {
+            if heightCentimeters >= 1 { return heightCentimeters }
+            let aspect = Double(prepared.size.height / max(prepared.size.width, 1))
+            guard aspect > 0 else { return widthCentimeters }
+            return (widthCentimeters * aspect).rounded()
+        }()
+        let heightM = max(heightCm, 2) / 100.0
 
         guard let jpeg = prepared.jpegData(compressionQuality: 0.9) else {
             throw ExportError.imageEncodingFailed
+        }
+
+        if writeSceneKitUSDZ(
+            jpeg: jpeg,
+            widthMeters: widthM,
+            heightMeters: heightM,
+            title: title,
+            to: destination
+        ) {
+            return
         }
 
         let usda = makeUSDA(
             displayName: title,
             widthMeters: widthM,
             heightMeters: heightM,
+            thicknessMeters: thicknessMeters,
             textureFileName: "texture.jpg"
         )
         guard let usdaData = usda.data(using: .utf8) else {
@@ -40,19 +60,104 @@ enum USDZExporter {
         )
     }
 
+    /// Apple-valid USDZ via SceneKit. Painting on the front (+Z) of an 8 mm box,
+    /// unlit (constant + emission) so Quick Look is not black without lights.
+    @discardableResult
+    private static func writeSceneKitUSDZ(
+        jpeg: Data,
+        widthMeters: Double,
+        heightMeters: Double,
+        title: String,
+        to destination: URL
+    ) -> Bool {
+        let tmp: URL
+        do {
+            tmp = FileManager.default.temporaryDirectory
+                .appendingPathComponent("frame-usdz-\(UUID().uuidString)", isDirectory: true)
+            try FileManager.default.createDirectory(at: tmp, withIntermediateDirectories: true)
+        } catch {
+            return false
+        }
+        defer { try? FileManager.default.removeItem(at: tmp) }
+
+        let texURL = tmp.appendingPathComponent("texture.jpg")
+        do { try jpeg.write(to: texURL, options: .atomic) } catch { return false }
+
+        let paint = SCNMaterial()
+        paint.lightingModel = .constant
+        paint.diffuse.contents = texURL
+        paint.emission.contents = texURL
+        paint.diffuse.wrapS = .clamp
+        paint.diffuse.wrapT = .clamp
+        paint.emission.wrapS = .clamp
+        paint.emission.wrapT = .clamp
+        paint.isDoubleSided = true
+
+        let edge = SCNMaterial()
+        edge.lightingModel = .constant
+        edge.diffuse.contents = UIColor(red: 0.12, green: 0.10, blue: 0.08, alpha: 1)
+        edge.emission.contents = UIColor(red: 0.12, green: 0.10, blue: 0.08, alpha: 1)
+        edge.isDoubleSided = true
+
+        // SCNBox materials: front, right, back, left, top, bottom. Front is +Z.
+        let box = SCNBox(
+            width: CGFloat(widthMeters),
+            height: CGFloat(heightMeters),
+            length: CGFloat(thicknessMeters),
+            chamferRadius: 0
+        )
+        box.materials = [paint, edge, paint, edge, edge, edge]
+
+        let node = SCNNode(geometry: box)
+        node.name = "Painting"
+        let scene = SCNScene()
+        scene.rootNode.name = title.isEmpty ? "Artwork" : title
+        scene.rootNode.addChildNode(node)
+
+        let staging = tmp.appendingPathComponent("model.usdz")
+        let ok = scene.write(to: staging, options: nil, delegate: nil, progressHandler: nil)
+        guard ok else { return false }
+
+        guard let data = try? Data(contentsOf: staging),
+              data.count > 256,
+              data.starts(with: [0x50, 0x4B]) else {
+            return false
+        }
+
+        do {
+            if FileManager.default.fileExists(atPath: destination.path) {
+                try FileManager.default.removeItem(at: destination)
+            }
+            try data.write(to: destination, options: .atomic)
+            return true
+        } catch {
+            return false
+        }
+    }
+
     private static func makeUSDA(
         displayName: String,
         widthMeters: Double,
         heightMeters: Double,
+        thicknessMeters: Double,
         textureFileName: String
     ) -> String {
-        let nw = String(format: "%.6f", -widthMeters / 2)
-        let nh = String(format: "%.6f", -heightMeters / 2)
-        let pw = String(format: "%.6f", widthMeters / 2)
-        let ph = String(format: "%.6f", heightMeters / 2)
+        let hw = widthMeters / 2
+        let hh = heightMeters / 2
+        let ht = thicknessMeters / 2
+        let f = { (v: Double) in String(format: "%.6f", v) }
         let escaped = displayName
             .replacingOccurrences(of: "\\", with: "\\\\")
             .replacingOccurrences(of: "\"", with: "\\\"")
+
+        // Front (+Z) — painting. USD st origin is lower-left.
+        let frontPoints = """
+                        (\(f(-hw)), \(f(-hh)), \(f(ht))), (\(f(hw)), \(f(-hh)), \(f(ht))), (\(f(hw)), \(f(hh)), \(f(ht))), (\(f(-hw)), \(f(hh)), \(f(ht)))
+        """
+        // Back, right, left, top, bottom — dark slab so the piece cannot vanish edge-on.
+        let slabPoints = """
+                        (\(f(hw)), \(f(-hh)), \(f(-ht))), (\(f(-hw)), \(f(-hh)), \(f(-ht))), (\(f(-hw)), \(f(hh)), \(f(-ht))), (\(f(hw)), \(f(hh)), \(f(-ht))), (\(f(hw)), \(f(-hh)), \(f(ht))), (\(f(hw)), \(f(-hh)), \(f(-ht))), (\(f(hw)), \(f(hh)), \(f(-ht))), (\(f(hw)), \(f(hh)), \(f(ht))), (\(f(-hw)), \(f(-hh)), \(f(-ht))), (\(f(-hw)), \(f(-hh)), \(f(ht))), (\(f(-hw)), \(f(hh)), \(f(ht))), (\(f(-hw)), \(f(hh)), \(f(-ht))), (\(f(-hw)), \(f(hh)), \(f(ht))), (\(f(hw)), \(f(hh)), \(f(ht))), (\(f(hw)), \(f(hh)), \(f(-ht))), (\(f(-hw)), \(f(hh)), \(f(-ht))), (\(f(-hw)), \(f(-hh)), \(f(-ht))), (\(f(hw)), \(f(-hh)), \(f(-ht))), (\(f(hw)), \(f(-hh)), \(f(ht))), (\(f(-hw)), \(f(-hh)), \(f(ht)))
+        """
 
         return """
         #usda 1.0
@@ -60,7 +165,7 @@ enum USDZExporter {
             defaultPrim = "Artwork"
             metersPerUnit = 1
             upAxis = "Y"
-            doc = "Frame Art — plano texturizado para AR Quick Look"
+            doc = "Frame Art — losa texturizada 8 mm para AR Quick Look"
         )
 
         def Xform "Artwork" (
@@ -84,8 +189,9 @@ enum USDZExporter {
                     {
                         uniform token info:id = "UsdPreviewSurface"
                         color3f inputs:diffuseColor.connect = </Artwork/Looks/PaintingMaterial/DiffuseTexture.outputs:rgb>
+                        color3f inputs:emissiveColor.connect = </Artwork/Looks/PaintingMaterial/DiffuseTexture.outputs:rgb>
                         float inputs:metallic = 0
-                        float inputs:roughness = 0.75
+                        float inputs:roughness = 1
                         int inputs:useSpecularWorkflow = 0
                         token outputs:surface
                     }
@@ -94,6 +200,7 @@ enum USDZExporter {
                     {
                         uniform token info:id = "UsdUVTexture"
                         asset inputs:file = @\(textureFileName)@
+                        token inputs:sourceColorSpace = "sRGB"
                         float2 inputs:st.connect = </Artwork/Looks/PaintingMaterial/PrimvarST.outputs:result>
                         token inputs:wrapS = "clamp"
                         token inputs:wrapT = "clamp"
@@ -107,22 +214,50 @@ enum USDZExporter {
                         float2 outputs:result
                     }
                 }
+
+                def Material "EdgeMaterial"
+                {
+                    token outputs:surface.connect = </Artwork/Looks/EdgeMaterial/PreviewSurface.outputs:surface>
+
+                    def Shader "PreviewSurface"
+                    {
+                        uniform token info:id = "UsdPreviewSurface"
+                        color3f inputs:diffuseColor = (0.12, 0.10, 0.08)
+                        color3f inputs:emissiveColor = (0.08, 0.07, 0.05)
+                        float inputs:metallic = 0
+                        float inputs:roughness = 1
+                        token outputs:surface
+                    }
+                }
             }
 
             def Mesh "Painting"
             {
                 uniform bool doubleSided = 1
-                float3[] extent = [(\(nw), \(nh), -0.001), (\(pw), \(ph), 0.001)]
-                int[] faceVertexCounts = [4]
-                int[] faceVertexIndices = [0, 1, 2, 3]
+                float3[] extent = [(\(f(-hw)), \(f(-hh)), \(f(-ht))), (\(f(hw)), \(f(hh)), \(f(ht)))]
+                int[] faceVertexCounts = [3, 3]
+                int[] faceVertexIndices = [0, 1, 2, 0, 2, 3]
                 rel material:binding = </Artwork/Looks/PaintingMaterial>
                 normal3f[] normals = [(0, 0, 1), (0, 0, 1), (0, 0, 1), (0, 0, 1)] (
                     interpolation = "vertex"
                 )
-                point3f[] points = [(\(nw), \(nh), 0), (\(pw), \(nh), 0), (\(pw), \(ph), 0), (\(nw), \(ph), 0)]
+                point3f[] points = [\(frontPoints)]
                 texCoord2f[] primvars:st = [(0, 0), (1, 0), (1, 1), (0, 1)] (
                     interpolation = "vertex"
                 )
+                uniform token subdivisionScheme = "none"
+            }
+
+            def Mesh "Slab"
+            {
+                float3[] extent = [(\(f(-hw)), \(f(-hh)), \(f(-ht))), (\(f(hw)), \(f(hh)), \(f(ht)))]
+                int[] faceVertexCounts = [3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
+                int[] faceVertexIndices = [0, 1, 2, 0, 2, 3, 4, 5, 6, 4, 6, 7, 8, 9, 10, 8, 10, 11, 12, 13, 14, 12, 14, 15, 16, 17, 18, 16, 18, 19]
+                rel material:binding = </Artwork/Looks/EdgeMaterial>
+                normal3f[] normals = [(0, 0, -1), (0, 0, -1), (0, 0, -1), (0, 0, -1), (1, 0, 0), (1, 0, 0), (1, 0, 0), (1, 0, 0), (-1, 0, 0), (-1, 0, 0), (-1, 0, 0), (-1, 0, 0), (0, 1, 0), (0, 1, 0), (0, 1, 0), (0, 1, 0), (0, -1, 0), (0, -1, 0), (0, -1, 0), (0, -1, 0)] (
+                    interpolation = "vertex"
+                )
+                point3f[] points = [\(slabPoints)]
                 uniform token subdivisionScheme = "none"
             }
         }

@@ -11,6 +11,7 @@ struct AddArtworkView: View {
 
     @State private var title = ""
     @State private var widthCentimeters: Double = 60
+    @State private var heightCentimeters: Double = 80
     @State private var pickerItem: PhotosPickerItem?
     @State private var selectedImage: UIImage?
     @State private var importedUSDZ: URL?
@@ -18,6 +19,11 @@ struct AddArtworkView: View {
     @State private var showCamera = false
     @State private var showFileImporter = false
     @State private var errorMessage: String?
+    @State private var originalImage: UIImage?
+    @State private var isCroppingCanvas = false
+    @State private var didCropCanvas = false
+    @State private var cropStatusMessage = "Recortando el lienzo…"
+    @State private var canvasCropTask: Task<Void, Never>?
 
     private var cameraAvailable: Bool {
         UIImagePickerController.isSourceTypeAvailable(.camera)
@@ -56,13 +62,45 @@ struct AddArtworkView: View {
 
             if let selectedImage {
                 Section("Vista previa") {
-                    Image(uiImage: selectedImage)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(maxHeight: 240)
-                        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-                        .listRowInsets(EdgeInsets())
-                        .accessibilityLabel("Vista previa de la pintura")
+                    ZStack {
+                        Image(uiImage: selectedImage)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(maxHeight: 240)
+                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                            .opacity(isCroppingCanvas ? 0.55 : 1)
+                            .accessibilityLabel("Vista previa de la pintura")
+                        if isCroppingCanvas {
+                            VStack(spacing: 8) {
+                                ProgressView()
+                                    .tint(FrameStudioBrand.gold)
+                                Text(cropStatusMessage)
+                                    .font(.footnote)
+                                    .foregroundStyle(.secondary)
+                            }
+                            .padding(12)
+                            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                        }
+                    }
+                    .frame(maxWidth: .infinity)
+                    .listRowInsets(EdgeInsets())
+
+                    if didCropCanvas, !isCroppingCanvas {
+                        Text("Lienzo recortado")
+                            .foregroundStyle(.secondary)
+                        Button("Usar foto completa") {
+                            restoreOriginalPhoto()
+                        }
+                        .foregroundStyle(FrameStudioBrand.hunter)
+                        .frame(minHeight: 44, alignment: .leading)
+                    } else if originalImage != nil, !isCroppingCanvas {
+                        Button("Recortar lienzo") {
+                            startCanvasCrop()
+                        }
+                        .foregroundStyle(FrameStudioBrand.hunter)
+                        .frame(minHeight: 44, alignment: .leading)
+                    }
+
                     Text(ArtworkKind.paintingPhoto.title)
                         .foregroundStyle(.secondary)
                 }
@@ -78,18 +116,11 @@ struct AddArtworkView: View {
             Section {
                 TextField("Título", text: $title)
                 if kind != .scan3D {
-                    Stepper(value: $widthCentimeters, in: 10...400, step: 1) {
-                        LabeledContent("Ancho real") {
-                            Text("\(Int(widthCentimeters)) cm")
-                        }
-                    }
-                    if let selectedImage, selectedImage.size.width > 0 {
-                        let height = widthCentimeters * (selectedImage.size.height / selectedImage.size.width)
-                        LabeledContent("Alto estimado") {
-                            Text("\(Int(height.rounded())) cm")
-                        }
-                        .foregroundStyle(.secondary)
-                    }
+                    ArtworkSizeFields(
+                        widthCentimeters: $widthCentimeters,
+                        heightCentimeters: $heightCentimeters,
+                        image: selectedImage
+                    )
                 }
             } header: {
                 Text("Obra")
@@ -97,7 +128,7 @@ struct AddArtworkView: View {
                 if kind == .scan3D {
                     Text("El escaneo ya trae su tamaño.")
                 } else {
-                    Text("Este ancho es el tamaño en la pared. Mide el lado más ancho del marco.")
+                    Text("Mide el marco. El alto sale de la foto; puedes corregir ancho y alto. Esos centímetros son los de la pared.")
                 }
             }
         }
@@ -120,8 +151,18 @@ struct AddArtworkView: View {
             Task { await loadPickerItem(item) }
         }
         .fullScreenCover(isPresented: $showCamera) {
-            CameraPicker(image: $selectedImage)
-                .ignoresSafeArea()
+            CameraPicker(image: Binding(
+                get: { selectedImage },
+                set: { newImage in
+                    if let newImage {
+                        applyNewPhoto(newImage)
+                    }
+                }
+            ))
+            .ignoresSafeArea()
+        }
+        .onDisappear {
+            canvasCropTask?.cancel()
         }
         .fileImporter(
             isPresented: $showFileImporter,
@@ -157,9 +198,7 @@ struct AddArtworkView: View {
         do {
             if let data = try await item.loadTransferable(type: Data.self),
                let image = UIImage(data: data) {
-                selectedImage = image
-                importedUSDZ = nil
-                kind = .paintingPhoto
+                applyNewPhoto(image)
             }
         } catch {
             errorMessage = error.localizedDescription
@@ -180,8 +219,12 @@ struct AddArtworkView: View {
                         try FileManager.default.removeItem(at: tmp)
                     }
                     try FileManager.default.copyItem(at: url, to: tmp)
+                    canvasCropTask?.cancel()
                     importedUSDZ = tmp
                     selectedImage = nil
+                    originalImage = nil
+                    didCropCanvas = false
+                    isCroppingCanvas = false
                     kind = .scan3D
                     if title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                         title = url.deletingPathExtension().lastPathComponent
@@ -190,9 +233,7 @@ struct AddArtworkView: View {
                     errorMessage = error.localizedDescription
                 }
             } else if let image = UIImage(contentsOfFile: url.path) {
-                selectedImage = image
-                importedUSDZ = nil
-                kind = .paintingPhoto
+                applyNewPhoto(image)
             } else {
                 errorMessage = "Este archivo no es una imagen ni un USDZ o Reality."
             }
@@ -201,11 +242,46 @@ struct AddArtworkView: View {
         }
     }
 
+    private func applyNewPhoto(_ image: UIImage) {
+        originalImage = image
+        selectedImage = image
+        importedUSDZ = nil
+        kind = .paintingPhoto
+        didCropCanvas = false
+        startCanvasCrop()
+    }
+
+    private func startCanvasCrop() {
+        guard let originalImage else { return }
+        canvasCropTask?.cancel()
+        isCroppingCanvas = true
+        cropStatusMessage = "Recortando el lienzo…"
+        canvasCropTask = Task {
+            let result = await PaintingCanvasCropper.cropCanvas(from: originalImage) { message in
+                Task { @MainActor in
+                    cropStatusMessage = message
+                }
+            }
+            guard !Task.isCancelled else { return }
+            selectedImage = result.image
+            didCropCanvas = result.didCrop
+            isCroppingCanvas = false
+        }
+    }
+
+    private func restoreOriginalPhoto() {
+        canvasCropTask?.cancel()
+        isCroppingCanvas = false
+        didCropCanvas = false
+        selectedImage = originalImage
+    }
+
     private func save() {
         let trimmed = title.trimmingCharacters(in: .whitespacesAndNewlines)
         let piece = ArtworkPiece(
             title: trimmed.isEmpty ? "Sin título" : trimmed,
             widthCentimeters: widthCentimeters,
+            heightCentimeters: heightCentimeters,
             kind: kind
         )
         do {
@@ -233,3 +309,67 @@ struct AddArtworkView: View {
         }
     }
 }
+
+struct ArtworkSizeFields: View {
+    @Binding var widthCentimeters: Double
+    @Binding var heightCentimeters: Double
+    var image: UIImage?
+    @State private var lockAspect = true
+    @State private var syncing = false
+
+    private var aspect: Double {
+        guard let image, image.size.width > 1 else { return 1 }
+        return Double(image.size.height / image.size.width)
+    }
+
+    var body: some View {
+        Toggle("Mantener proporción de la foto", isOn: $lockAspect)
+        Stepper(value: $widthCentimeters, in: 10...400, step: 1) {
+            LabeledContent("Ancho") {
+                Text("\(Int(widthCentimeters.rounded())) cm")
+            }
+        }
+        Stepper(value: $heightCentimeters, in: 10...400, step: 1) {
+            LabeledContent("Alto") {
+                Text("\(Int(heightCentimeters.rounded())) cm")
+            }
+        }
+        .onChange(of: widthCentimeters) { _, newValue in
+            guard lockAspect, !syncing, aspect > 0 else { return }
+            syncing = true
+            heightCentimeters = min(400, max(10, (newValue * aspect).rounded()))
+            syncing = false
+        }
+        .onChange(of: heightCentimeters) { _, newValue in
+            guard lockAspect, !syncing, aspect > 0 else { return }
+            syncing = true
+            widthCentimeters = min(400, max(10, (newValue / aspect).rounded()))
+            syncing = false
+        }
+        .onChange(of: image != nil) { _, hasImage in
+            guard hasImage else { return }
+            applyAspectFromImage()
+        }
+        .onChange(of: image?.size.width) { _, _ in
+            applyAspectFromImage()
+        }
+        .onChange(of: image?.size.height) { _, _ in
+            applyAspectFromImage()
+        }
+        .onAppear {
+            if heightCentimeters < 1, aspect > 0 {
+                applyAspectFromImage()
+            } else if heightCentimeters < 1 {
+                heightCentimeters = widthCentimeters
+            }
+        }
+    }
+
+    private func applyAspectFromImage() {
+        guard lockAspect, aspect > 0 else { return }
+        syncing = true
+        heightCentimeters = min(400, max(10, (widthCentimeters * aspect).rounded()))
+        syncing = false
+    }
+}
+

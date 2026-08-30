@@ -1,0 +1,39 @@
+import type { Config } from "@netlify/functions";
+
+const BODY = {
+  applinks: {
+    details: [
+      {
+        appIDs: ["ML4VB5PQ6H.com.alancruzr.frameart"],
+        components: [
+          { "/": "/api/*", exclude: true, comment: "API is not an app link" },
+          { "/": "/.well-known/*", exclude: true },
+          { "/": "/apple-app-site-association", exclude: true },
+          { "/": "/o/*", exclude: true, comment: "Static UUID fallbacks stay on the web" },
+          { "/": "/model.usdz", exclude: true },
+          { "/": "/model.glb", exclude: true },
+          { "/": "/poster.jpg", exclude: true },
+          { "/": "/poster.png", exclude: true },
+          { "/": "/index.html", exclude: true },
+          { "/": "/", exclude: true },
+          { "/": "/*/", comment: "Studio/artwork viewer opens Frame Studio" },
+          { "/": "/*/*", comment: "Studio/artwork viewer opens Frame Studio" },
+        ],
+      },
+    ],
+  },
+};
+
+export default async () =>
+  new Response(JSON.stringify(BODY), {
+    status: 200,
+    headers: {
+      "Content-Type": "application/json",
+      "Cache-Control": "public, max-age=0, must-revalidate",
+    },
+  });
+
+export const config: Config = {
+  path: ["/.well-known/apple-app-site-association", "/apple-app-site-association"],
+  method: "GET",
+};

@@ -67,8 +67,19 @@ enum ArtworkFileStore {
         return fileName
     }
 
+    @discardableResult
+    static func saveData(_ data: Data, for pieceID: UUID, fileName: String) throws -> String {
+        let url = directory(for: pieceID).appendingPathComponent(fileName)
+        try data.write(to: url, options: .atomic)
+        return fileName
+    }
+
     static func deleteFiles(for piece: ArtworkPiece) {
-        let dir = applicationSupport.appendingPathComponent(piece.id.uuidString, isDirectory: true)
+        deleteFiles(forID: piece.id)
+    }
+
+    static func deleteFiles(forID pieceID: UUID) {
+        let dir = applicationSupport.appendingPathComponent(pieceID.uuidString, isDirectory: true)
         try? FileManager.default.removeItem(at: dir)
     }
 

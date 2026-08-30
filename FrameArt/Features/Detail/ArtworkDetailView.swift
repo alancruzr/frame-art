@@ -1,3 +1,5 @@
+import AVFoundation
+import PhotosUI
 import SwiftData
 import SwiftUI
 import UIKit
@@ -5,10 +7,19 @@ import UIKit
 struct ArtworkDetailView: View {
     @Bindable var piece: ArtworkPiece
     @State private var showAR = false
-    @State private var usdzURL: URL?
     @State private var glbURL: URL?
     @State private var isExporting = false
+    @State private var isPublishing = false
     @State private var errorMessage: String?
+    @State private var publishedURL: URL?
+    @State private var showShareSheet = false
+    @State private var showCamera = false
+    @State private var showPhotoLibrary = false
+    @State private var pickerItem: PhotosPickerItem?
+    @State private var isReplacingPhoto = false
+    @State private var replaceStatus = "Recortando el lienzo…"
+    @State private var previewImage: UIImage?
+    @State private var photoRevision = 0
 
     var body: some View {
         List {
@@ -16,6 +27,30 @@ struct ArtworkDetailView: View {
                 thumbnail
                     .frame(maxWidth: .infinity)
                     .listRowInsets(EdgeInsets())
+                if piece.kind == .paintingPhoto {
+                    Menu {
+                        if UIImagePickerController.isSourceTypeAvailable(.camera) {
+                            Button("Tomar foto", systemImage: "camera") {
+                                openCamera()
+                            }
+                        }
+                        Button("Elegir de Fotos", systemImage: "photo.on.rectangle") {
+                            showPhotoLibrary = true
+                        }
+                    } label: {
+                        Label("Cambiar foto", systemImage: "photo.on.rectangle.angled")
+                            .frame(minHeight: 44, alignment: .leading)
+                    }
+                    .disabled(isReplacingPhoto)
+                    .accessibilityHint("Tomar foto o elegir de Fotos")
+                    if isReplacingPhoto {
+                        ProgressView(replaceStatus)
+                    }
+                }
+            } footer: {
+                if piece.kind == .paintingPhoto {
+                    Text("La foto nueva reemplaza esta. El lienzo se recorta solo.")
+                }
             }
 
             Section {
@@ -25,18 +60,11 @@ struct ArtworkDetailView: View {
                         Text("Del escaneo")
                     }
                 } else {
-                    Stepper(value: $piece.widthCentimeters, in: 10...400, step: 1) {
-                        LabeledContent("Ancho real") {
-                            Text("\(Int(piece.widthCentimeters)) cm")
-                        }
-                    }
-                    if let image = ArtworkFileStore.loadImage(for: piece), image.size.width > 0 {
-                        let height = piece.widthCentimeters * (image.size.height / image.size.width)
-                        LabeledContent("Alto estimado") {
-                            Text("\(Int(height.rounded())) cm")
-                        }
-                        .foregroundStyle(.secondary)
-                    }
+                    ArtworkSizeFields(
+                        widthCentimeters: $piece.widthCentimeters,
+                        heightCentimeters: $piece.heightCentimeters,
+                        image: previewImage ?? ArtworkFileStore.loadImage(for: piece)
+                    )
                 }
                 LabeledContent("Tipo") {
                     Text(piece.kind.title)
@@ -63,23 +91,18 @@ struct ArtworkDetailView: View {
             }
 
             Section {
-                if let usdzURL, let glbURL {
-                    ShareLink(
-                        items: [usdzURL, glbURL],
-                        preview: SharePreview(piece.title, image: Image(systemName: "square.and.arrow.up"))
-                    ) {
-                        Label("Compartir con el cliente", systemImage: "square.and.arrow.up")
+                Button {
+                    Task { await publishAndShare() }
+                } label: {
+                    if isPublishing {
+                        ProgressView("Publicando la obra…")
                             .frame(minHeight: 44, alignment: .leading)
-                    }
-                } else if let usdzURL {
-                    ShareLink(
-                        item: usdzURL,
-                        preview: SharePreview(piece.title, image: Image(systemName: "cube.transparent"))
-                    ) {
+                    } else {
                         Label("Compartir con el cliente", systemImage: "square.and.arrow.up")
                             .frame(minHeight: 44, alignment: .leading)
                     }
                 }
+                .disabled(isPublishing || isExporting)
 
                 if piece.kind == .scan3D, glbURL == nil {
                     Text("Este escaneo es USDZ (iPhone). Aún no hay GLB para Android.")
@@ -93,7 +116,7 @@ struct ArtworkDetailView: View {
             } header: {
                 Text("Cliente")
             } footer: {
-                Text("iPhone abre el USDZ (Quick Look). Android abre el GLB (Scene Viewer). El cliente no instala Frame Studio.")
+                Text("WhatsApp recibe un enlace. El cliente abre la obra en su pared, sin instalar Frame Studio.")
             }
         }
         .navigationTitle(piece.title.isEmpty ? "Obra" : piece.title)
@@ -104,7 +127,7 @@ struct ArtworkDetailView: View {
         .task(id: exportToken) {
             await prepareExports()
         }
-        .alert("No se pudo exportar", isPresented: Binding(
+        .alert("No se pudo completar", isPresented: Binding(
             get: { errorMessage != nil },
             set: { if !$0 { errorMessage = nil } }
         )) {
@@ -112,19 +135,50 @@ struct ArtworkDetailView: View {
         } message: {
             Text(errorMessage ?? "")
         }
+        .sheet(isPresented: $showShareSheet) {
+            if let publishedURL {
+                ArtworkShareSheet(
+                    url: publishedURL,
+                    title: piece.title.isEmpty ? "Obra" : piece.title,
+                    image: previewImage ?? ArtworkFileStore.loadImage(for: piece)
+                )
+            }
+        }
+        .photosPicker(isPresented: $showPhotoLibrary, selection: $pickerItem, matching: .images)
+        .onChange(of: pickerItem) { _, item in
+            Task { await loadPickerItem(item) }
+        }
+        .fullScreenCover(isPresented: $showCamera) {
+            CameraPicker(image: Binding(
+                get: { previewImage },
+                set: { newImage in
+                    if let newImage {
+                        Task { await replacePhoto(newImage) }
+                    }
+                }
+            ))
+            .ignoresSafeArea()
+        }
+        .onAppear {
+            if previewImage == nil {
+                previewImage = ArtworkFileStore.loadImage(for: piece)
+            }
+        }
     }
 
     private var exportToken: String {
-        "\(piece.id.uuidString)-\(piece.widthCentimeters)-\(piece.title)"
+        "\(piece.id.uuidString)-\(piece.widthCentimeters)-\(piece.heightCentimeters)-\(piece.title)-\(photoRevision)"
     }
 
     @ViewBuilder
     private var thumbnail: some View {
-        if let image = ArtworkFileStore.loadImage(for: piece) {
+        let image = previewImage ?? ArtworkFileStore.loadImage(for: piece)
+        if let image {
             Image(uiImage: image)
                 .resizable()
                 .scaledToFit()
                 .frame(maxHeight: 280)
+                .frame(maxWidth: .infinity)
                 .accessibilityLabel("Imagen de \(piece.title.isEmpty ? "la obra" : piece.title)")
         } else {
             ContentUnavailableView(
@@ -135,18 +189,75 @@ struct ArtworkDetailView: View {
         }
     }
 
+    private func openCamera() {
+        switch AVCaptureDevice.authorizationStatus(for: .video) {
+        case .denied, .restricted:
+            FrameStudioSettings.open()
+        default:
+            showCamera = true
+        }
+    }
+
+    private func loadPickerItem(_ item: PhotosPickerItem?) async {
+        guard let item else { return }
+        do {
+            if let data = try await item.loadTransferable(type: Data.self),
+               let image = UIImage(data: data) {
+                await replacePhoto(image)
+            }
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+        pickerItem = nil
+    }
+
+    @MainActor
+    private func replacePhoto(_ image: UIImage) async {
+        isReplacingPhoto = true
+        replaceStatus = "Recortando el lienzo…"
+        defer { isReplacingPhoto = false }
+        let result = await PaintingCanvasCropper.cropCanvas(from: image) { message in
+            Task { @MainActor in
+                replaceStatus = message
+            }
+        }
+        do {
+            piece.kind = .paintingPhoto
+            piece.imageFileName = try ArtworkFileStore.saveJPEG(result.image, for: piece.id)
+            let aspect = Double(result.image.size.height / max(result.image.size.width, 1))
+            if aspect > 0 {
+                piece.heightCentimeters = min(400, max(10, (piece.widthCentimeters * aspect).rounded()))
+            }
+            previewImage = result.image
+            photoRevision += 1
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
     @MainActor
     private func prepareExports() async {
         isExporting = true
         defer { isExporting = false }
         do {
             try ArtworkExporter.exportShareMeshes(for: piece)
-            usdzURL = ArtworkFileStore.usdzURL(for: piece)
             glbURL = ArtworkFileStore.glbURL(for: piece)
         } catch {
             errorMessage = error.localizedDescription
-            usdzURL = ArtworkFileStore.usdzURL(for: piece)
             glbURL = ArtworkFileStore.glbURL(for: piece)
+        }
+    }
+
+    @MainActor
+    private func publishAndShare() async {
+        isPublishing = true
+        defer { isPublishing = false }
+        do {
+            let url = try await ArtworkPublisher.publish(piece)
+            publishedURL = url
+            showShareSheet = true
+        } catch {
+            errorMessage = error.localizedDescription
         }
     }
 }

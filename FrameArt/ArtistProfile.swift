@@ -32,7 +32,7 @@ final class ArtistProfile {
         UserDefaults.standard.set(handle, forKey: Self.slugKey)
     }
 
-    static func makeSlug(from raw: String) -> String {
+    nonisolated static func makeSlug(from raw: String) -> String {
         let folded = raw.folding(options: .diacriticInsensitive, locale: .current).lowercased()
         var out = ""
         var lastDash = false
@@ -51,7 +51,7 @@ final class ArtistProfile {
         return String(out.prefix(32))
     }
 
-    static func randomSlug() -> String {
+    nonisolated static func randomSlug() -> String {
         let chars = Array("abcdefghjkmnpqrstuvwxyz23456789")
         return String((0..<7).map { _ in chars.randomElement()! })
     }

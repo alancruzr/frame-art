@@ -1,4 +1,21 @@
-<!DOCTYPE html>
+export function escapeHtml(value: string): string {
+  return value.replace(/[&<>"']/g, (ch) => {
+    switch (ch) {
+      case "&": return "&amp;";
+      case "<": return "&lt;";
+      case ">": return "&gt;";
+      case '"': return "&quot;";
+      case "'": return "&#39;";
+      default: return ch;
+    }
+  });
+}
+
+export function viewerHTML(title: string, posterAbs: string): string {
+  const safeTitle = escapeHtml(title || "Frame Studio");
+  const safePoster = escapeHtml(posterAbs);
+  const pageTitle = `${safeTitle} — Frame Studio`;
+  return `<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="utf-8">
@@ -14,16 +31,16 @@
     })();
   </script>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Frame Studio — Frame Studio</title>
+  <title>${pageTitle}</title>
   <meta name="description" content="Mira esta obra en tu pared con AR. En iPhone abre Quick Look; en Android, Scene Viewer.">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Frame Studio">
-  <meta property="og:title" content="Frame Studio — Frame Studio">
+  <meta property="og:title" content="${pageTitle}">
   <meta property="og:description" content="Abre el enlace y coloca la obra en tu pared. No hace falta instalar la app.">
-  <meta property="og:image" content="https://frame-studio.netlify.app/poster.jpg">
+  <meta property="og:image" content="${safePoster}">
   <meta property="og:image:type" content="image/jpeg">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:image" content="https://frame-studio.netlify.app/poster.jpg">
+  <meta name="twitter:image" content="${safePoster}">
   <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
   <style>
     :root {
@@ -202,17 +219,17 @@
     <header class="top">
       <p class="kicker">Frame Studio</p>
       <h1>Mi espacio</h1>
-      <p class="piece" id="title">Frame Studio</p>
+      <p class="piece" id="title">${safeTitle}</p>
     </header>
     <div class="hero" id="hero">
-      <img id="poster" src="poster.jpg" alt="Frame Studio">
+      <img id="poster" src="poster.jpg" alt="${safeTitle}">
       <model-viewer
         class="ar-engine"
         id="viewer"
         src="model.glb"
         ios-src="model.usdz"
         poster="poster.jpg"
-        alt="Frame Studio"
+        alt="${safeTitle}"
         ar
         ar-modes="quick-look scene-viewer webxr"
         ar-placement="wall"
@@ -405,3 +422,5 @@
   </script>
 </body>
 </html>
+`;
+}
