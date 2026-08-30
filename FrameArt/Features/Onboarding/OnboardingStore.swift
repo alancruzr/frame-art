@@ -4,7 +4,6 @@ import UIKit
 
 enum OnboardingGoalID: String, CaseIterable, Equatable {
     case painting
-    case scan
     case several
     case clientPreview
     case fair
@@ -13,7 +12,6 @@ enum OnboardingGoalID: String, CaseIterable, Equatable {
     var title: String {
         switch self {
         case .painting: return "Una pintura (foto)"
-        case .scan: return "Un escaneo 3D"
         case .several: return "Varias obras del taller"
         case .clientPreview: return "Mostrársela al cliente"
         case .fair: return "Una feria o exposición"
@@ -24,7 +22,6 @@ enum OnboardingGoalID: String, CaseIterable, Equatable {
     var systemImage: String {
         switch self {
         case .painting: return "photo.artframe"
-        case .scan: return "cube"
         case .several: return "square.grid.2x2"
         case .clientPreview: return "person.2"
         case .fair: return "building.columns"

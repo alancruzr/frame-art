@@ -14,7 +14,6 @@ struct AddArtworkView: View {
     @State private var heightCentimeters: Double = 80
     @State private var pickerItem: PhotosPickerItem?
     @State private var selectedImage: UIImage?
-    @State private var importedUSDZ: URL?
     @State private var kind: ArtworkKind = .paintingPhoto
     @State private var showCamera = false
     @State private var showFileImporter = false
@@ -51,13 +50,13 @@ struct AddArtworkView: View {
                 Button {
                     showFileImporter = true
                 } label: {
-                    Label("Importar escaneo 3D (USDZ o Reality)", systemImage: "cube.transparent")
+                    Label("Importar desde Archivos", systemImage: "folder")
                         .frame(minHeight: 44, alignment: .leading)
                 }
             } header: {
                 Text("Origen")
             } footer: {
-                Text("Foto de una pintura, o un escaneo 3D desde Archivos.")
+                Text("Foto de una pintura: cámara, Fotos o Archivos.")
             }
 
             if let selectedImage {
@@ -104,32 +103,19 @@ struct AddArtworkView: View {
                     Text(ArtworkKind.paintingPhoto.title)
                         .foregroundStyle(.secondary)
                 }
-            } else if let importedUSDZ {
-                Section("Vista previa") {
-                    Label("Escaneo 3D listo para guardar", systemImage: "cube.transparent")
-                    Text(importedUSDZ.lastPathComponent)
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
-                }
             }
 
             Section {
                 TextField("Título", text: $title)
-                if kind != .scan3D {
-                    ArtworkSizeFields(
-                        widthCentimeters: $widthCentimeters,
-                        heightCentimeters: $heightCentimeters,
-                        image: selectedImage
-                    )
-                }
+                ArtworkSizeFields(
+                    widthCentimeters: $widthCentimeters,
+                    heightCentimeters: $heightCentimeters,
+                    image: selectedImage
+                )
             } header: {
                 Text("Obra")
             } footer: {
-                if kind == .scan3D {
-                    Text("El escaneo ya trae su tamaño.")
-                } else {
-                    Text("Mide el marco. El alto sale de la foto; puedes corregir ancho y alto. Esos centímetros son los de la pared.")
-                }
+                Text("Mide el marco. El alto sale de la foto; puedes corregir ancho y alto. Esos centímetros son los de la pared.")
             }
         }
         .navigationTitle("Nueva obra")
@@ -181,7 +167,7 @@ struct AddArtworkView: View {
     }
 
     private var canSave: Bool {
-        selectedImage != nil || importedUSDZ != nil
+        selectedImage != nil
     }
 
     private func openCamera() {
@@ -210,32 +196,10 @@ struct AddArtworkView: View {
         case .success(let url):
             let accessed = url.startAccessingSecurityScopedResource()
             defer { if accessed { url.stopAccessingSecurityScopedResource() } }
-            let ext = url.pathExtension.lowercased()
-            if ["usdz", "reality"].contains(ext) {
-                do {
-                    let tmp = FileManager.default.temporaryDirectory
-                        .appendingPathComponent(UUID().uuidString + "." + ext)
-                    if FileManager.default.fileExists(atPath: tmp.path) {
-                        try FileManager.default.removeItem(at: tmp)
-                    }
-                    try FileManager.default.copyItem(at: url, to: tmp)
-                    canvasCropTask?.cancel()
-                    importedUSDZ = tmp
-                    selectedImage = nil
-                    originalImage = nil
-                    didCropCanvas = false
-                    isCroppingCanvas = false
-                    kind = .scan3D
-                    if title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                        title = url.deletingPathExtension().lastPathComponent
-                    }
-                } catch {
-                    errorMessage = error.localizedDescription
-                }
-            } else if let image = UIImage(contentsOfFile: url.path) {
+            if let image = UIImage(contentsOfFile: url.path) {
                 applyNewPhoto(image)
             } else {
-                errorMessage = "Este archivo no es una imagen ni un USDZ o Reality."
+                errorMessage = "Este archivo no es una imagen."
             }
         case .failure(let error):
             errorMessage = error.localizedDescription
@@ -245,7 +209,6 @@ struct AddArtworkView: View {
     private func applyNewPhoto(_ image: UIImage) {
         originalImage = image
         selectedImage = image
-        importedUSDZ = nil
         kind = .paintingPhoto
         didCropCanvas = false
         startCanvasCrop()
@@ -285,21 +248,10 @@ struct AddArtworkView: View {
             kind: kind
         )
         do {
-            if let selectedImage {
-                piece.kind = .paintingPhoto
-                piece.imageFileName = try ArtworkFileStore.saveJPEG(selectedImage, for: piece.id)
-                try ArtworkExporter.exportShareMeshes(for: piece)
-            } else if let importedUSDZ {
-                piece.kind = .scan3D
-                let name = "model." + importedUSDZ.pathExtension.lowercased()
-                piece.usdzFileName = try ArtworkFileStore.copyFile(
-                    from: importedUSDZ,
-                    for: piece.id,
-                    fileName: name
-                )
-            } else {
-                return
-            }
+            guard let selectedImage else { return }
+            piece.kind = .paintingPhoto
+            piece.imageFileName = try ArtworkFileStore.saveJPEG(selectedImage, for: piece.id)
+            try ArtworkExporter.exportShareMeshes(for: piece)
             modelContext.insert(piece)
             try modelContext.save()
             dismiss()

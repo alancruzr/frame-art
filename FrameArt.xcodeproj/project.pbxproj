@@ -8,9 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		262A03A994282AFFABC26890 /* BuildFile in Frameworks */ = {isa = PBXBuildFile; };
-		9ADBFF8AD318E24E91322BCC /* PurchasesBootstrap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9419DA09D9401D2240392027 /* PurchasesBootstrap.swift */; };
 		D1867BEC51EB4BD0550E5A19 /* BuildFile in Frameworks */ = {isa = PBXBuildFile; };
-		D41C789060171EDB2922DE00 /* RevenueCatUI in Frameworks */ = {isa = PBXBuildFile; productRef = 035EAAE841508AB91A3093B7 /* RevenueCatUI */; };
 		FA0000000000000000000065 /* FrameArtApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0000000000000000000064 /* FrameArtApp.swift */; };
 		FA0000000000000000000067 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0000000000000000000066 /* RootView.swift */; };
 		FA0000000000000000000069 /* ArtworkKind.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0000000000000000000068 /* ArtworkKind.swift */; };
@@ -28,6 +26,7 @@
 		FA000000000000000000007F /* ArtworkDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA000000000000000000007E /* ArtworkDetailView.swift */; };
 		FA0000000000000000000081 /* ArtworkARView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0000000000000000000080 /* ArtworkARView.swift */; };
 		FA0000000000000000000083 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FA0000000000000000000082 /* Assets.xcassets */; };
+		FA00000000000000000000A1 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000A0 /* PrivacyInfo.xcprivacy */; };
 		FA0000000000000000000085 /* Brand.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0000000000000000000084 /* Brand.swift */; };
 		FA0000000000000000000087 /* OnboardingStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0000000000000000000086 /* OnboardingStore.swift */; };
 		FA0000000000000000000089 /* OnboardingContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0000000000000000000088 /* OnboardingContainerView.swift */; };
@@ -40,11 +39,9 @@
 		FA0000000000000000000097 /* MiEspacioView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0000000000000000000096 /* MiEspacioView.swift */; };
 		FA0000000000000000000099 /* DeepLinkRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0000000000000000000098 /* DeepLinkRouter.swift */; };
 		FA000000000000000000009B /* StudioNameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA000000000000000000009A /* StudioNameView.swift */; };
-		FBCB9EE085CEFC199F918765 /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = 5B2768B5CC90512997581202 /* RevenueCat */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		9419DA09D9401D2240392027 /* PurchasesBootstrap.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PurchasesBootstrap.swift; sourceTree = "<group>"; };
 		FA0000000000000000000006 /* FrameArt.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FrameArt.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FA0000000000000000000064 /* FrameArtApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrameArtApp.swift; sourceTree = "<group>"; };
 		FA0000000000000000000066 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
@@ -77,6 +74,7 @@
 		FA000000000000000000009A /* StudioNameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudioNameView.swift; sourceTree = "<group>"; };
 		FA000000000000000000009C /* FrameArt.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = FrameArt.entitlements; sourceTree = "<group>"; };
 		FA000000000000000000009D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		FA00000000000000000000A0 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -85,9 +83,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				262A03A994282AFFABC26890 /* BuildFile in Frameworks */,
-				FBCB9EE085CEFC199F918765 /* RevenueCat in Frameworks */,
 				D1867BEC51EB4BD0550E5A19 /* BuildFile in Frameworks */,
-				D41C789060171EDB2922DE00 /* RevenueCatUI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -123,12 +119,12 @@
 				FA0000000000000000000098 /* DeepLinkRouter.swift */,
 				FA000000000000000000009C /* FrameArt.entitlements */,
 				FA000000000000000000009D /* Info.plist */,
+				FA00000000000000000000A0 /* PrivacyInfo.xcprivacy */,
 				FA0000000000000000000014 /* Models */,
 				FA0000000000000000000015 /* Storage */,
 				FA0000000000000000000016 /* Export */,
 				FA0000000000000000000017 /* Features */,
 				FA0000000000000000000082 /* Assets.xcassets */,
-				9419DA09D9401D2240392027 /* PurchasesBootstrap.swift */,
 			);
 			path = FrameArt;
 			sourceTree = "<group>";
@@ -246,8 +242,6 @@
 			);
 			name = FrameArt;
 			packageProductDependencies = (
-				5B2768B5CC90512997581202 /* RevenueCat */,
-				035EAAE841508AB91A3093B7 /* RevenueCatUI */,
 			);
 			productName = FrameArt;
 			productReference = FA0000000000000000000006 /* FrameArt.app */;
@@ -279,7 +273,6 @@
 			);
 			mainGroup = FA0000000000000000000002;
 			packageReferences = (
-				33B03A3A403338F9EA57A1EB /* XCRemoteSwiftPackageReference "purchases-ios" */,
 			);
 			productRefGroup = FA0000000000000000000003 /* Products */;
 			projectDirPath = "";
@@ -296,6 +289,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				FA0000000000000000000083 /* Assets.xcassets in Resources */,
+				FA00000000000000000000A1 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -334,7 +328,6 @@
 				FA0000000000000000000097 /* MiEspacioView.swift in Sources */,
 				FA0000000000000000000099 /* DeepLinkRouter.swift in Sources */,
 				FA000000000000000000009B /* StudioNameView.swift in Sources */,
-				9ADBFF8AD318E24E91322BCC /* PurchasesBootstrap.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -409,7 +402,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = FrameArt/FrameArt.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = ML4VB5PQ6H;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -417,9 +410,8 @@
 				INFOPLIST_KEY_CFBundleDisplayName = "Frame Studio";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.graphics-design";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Frame Studio usa la cámara para fotografiar tus pinturas y para la vista previa en AR.";
-				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Frame Studio guarda exportaciones de tus obras cuando las compartes.";
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSPhotoLibraryPickerUsageDescription = "Frame Studio usa el selector de fotos para añadir una pintura.";
-				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Frame Studio usa tu fototeca para importar fotos de pinturas.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -448,7 +440,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = FrameArt/FrameArt.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = ML4VB5PQ6H;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -456,9 +448,8 @@
 				INFOPLIST_KEY_CFBundleDisplayName = "Frame Studio";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.graphics-design";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Frame Studio usa la cámara para fotografiar tus pinturas y para la vista previa en AR.";
-				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Frame Studio guarda exportaciones de tus obras cuando las compartes.";
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSPhotoLibraryPickerUsageDescription = "Frame Studio usa el selector de fotos para añadir una pintura.";
-				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Frame Studio usa tu fototeca para importar fotos de pinturas.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -502,30 +493,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCRemoteSwiftPackageReference section */
-		33B03A3A403338F9EA57A1EB /* XCRemoteSwiftPackageReference "purchases-ios" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/RevenueCat/purchases-ios.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 5.32.0;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		035EAAE841508AB91A3093B7 /* RevenueCatUI */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 33B03A3A403338F9EA57A1EB /* XCRemoteSwiftPackageReference "purchases-ios" */;
-			productName = RevenueCatUI;
-		};
-		5B2768B5CC90512997581202 /* RevenueCat */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 33B03A3A403338F9EA57A1EB /* XCRemoteSwiftPackageReference "purchases-ios" */;
-			productName = RevenueCat;
-		};
-/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = FA0000000000000000000001 /* Project object */;
 }

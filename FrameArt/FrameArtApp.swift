@@ -8,7 +8,6 @@ struct FrameArtApp: App {
     @State private var router = DeepLinkRouter.shared
 
     init() {
-        PurchasesBootstrap.start()
         do {
             container = try ModelContainer(for: ArtworkPiece.self, ReceivedPiece.self)
         } catch {
