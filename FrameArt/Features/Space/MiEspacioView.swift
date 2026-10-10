@@ -147,7 +147,7 @@ private struct ReceivedPieceRow: View {
                 .scaledToFill()
         } else {
             Image(systemName: "cube.transparent")
-                .foregroundStyle(FrameStudioBrand.gold)
+                .foregroundStyle(FrameStudioBrand.accent)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .background(.fill.tertiary)
         }
