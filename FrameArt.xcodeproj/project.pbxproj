@@ -43,6 +43,10 @@
 		FA00000000000000000000B1 /* USDZExporterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000B0 /* USDZExporterTests.swift */; };
 		FA00000000000000000000B3 /* GLBExporterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000B2 /* GLBExporterTests.swift */; };
 		FA00000000000000000000B5 /* ArtworkPieceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000B4 /* ArtworkPieceTests.swift */; };
+		FA00000000000000000000B7 /* FrameStudioSchema.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000B6 /* FrameStudioSchema.swift */; };
+		FA00000000000000000000B9 /* PersistenceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000B8 /* PersistenceController.swift */; };
+		FA00000000000000000000BC /* StorageErrorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000BB /* StorageErrorView.swift */; };
+		FA00000000000000000000BE /* PersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000BD /* PersistenceTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -84,6 +88,10 @@
 		FA00000000000000000000B0 /* USDZExporterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = USDZExporterTests.swift; sourceTree = "<group>"; };
 		FA00000000000000000000B2 /* GLBExporterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GLBExporterTests.swift; sourceTree = "<group>"; };
 		FA00000000000000000000B4 /* ArtworkPieceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArtworkPieceTests.swift; sourceTree = "<group>"; };
+		FA00000000000000000000B6 /* FrameStudioSchema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrameStudioSchema.swift; sourceTree = "<group>"; };
+		FA00000000000000000000B8 /* PersistenceController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceController.swift; sourceTree = "<group>"; };
+		FA00000000000000000000BB /* StorageErrorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageErrorView.swift; sourceTree = "<group>"; };
+		FA00000000000000000000BD /* PersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXShellScriptBuildPhase section */
@@ -192,6 +200,7 @@
 		FA0000000000000000000014 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				FA00000000000000000000B6 /* FrameStudioSchema.swift */,
 				FA0000000000000000000068 /* ArtworkKind.swift */,
 				FA000000000000000000006A /* ArtworkPiece.swift */,
 				FA0000000000000000000094 /* ReceivedPiece.swift */,
@@ -202,6 +211,7 @@
 		FA0000000000000000000015 /* Storage */ = {
 			isa = PBXGroup;
 			children = (
+				FA00000000000000000000B8 /* PersistenceController.swift */,
 				FA000000000000000000006C /* ArtworkFileStore.swift */,
 			);
 			path = Storage;
@@ -222,6 +232,7 @@
 		FA0000000000000000000017 /* Features */ = {
 			isa = PBXGroup;
 			children = (
+				FA00000000000000000000BA /* Recovery */,
 				FA000000000000000000001C /* Onboarding */,
 				FA0000000000000000000018 /* Gallery */,
 				FA0000000000000000000019 /* Add */,
@@ -288,12 +299,21 @@
 		FA00000000000000000000AD /* FrameArtTests */ = {
 			isa = PBXGroup;
 			children = (
+				FA00000000000000000000BD /* PersistenceTests.swift */,
 				FA00000000000000000000B4 /* ArtworkPieceTests.swift */,
 				FA00000000000000000000B2 /* GLBExporterTests.swift */,
 				FA00000000000000000000B0 /* USDZExporterTests.swift */,
 				FA00000000000000000000AE /* TestSupport.swift */,
 			);
 			path = FrameArtTests;
+			sourceTree = "<group>";
+		};
+		FA00000000000000000000BA /* Recovery */ = {
+			isa = PBXGroup;
+			children = (
+				FA00000000000000000000BB /* StorageErrorView.swift */,
+			);
+			path = Recovery;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -402,6 +422,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FA00000000000000000000BC /* StorageErrorView.swift in Sources */,
+				FA00000000000000000000B9 /* PersistenceController.swift in Sources */,
+				FA00000000000000000000B7 /* FrameStudioSchema.swift in Sources */,
 				FA0000000000000000000065 /* FrameArtApp.swift in Sources */,
 				FA0000000000000000000067 /* RootView.swift in Sources */,
 				FA0000000000000000000069 /* ArtworkKind.swift in Sources */,
@@ -437,6 +460,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FA00000000000000000000BE /* PersistenceTests.swift in Sources */,
 				FA00000000000000000000B5 /* ArtworkPieceTests.swift in Sources */,
 				FA00000000000000000000B3 /* GLBExporterTests.swift in Sources */,
 				FA00000000000000000000B1 /* USDZExporterTests.swift in Sources */,
