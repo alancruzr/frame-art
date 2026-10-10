@@ -53,6 +53,13 @@ Permisos (Info.plist generado): cámara y fototeca. El onboarding los pide; se p
 
 La clave compartida de publicación es **legacy**: la app publica con App Attest y solo usa la clave si el servidor tiene `FRAME_STUDIO_LEGACY_KEY_ENABLED=true`.
 
+## Publicación segura (App Attest)
+
+- La app obtiene un token de 15 min con App Attest (`FrameArt/Services/DeviceAuth.swift`) vía `/api/auth/challenge`, `/api/auth/attest` y `/api/auth/assert`. El primer dispositivo que usa un slug de estudio queda como dueño.
+- `/api/publish` y `/api/unpublish` exigen token (o la clave legacy mientras `FRAME_STUDIO_LEGACY_KEY_ENABLED` ≠ `false`), validan el tipo real de archivo y aplican límites: poster 3 MB, USDZ/GLB 6 MB, meta 4 KB, 200 obras por estudio, 60 subidas/h por dispositivo, 120/h por IP.
+- Variables en Netlify: `FRAME_STUDIO_SESSION_SECRET`, `APPLE_TEAM_ID`, `APPLE_BUNDLE_ID`, `APP_ATTEST_ENV`, opcional `APP_ATTEST_ALLOW_DEVELOPMENT`, `FRAME_STUDIO_LEGACY_KEY_ENABLED`.
+- Tests del servidor: `npm ci && npm run typecheck && npm test`.
+
 ## Cómo abre el cliente la obra
 
 **Opción A — un enlace (iPhone y Android)**  

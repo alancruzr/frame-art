@@ -47,6 +47,8 @@
 		FA00000000000000000000B9 /* PersistenceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000B8 /* PersistenceController.swift */; };
 		FA00000000000000000000BC /* StorageErrorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000BB /* StorageErrorView.swift */; };
 		FA00000000000000000000BE /* PersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000BD /* PersistenceTests.swift */; };
+		FA00000000000000000000C1 /* DeviceAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000C0 /* DeviceAuth.swift */; };
+		FA00000000000000000000C3 /* KeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000C2 /* KeychainStore.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -92,6 +94,8 @@
 		FA00000000000000000000B8 /* PersistenceController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceController.swift; sourceTree = "<group>"; };
 		FA00000000000000000000BB /* StorageErrorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageErrorView.swift; sourceTree = "<group>"; };
 		FA00000000000000000000BD /* PersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceTests.swift; sourceTree = "<group>"; };
+		FA00000000000000000000C0 /* DeviceAuth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceAuth.swift; sourceTree = "<group>"; };
+		FA00000000000000000000C2 /* KeychainStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStore.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXShellScriptBuildPhase section */
@@ -177,6 +181,7 @@
 		FA0000000000000000000004 /* FrameArt */ = {
 			isa = PBXGroup;
 			children = (
+				FA00000000000000000000BF /* Services */,
 				FA0000000000000000000064 /* FrameArtApp.swift */,
 				FA0000000000000000000066 /* RootView.swift */,
 				FA0000000000000000000084 /* Brand.swift */,
@@ -316,6 +321,15 @@
 			path = Recovery;
 			sourceTree = "<group>";
 		};
+		FA00000000000000000000BF /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				FA00000000000000000000C2 /* KeychainStore.swift */,
+				FA00000000000000000000C0 /* DeviceAuth.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -422,6 +436,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FA00000000000000000000C3 /* KeychainStore.swift in Sources */,
+				FA00000000000000000000C1 /* DeviceAuth.swift in Sources */,
 				FA00000000000000000000BC /* StorageErrorView.swift in Sources */,
 				FA00000000000000000000B9 /* PersistenceController.swift in Sources */,
 				FA00000000000000000000B7 /* FrameStudioSchema.swift in Sources */,
