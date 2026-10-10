@@ -9,11 +9,30 @@ enum FrameStudioBrand {
 
 extension View {
     /// System prominent button. Hunter tint for contrast in light and dark.
+    /// iOS 26+: Liquid Glass prominent. iOS 18–25: borderedProminent.
+    @ViewBuilder
     func primaryButtonStyle() -> some View {
-        self
-            .buttonStyle(.glassProminent)
-            .controlSize(.large)
-            .tint(FrameStudioBrand.hunter)
+        if #available(iOS 26.0, *) {
+            self
+                .buttonStyle(.glassProminent)
+                .controlSize(.large)
+                .tint(FrameStudioBrand.hunter)
+        } else {
+            self
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
+                .tint(FrameStudioBrand.hunter)
+        }
+    }
+
+    /// Secondary button. iOS 26+: Liquid Glass. iOS 18–25: bordered.
+    @ViewBuilder
+    func secondaryGlassButtonStyle() -> some View {
+        if #available(iOS 26.0, *) {
+            self.buttonStyle(.glass).controlSize(.large)
+        } else {
+            self.buttonStyle(.bordered).controlSize(.large)
+        }
     }
 }
 

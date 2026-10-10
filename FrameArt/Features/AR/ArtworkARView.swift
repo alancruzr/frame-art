@@ -163,8 +163,7 @@ struct ArtworkARContainer: View {
                     Text("Mover")
                         .frame(maxWidth: .infinity, minHeight: 44)
                 }
-                .buttonStyle(.glass)
-                .controlSize(.large)
+                .secondaryGlassButtonStyle()
                 Button {
                     placement.pin()
                 } label: {
@@ -181,8 +180,7 @@ struct ArtworkARContainer: View {
                 Text("Mover a otra pared")
                     .frame(maxWidth: .infinity, minHeight: 44)
             }
-            .buttonStyle(.glass)
-            .controlSize(.large)
+            .secondaryGlassButtonStyle()
             .padding()
         case .failed:
             EmptyView()

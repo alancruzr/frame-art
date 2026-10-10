@@ -14,7 +14,7 @@ App nativa de iOS (SwiftUI, Swift 6, SwiftData) para artistas. Añades la foto d
 
 La app del artista sigue siendo solo iOS. Exporta **USDZ y GLB** de cada pintura (foto). El cliente no usa ARKit.
 
-Requisito: **iOS 18 o posterior** (el proyecto apunta a iOS 26). La vista previa AR en la app necesita un **iPhone o iPad real**.
+Requisito: **iOS 18.0 o posterior** (deployment target 18.0; se compila con el SDK de iOS 26+). Liquid Glass se usa solo en iOS 26+ (`#available`); en iOS 18–25 los botones usan estilos `bordered`. La vista previa AR en la app necesita un **iPhone o iPad real**.
 
 Visor público: https://alancruzr.github.io/frame-art/
 
