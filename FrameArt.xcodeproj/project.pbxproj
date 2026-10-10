@@ -49,6 +49,13 @@
 		FA00000000000000000000BE /* PersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000BD /* PersistenceTests.swift */; };
 		FA00000000000000000000C1 /* DeviceAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000C0 /* DeviceAuth.swift */; };
 		FA00000000000000000000C3 /* KeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000C2 /* KeychainStore.swift */; };
+		FA00000000000000000000C5 /* ARPlacementState.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000C4 /* ARPlacementState.swift */; };
+		FA00000000000000000000C7 /* WallPlacementMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000C6 /* WallPlacementMath.swift */; };
+		FA00000000000000000000C9 /* ArtworkARContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000C8 /* ArtworkARContainer.swift */; };
+		FA00000000000000000000CB /* ARSessionCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000CA /* ARSessionCoordinator.swift */; };
+		FA00000000000000000000CD /* PlaneHintRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000CC /* PlaneHintRenderer.swift */; };
+		FA00000000000000000000CF /* WallPlacementController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000CE /* WallPlacementController.swift */; };
+		FA00000000000000000000D1 /* WallPlacementMathTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000D0 /* WallPlacementMathTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -96,6 +103,13 @@
 		FA00000000000000000000BD /* PersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceTests.swift; sourceTree = "<group>"; };
 		FA00000000000000000000C0 /* DeviceAuth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceAuth.swift; sourceTree = "<group>"; };
 		FA00000000000000000000C2 /* KeychainStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStore.swift; sourceTree = "<group>"; };
+		FA00000000000000000000C4 /* ARPlacementState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARPlacementState.swift; sourceTree = "<group>"; };
+		FA00000000000000000000C6 /* WallPlacementMath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WallPlacementMath.swift; sourceTree = "<group>"; };
+		FA00000000000000000000C8 /* ArtworkARContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArtworkARContainer.swift; sourceTree = "<group>"; };
+		FA00000000000000000000CA /* ARSessionCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARSessionCoordinator.swift; sourceTree = "<group>"; };
+		FA00000000000000000000CC /* PlaneHintRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaneHintRenderer.swift; sourceTree = "<group>"; };
+		FA00000000000000000000CE /* WallPlacementController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WallPlacementController.swift; sourceTree = "<group>"; };
+		FA00000000000000000000D0 /* WallPlacementMathTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WallPlacementMathTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXShellScriptBuildPhase section */
@@ -277,6 +291,12 @@
 		FA000000000000000000001B /* AR */ = {
 			isa = PBXGroup;
 			children = (
+				FA00000000000000000000CE /* WallPlacementController.swift */,
+				FA00000000000000000000CC /* PlaneHintRenderer.swift */,
+				FA00000000000000000000CA /* ARSessionCoordinator.swift */,
+				FA00000000000000000000C8 /* ArtworkARContainer.swift */,
+				FA00000000000000000000C6 /* WallPlacementMath.swift */,
+				FA00000000000000000000C4 /* ARPlacementState.swift */,
 				FA0000000000000000000080 /* ArtworkARView.swift */,
 			);
 			path = AR;
@@ -304,6 +324,7 @@
 		FA00000000000000000000AD /* FrameArtTests */ = {
 			isa = PBXGroup;
 			children = (
+				FA00000000000000000000D0 /* WallPlacementMathTests.swift */,
 				FA00000000000000000000BD /* PersistenceTests.swift */,
 				FA00000000000000000000B4 /* ArtworkPieceTests.swift */,
 				FA00000000000000000000B2 /* GLBExporterTests.swift */,
@@ -436,6 +457,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FA00000000000000000000CF /* WallPlacementController.swift in Sources */,
+				FA00000000000000000000CD /* PlaneHintRenderer.swift in Sources */,
+				FA00000000000000000000CB /* ARSessionCoordinator.swift in Sources */,
+				FA00000000000000000000C9 /* ArtworkARContainer.swift in Sources */,
+				FA00000000000000000000C7 /* WallPlacementMath.swift in Sources */,
+				FA00000000000000000000C5 /* ARPlacementState.swift in Sources */,
 				FA00000000000000000000C3 /* KeychainStore.swift in Sources */,
 				FA00000000000000000000C1 /* DeviceAuth.swift in Sources */,
 				FA00000000000000000000BC /* StorageErrorView.swift in Sources */,
@@ -476,6 +503,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FA00000000000000000000D1 /* WallPlacementMathTests.swift in Sources */,
 				FA00000000000000000000BE /* PersistenceTests.swift in Sources */,
 				FA00000000000000000000B5 /* ArtworkPieceTests.swift in Sources */,
 				FA00000000000000000000B3 /* GLBExporterTests.swift in Sources */,
