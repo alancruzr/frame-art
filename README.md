@@ -16,7 +16,9 @@ La app del artista sigue siendo solo iOS. Exporta **USDZ y GLB** de cada pintura
 
 Requisito: **iOS 18.0 o posterior** (deployment target 18.0; se compila con el SDK de iOS 26+). Liquid Glass se usa solo en iOS 26+ (`#available`); en iOS 18–25 los botones usan estilos `bordered`. La vista previa AR en la app necesita un **iPhone o iPad real**.
 
-Visor público: https://alancruzr.github.io/frame-art/
+Visor público: https://frame-studio.netlify.app/{estudio}/{obra}/ (Netlify es el hosting principal; el visor de GitHub Pages en `docs/` está en retirada, ver `docs/DEPRECATED.md`).
+
+Legales: https://frame-studio.netlify.app/privacy/ · /terms/ · /support/
 
 Query: `?title=Atardecer&glb=model.glb&usdz=model.usdz`
 
