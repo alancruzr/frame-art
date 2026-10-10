@@ -62,3 +62,5 @@ web/poster.jpg
 web/poster.png
 web/o/
 scripts/__pycache__/
+
+Config/Secrets.env

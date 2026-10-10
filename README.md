@@ -42,6 +42,17 @@ Cuatro pasos breves (se puede **Saltar**): bienvenida, qué vas a compartir, qu�
 
 Permisos (Info.plist generado): cámara y fototeca. El onboarding los pide; se pueden conceder después en Ajustes.
 
+## Configuración local (secretos)
+
+`FrameArt/Secrets.generated.swift` está en `.gitignore` y lo genera la fase de build **Generate Secrets** (`scripts/generate_secrets.sh`).
+
+1. `cp Config/Secrets.example.env Config/Secrets.env` y rellena los valores (archivo ignorado por git).
+2. Genera a mano: `./scripts/generate_secrets.sh` (Xcode lo ejecuta en cada build).
+3. En CI, define `FRAME_STUDIO_PUBLISH_KEY` / `REVENUECAT_API_KEY` como variables de entorno o déjalas vacías: el proyecto compila igual.
+4. Si no hay `Secrets.env` ni variables y el archivo ya existe, el script no lo modifica. En un clon limpio lo crea con valores vacíos.
+
+La clave compartida de publicación es **legacy**: la app publica con App Attest y solo usa la clave si el servidor tiene `FRAME_STUDIO_LEGACY_KEY_ENABLED=true`.
+
 ## Cómo abre el cliente la obra
 
 **Opción A — un enlace (iPhone y Android)**  

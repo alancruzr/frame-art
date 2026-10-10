@@ -77,6 +77,30 @@
 		FA00000000000000000000A0 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		FA00000000000000000000A2 /* Generate Secrets */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/scripts/generate_secrets.sh",
+			);
+			name = "Generate Secrets";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(SRCROOT)/FrameArt/Secrets.generated.swift",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/scripts/generate_secrets.sh\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXFrameworksBuildPhase section */
 		FA0000000000000000000009 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
@@ -232,6 +256,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = FA000000000000000000000B /* Build configuration list for PBXNativeTarget "FrameArt" */;
 			buildPhases = (
+				FA00000000000000000000A2 /* Generate Secrets */,
 				FA0000000000000000000007 /* Sources */,
 				FA0000000000000000000009 /* Frameworks */,
 				FA0000000000000000000008 /* Resources */,
