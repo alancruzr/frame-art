@@ -11,7 +11,7 @@ struct StorageErrorView: View {
         VStack(spacing: 20) {
             Image(systemName: "externaldrive.badge.exclamationmark")
                 .font(.system(size: 52))
-                .foregroundStyle(FrameStudioBrand.hunter)
+                .foregroundStyle(FrameStudioBrand.accent)
             Text("No se pudieron abrir tus obras")
                 .font(.title2.bold())
                 .multilineTextAlignment(.center)
