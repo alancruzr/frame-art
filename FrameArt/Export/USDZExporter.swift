@@ -135,7 +135,7 @@ enum USDZExporter {
         }
     }
 
-    private static func makeUSDA(
+    static func makeUSDA(
         displayName: String,
         widthMeters: Double,
         heightMeters: Double,
@@ -266,7 +266,7 @@ enum USDZExporter {
     }
 
     /// Uncompressed ZIP with 64-byte aligned local file payloads (USDZ spec).
-    private static func writeUSDZ(to url: URL, files: [(String, Data)]) throws {
+    static func writeUSDZ(to url: URL, files: [(String, Data)]) throws {
         var entries: [(name: String, crc: UInt32, size: UInt32, offset: UInt32)] = []
         var archive = Data()
 
