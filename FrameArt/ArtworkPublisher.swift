@@ -101,18 +101,13 @@ enum ArtworkPublisher {
         "meta": 4 * 1024,
     ]
 
-    /// Cabecera Authorization: token de App Attest; si no está disponible, clave legacy (si existe).
+    /// Los builds nuevos usan App Attest. Los binarios antiguos conservan su fallback legacy;
+    /// el servidor debe mantenerlo activo hasta completar la migración de clientes.
     static func authorization(for studio: String) async throws -> String {
         do {
             return "Bearer \(try await DeviceAuth.shared.bearer(for: studio))"
         } catch DeviceAuth.AuthError.studioTaken {
             throw PublishError.studioTaken
-        } catch {
-            let legacy = FrameStudioSecrets.publishKey
-            guard !legacy.isEmpty else {
-                throw (error as? DeviceAuth.AuthError) == .unsupported ? PublishError.deviceNotSupported : PublishError.missingKey
-            }
-            return "Bearer \(legacy)"
         }
     }
 
@@ -164,19 +159,15 @@ enum ArtworkPublisher {
     }
 
     enum PublishError: LocalizedError {
-        case missingKey
         case missingFiles
         case imageEncodingFailed
         case uploadFailed
         case fileTooLarge
         case rateLimited
         case studioTaken
-        case deviceNotSupported
 
         var errorDescription: String? {
             switch self {
-            case .missingKey:
-                "Falta la clave de publicación."
             case .missingFiles:
                 "No hay archivos AR para publicar."
             case .imageEncodingFailed:
@@ -189,8 +180,6 @@ enum ArtworkPublisher {
                 "Has publicado muchas veces seguidas. Espera un rato e inténtalo de nuevo."
             case .studioTaken:
                 "Este nombre de estudio pertenece a otro dispositivo. Cámbialo en Mi espacio."
-            case .deviceNotSupported:
-                "Este dispositivo no puede publicar (App Attest no disponible)."
             }
         }
     }

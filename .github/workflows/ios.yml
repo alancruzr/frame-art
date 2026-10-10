@@ -25,6 +25,9 @@ jobs:
           sudo xcode-select -s "$XCODE"
           xcodebuild -version
 
+      - name: Verify legacy publish key is not embedded in new clients
+        run: ./scripts/tests/generate_secrets_test.sh
+
       - name: Generate Secrets.generated.swift (empty values)
         run: ./scripts/generate_secrets.sh
 

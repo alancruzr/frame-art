@@ -2,9 +2,9 @@
 # Genera FrameArt/Secrets.generated.swift (en .gitignore; NUNCA versionar).
 #
 # Fuentes, por prioridad:
-#   1. Variables de entorno (CI): FRAME_STUDIO_PUBLISH_KEY, REVENUECAT_API_KEY, FRAME_STUDIO_API_ORIGIN
+#   1. Variables de entorno (CI): REVENUECAT_API_KEY, FRAME_STUDIO_API_ORIGIN
 #   2. Config/Secrets.env (local, en .gitignore). Copia Config/Secrets.example.env.
-# Si no hay ninguna fuente y el archivo generado ya existe, NO se toca (conserva tu configuración local).
+# Si no hay ninguna fuente, se conservan los valores locales no relacionados con publicación.
 # Si no existe, se crea con valores vacíos para que el proyecto compile (publicar fallará con un error claro).
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -17,12 +17,21 @@ if [[ -r "$ENV_FILE" ]] && cat "$ENV_FILE" >/dev/null 2>&1; then
 fi
 
 have_source=0
-for v in FRAME_STUDIO_PUBLISH_KEY REVENUECAT_API_KEY FRAME_STUDIO_API_ORIGIN; do
+for v in REVENUECAT_API_KEY FRAME_STUDIO_API_ORIGIN; do
   [[ -n "${!v:-}" ]] && have_source=1
 done
 
 if [[ $have_source -eq 0 && -f "$OUT" ]]; then
-  echo "generate_secrets: sin fuentes; se conserva $OUT"
+  # Preserve existing local non-publish settings while removing the legacy
+  # credential from future client builds. This does not revoke old binaries.
+  TMP="$(mktemp)"
+  awk '
+    /^[[:space:]]*\/\/\/ Clave compartida LEGACY\./ { next }
+    /^[[:space:]]*static let publishKey =/ { next }
+    { print }
+  ' "$OUT" > "$TMP"
+  if cmp -s "$TMP" "$OUT"; then rm -f "$TMP"; else mv "$TMP" "$OUT"; fi
+  echo "generate_secrets: sin fuentes; se conservan valores locales y se retira la clave legacy del cliente"
   exit 0
 fi
 
@@ -31,8 +40,6 @@ TMP="$(mktemp)"
 cat > "$TMP" <<SWIFT
 // Generado por scripts/generate_secrets.sh. NO EDITAR NI VERSIONAR.
 enum FrameStudioSecrets {
-    /// Clave compartida LEGACY. Solo se usa si el servidor tiene activado FRAME_STUDIO_LEGACY_KEY_ENABLED.
-    static let publishKey = "$(esc "${FRAME_STUDIO_PUBLISH_KEY:-}")"
     static let revenueCatAPIKey = "$(esc "${REVENUECAT_API_KEY:-}")"
     static let apiOrigin = "$(esc "${FRAME_STUDIO_API_ORIGIN:-https://frame-studio.netlify.app}")"
 }
