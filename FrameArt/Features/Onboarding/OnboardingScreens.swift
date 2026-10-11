@@ -27,7 +27,7 @@ struct OnboardingTitle: View {
     var body: some View {
         Text(text)
             .font(.system(size: 28, weight: .bold))
-            .foregroundStyle(.white)
+            .foregroundStyle(.primary)
             .multilineTextAlignment(.center)
             .lineSpacing(2)
             .minimumScaleFactor(0.86)
@@ -43,7 +43,7 @@ struct OnboardingSubtitle: View {
     var body: some View {
         Text(text)
             .font(.system(size: 16))
-            .foregroundStyle(.white.opacity(0.65))
+            .foregroundStyle(.secondary)
             .multilineTextAlignment(.center)
             .lineSpacing(2)
             .frame(maxWidth: 360)
@@ -61,11 +61,11 @@ struct OnboardingPrimaryButton: View {
         Button(action: action) {
             Text(title)
                 .font(.system(size: 17, weight: .semibold))
-                .foregroundStyle(FrameStudioBrand.hunter)
+                .foregroundStyle(enabled ? Color.white : Color.secondary)
                 .frame(maxWidth: .infinity)
                 .frame(height: 50)
                 .background(
-                    FrameStudioBrand.gold.opacity(enabled ? 1 : 0.4),
+                    enabled ? FrameStudioBrand.buttonFill : FrameStudioBrand.softLavender,
                     in: RoundedRectangle(cornerRadius: 16, style: .continuous)
                 )
         }
@@ -82,8 +82,8 @@ private struct OnboardingHeroAppIcon: View {
                 .fill(
                     RadialGradient(
                         colors: [
-                            FrameStudioBrand.gold.opacity(0.28),
-                            FrameStudioBrand.gold.opacity(0.10),
+                            FrameStudioBrand.accent.opacity(0.20),
+                            FrameStudioBrand.blue.opacity(0.10),
                             .clear
                         ],
                         center: .center,
@@ -106,7 +106,7 @@ private struct OnboardingHeroAppIcon: View {
                                 colors: [
                                     .white.opacity(0.42),
                                     .white.opacity(0.10),
-                                    FrameStudioBrand.gold.opacity(0.28)
+                                    FrameStudioBrand.accent.opacity(0.20)
                                 ],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
@@ -115,7 +115,7 @@ private struct OnboardingHeroAppIcon: View {
                         )
                 }
                 .shadow(color: .black.opacity(0.34), radius: 26, y: 18)
-                .shadow(color: FrameStudioBrand.gold.opacity(0.24), radius: 34, y: 12)
+                .shadow(color: FrameStudioBrand.accent.opacity(0.14), radius: 34, y: 12)
         }
         .frame(width: 218, height: 218)
         .accessibilityLabel("Icono de Frame Studio")
@@ -133,25 +133,25 @@ private struct OnboardingChoiceCard: View {
             HStack(spacing: 14) {
                 Image(systemName: systemImage)
                     .font(.system(size: 21, weight: .semibold))
-                    .foregroundStyle(FrameStudioBrand.gold)
+                    .foregroundStyle(FrameStudioBrand.accent)
                     .frame(width: 24)
                     .accessibilityHidden(true)
                 Text(title)
                     .font(.system(size: 15, weight: .medium))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(.primary)
                     .multilineTextAlignment(.leading)
                 Spacer(minLength: 8)
                 Image(systemName: selected ? "checkmark.circle.fill" : "circle")
-                    .foregroundStyle(selected ? FrameStudioBrand.gold : .white.opacity(0.3))
+                    .foregroundStyle(selected ? FrameStudioBrand.accent : .secondary)
                     .accessibilityHidden(true)
             }
             .padding(16)
             .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
-            .background(selected ? FrameStudioBrand.gold.opacity(0.18) : Color.white.opacity(0.10))
+            .background(selected ? FrameStudioBrand.softLavender : FrameStudioBrand.surface)
             .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .stroke(selected ? FrameStudioBrand.gold.opacity(0.5) : .clear, lineWidth: 1)
+                    .stroke(selected ? FrameStudioBrand.accent.opacity(0.55) : Color(uiColor: .separator), lineWidth: 1)
             )
         }
         .buttonStyle(.plain)
@@ -273,22 +273,22 @@ struct SolutionScreen: View {
                         HStack(alignment: .top, spacing: 14) {
                             Image(systemName: item.icon)
                                 .font(.system(size: 22))
-                                .foregroundStyle(FrameStudioBrand.gold)
+                                .foregroundStyle(FrameStudioBrand.accent)
                                 .frame(width: 44)
                                 .accessibilityHidden(true)
                             VStack(alignment: .leading, spacing: 8) {
                                 Text(item.label)
                                     .font(.system(size: 12, weight: .semibold))
-                                    .foregroundStyle(FrameStudioBrand.gold)
+                                    .foregroundStyle(FrameStudioBrand.accent)
                                 Text(item.text)
                                     .font(.system(size: 15, weight: .medium))
-                                    .foregroundStyle(.white)
+                                    .foregroundStyle(.primary)
                                     .fixedSize(horizontal: false, vertical: true)
                             }
                         }
                         .padding(16)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(Color.white.opacity(0.10))
+                        .background(FrameStudioBrand.surface)
                         .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                     }
                 }
@@ -356,7 +356,7 @@ struct ProfileScreen: View {
 
                     Text("Tu espacio: \(slugPreview)")
                         .font(.footnote)
-                        .foregroundStyle(.white.opacity(0.55))
+                        .foregroundStyle(.secondary)
                         .accessibilityLabel("Vista previa del enlace, \(slugPreview)")
                 }
                 .padding(.horizontal, 24)
@@ -379,12 +379,12 @@ struct ProfileScreen: View {
         VStack(alignment: .leading, spacing: 8) {
             Text(title)
                 .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(FrameStudioBrand.gold)
+                .foregroundStyle(FrameStudioBrand.accent)
             TextField(placeholder, text: text)
-                .foregroundStyle(.white)
+                .foregroundStyle(.primary)
                 .padding(14)
                 .frame(minHeight: 44)
-                .background(Color.white.opacity(0.10), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .background(FrameStudioBrand.surface, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
         }
     }
 }
@@ -412,25 +412,25 @@ struct PermissionsScreen: View {
                     HStack(spacing: 14) {
                         Image(systemName: cameraGranted ? "checkmark.circle.fill" : (cameraBlocked ? "gear" : "camera.fill"))
                             .font(.system(size: 21, weight: .semibold))
-                            .foregroundStyle(FrameStudioBrand.gold)
+                            .foregroundStyle(FrameStudioBrand.accent)
                             .frame(width: 24)
                         VStack(alignment: .leading, spacing: 4) {
                             Text(cameraBlocked ? "Abrir Ajustes" : "Cámara")
                                 .font(.system(size: 15, weight: .medium))
-                                .foregroundStyle(.white)
+                                .foregroundStyle(.primary)
                             Text(cameraGranted ? "Permitida" : "Para la foto y el AR")
                                 .font(.system(size: 13))
-                                .foregroundStyle(.white.opacity(0.55))
+                                .foregroundStyle(.secondary)
                         }
                         Spacer()
                     }
                     .padding(16)
                     .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
-                    .background(cameraGranted ? FrameStudioBrand.gold.opacity(0.18) : Color.white.opacity(0.10))
+                    .background(cameraGranted ? FrameStudioBrand.softBlue : FrameStudioBrand.surface)
                     .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                     .overlay(
                         RoundedRectangle(cornerRadius: 12, style: .continuous)
-                            .stroke(cameraGranted ? FrameStudioBrand.gold.opacity(0.5) : .clear, lineWidth: 1)
+                            .stroke(cameraGranted ? FrameStudioBrand.blue.opacity(0.55) : Color(uiColor: .separator), lineWidth: 1)
                     )
                 }
                 .buttonStyle(.plain)

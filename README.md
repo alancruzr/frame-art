@@ -14,9 +14,11 @@ App nativa de iOS (SwiftUI, Swift 6, SwiftData) para artistas. Añades la foto d
 
 La app del artista sigue siendo solo iOS. Exporta **USDZ y GLB** de cada pintura (foto). El cliente no usa ARKit.
 
-Requisito: **iOS 18 o posterior** (el proyecto apunta a iOS 26). La vista previa AR en la app necesita un **iPhone o iPad real**.
+Requisito: **iOS 18.0 o posterior** (deployment target 18.0; se compila con el SDK de iOS 26+). Liquid Glass se usa solo en iOS 26+ (`#available`); en iOS 18–25 los botones usan estilos `bordered`. La vista previa AR en la app necesita un **iPhone o iPad real**.
 
-Visor público: https://alancruzr.github.io/frame-art/
+Visor público: https://frame-studio.netlify.app/{estudio}/{obra}/ (Netlify es el hosting principal; el visor de GitHub Pages en `docs/` está en retirada, ver `docs/DEPRECATED.md`).
+
+Legales: https://frame-studio.netlify.app/privacy/ · /terms/ · /support/
 
 Query: `?title=Atardecer&glb=model.glb&usdz=model.usdz`
 
@@ -41,6 +43,24 @@ Cuatro pasos breves (se puede **Saltar**): bienvenida, qué vas a compartir, qu�
 4. Ejecuta en un iPhone o iPad real para AR. El simulador sirve para onboarding, lista, alta y exportación.
 
 Permisos (Info.plist generado): cámara y fototeca. El onboarding los pide; se pueden conceder después en Ajustes.
+
+## Configuración local (secretos)
+
+`FrameArt/Secrets.generated.swift` está en `.gitignore` y lo genera la fase de build **Generate Secrets** (`scripts/generate_secrets.sh`).
+
+1. `cp Config/Secrets.example.env Config/Secrets.env` y rellena los valores de cliente que correspondan (archivo ignorado por git).
+2. Xcode ejecuta `./scripts/generate_secrets.sh` en cada build. El generador no escribe `FRAME_STUDIO_PUBLISH_KEY` en la app; conserva los valores locales no relacionados con publicación si no hay entradas nuevas.
+3. En CI, define `REVENUECAT_API_KEY` si se necesita; la clave de publicación no es una variable de build iOS.
+
+Los builds nuevos publican con App Attest y no contienen la clave legacy. Los binarios antiguos pueden seguir usándola mientras `FRAME_STUDIO_LEGACY_KEY_ENABLED` permanezca activo en Netlify. Mantén esa compatibilidad hasta verificar la migración de los clientes; quitar la clave de una fuente o de builds nuevos no revoca credenciales ya empaquetadas en binarios antiguos.
+
+## Publicación segura (App Attest)
+
+- La app obtiene un token de 15 min con App Attest (`FrameArt/Services/DeviceAuth.swift`) vía `/api/auth/challenge`, `/api/auth/attest` y `/api/auth/assert`. El primer dispositivo que usa un slug de estudio queda como dueño.
+- `/api/publish` y `/api/unpublish` exigen token (o la clave legacy mientras `FRAME_STUDIO_LEGACY_KEY_ENABLED` ≠ `false`), validan el tipo real de archivo y aplican límites: poster 3 MB, USDZ/GLB 6 MB, meta 4 KB, 200 obras por estudio, 60 subidas/h por dispositivo, 120/h por IP.
+- Variables en Netlify: `FRAME_STUDIO_SESSION_SECRET` (mínimo 32 caracteres), `APPLE_TEAM_ID`; `APPLE_BUNDLE_ID` y `APP_ATTEST_ENV` tienen valores por defecto, pero pueden fijarse explícitamente por entorno. `APP_ATTEST_ALLOW_DEVELOPMENT` queda desactivado por defecto. No lo actives en producción sin una aprobación y una ventana de prueba concretas; es preferible validar builds de desarrollo en un entorno Deploy Preview aislado.
+- Release gate: configura el backend y habilita App Attest para el App ID antes de distribuir un build nuevo; los clientes nuevos fallan de forma cerrada si App Attest no está disponible. Mantén el fallback legacy del servidor hasta verificar la migración de los binarios antiguos.
+- Tests del servidor: `npm ci && npm run typecheck && npm test`.
 
 ## Cómo abre el cliente la obra
 

@@ -38,15 +38,14 @@ export function unauthorized(): Response {
   return new Response("Unauthorized", { status: 401 });
 }
 
-export function requireBearer(req: Request): Response | null {
-  const expected = envGet("FRAME_STUDIO_PUBLISH_KEY");
-  const header = req.headers.get("authorization") || "";
-  if (!expected || header !== `Bearer ${expected}`) {
-    return unauthorized();
-  }
-  return null;
-}
 
 export function publicArtworkURL(studio: string, artwork: string): string {
   return `${SITE_ORIGIN}/${studio}/${artwork}/`;
+}
+
+/** Slugs de estudio reservados para páginas estáticas y rutas del sitio. */
+export const RESERVED_STUDIOS = new Set(["api", "assets", "privacy", "terms", "support", "well-known", "index", "admin", "static"]);
+
+export function isStudioSlug(value: string): boolean {
+  return isSlug(value) && !RESERVED_STUDIOS.has(value);
 }

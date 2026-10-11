@@ -18,9 +18,8 @@ enum ArtworkPublisher {
         }
         let studio = profile.slug
         let artwork = piece.ensurePublicSlug()
-        guard !FrameStudioSecrets.publishKey.isEmpty else {
-            throw PublishError.missingKey
-        }
+        // Obtiene credenciales antes de exportar para fallar rápido (y reclamar el estudio).
+        _ = try await authorization(for: studio)
 
         try ArtworkExporter.exportShareMeshes(for: piece)
 
@@ -80,10 +79,11 @@ enum ArtworkPublisher {
     }
 
     static func unpublishBestEffort(studio: String, artwork: String) async {
-        guard !studio.isEmpty, !artwork.isEmpty, !FrameStudioSecrets.publishKey.isEmpty else { return }
+        guard !studio.isEmpty, !artwork.isEmpty,
+              let auth = try? await authorization(for: studio) else { return }
         var request = URLRequest(url: unpublishEndpoint)
         request.httpMethod = "POST"
-        request.setValue("Bearer \(FrameStudioSecrets.publishKey)", forHTTPHeaderField: "Authorization")
+        request.setValue(auth, forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.timeoutInterval = 30
         request.httpBody = try? JSONSerialization.data(withJSONObject: [
@@ -93,14 +93,34 @@ enum ArtworkPublisher {
         _ = try? await URLSession.shared.data(for: request)
     }
 
+    /// Límites alineados con netlify/lib/limits.ts.
+    static let maxBytes: [String: Int] = [
+        "poster": 3 * 1024 * 1024,
+        "usdz": 6 * 1024 * 1024,
+        "glb": 6 * 1024 * 1024,
+        "meta": 4 * 1024,
+    ]
+
+    /// Los builds nuevos usan App Attest. Los binarios antiguos conservan su fallback legacy;
+    /// el servidor debe mantenerlo activo hasta completar la migración de clientes.
+    static func authorization(for studio: String) async throws -> String {
+        do {
+            return "Bearer \(try await DeviceAuth.shared.bearer(for: studio))"
+        } catch DeviceAuth.AuthError.studioTaken {
+            throw PublishError.studioTaken
+        }
+    }
+
     private static func upload(
         studio: String,
         artwork: String,
         kind: String,
         title: String,
         body: Data,
-        contentType: String
+        contentType: String,
+        isRetry: Bool = false
     ) async throws {
+        guard body.count <= maxBytes[kind, default: 0] else { throw PublishError.fileTooLarge }
         var components = URLComponents(url: publishEndpoint, resolvingAgainstBaseURL: false)!
         var items = [
             URLQueryItem(name: "studio", value: studio),
@@ -114,32 +134,52 @@ enum ArtworkPublisher {
         guard let url = components.url else { throw PublishError.uploadFailed }
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
-        request.setValue("Bearer \(FrameStudioSecrets.publishKey)", forHTTPHeaderField: "Authorization")
+        request.setValue(try await authorization(for: studio), forHTTPHeaderField: "Authorization")
         request.setValue(contentType, forHTTPHeaderField: "Content-Type")
         request.httpBody = body
         request.timeoutInterval = 120
         let (_, response) = try await URLSession.shared.data(for: request)
-        guard let http = response as? HTTPURLResponse, (200...299).contains(http.statusCode) else {
+        let status = (response as? HTTPURLResponse)?.statusCode ?? 0
+        switch status {
+        case 200...299:
+            return
+        case 401 where !isRetry:
+            await DeviceAuth.shared.invalidate()
+            try await upload(studio: studio, artwork: artwork, kind: kind, title: title,
+                             body: body, contentType: contentType, isRetry: true)
+        case 403, 409:
+            throw PublishError.studioTaken
+        case 413:
+            throw PublishError.fileTooLarge
+        case 429:
+            throw PublishError.rateLimited
+        default:
             throw PublishError.uploadFailed
         }
     }
 
     enum PublishError: LocalizedError {
-        case missingKey
         case missingFiles
         case imageEncodingFailed
         case uploadFailed
+        case fileTooLarge
+        case rateLimited
+        case studioTaken
 
         var errorDescription: String? {
             switch self {
-            case .missingKey:
-                "Falta la clave de publicación."
             case .missingFiles:
                 "No hay archivos AR para publicar."
             case .imageEncodingFailed:
                 "No se pudo preparar la imagen."
             case .uploadFailed:
                 "No se pudo publicar el enlace. Inténtalo de nuevo."
+            case .fileTooLarge:
+                "La obra es demasiado pesada para publicarla (máx. 6 MB por archivo)."
+            case .rateLimited:
+                "Has publicado muchas veces seguidas. Espera un rato e inténtalo de nuevo."
+            case .studioTaken:
+                "Este nombre de estudio pertenece a otro dispositivo. Cámbialo en Mi espacio."
             }
         }
     }

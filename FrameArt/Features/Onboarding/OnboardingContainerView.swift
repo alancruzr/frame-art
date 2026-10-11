@@ -10,7 +10,7 @@ struct OnboardingContainerView: View {
 
     var body: some View {
         ZStack {
-            FrameStudioBrand.hunter.ignoresSafeArea()
+            FrameStudioBrand.canvas.ignoresSafeArea()
 
             VStack(spacing: 0) {
                 topBar
@@ -25,8 +25,7 @@ struct OnboardingContainerView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
-        .preferredColorScheme(.dark)
-        .tint(FrameStudioBrand.gold)
+        .tint(FrameStudioBrand.accent)
     }
 
     private var topBar: some View {
@@ -37,7 +36,7 @@ struct OnboardingContainerView: View {
                 } label: {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundStyle(.white.opacity(0.6))
+                        .foregroundStyle(.secondary)
                         .frame(width: 44, height: 44)
                 }
                 .accessibilityLabel("Atrás")
@@ -46,7 +45,7 @@ struct OnboardingContainerView: View {
             }
 
             ProgressView(value: store.progress)
-                .tint(FrameStudioBrand.gold)
+                .tint(FrameStudioBrand.accent)
                 .accessibilityLabel("Progreso")
                 .accessibilityValue("Paso \(store.step + 1) de 6")
 

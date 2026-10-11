@@ -27,7 +27,7 @@ struct RootView: View {
             }
             .tag(DeepLinkRouter.Tab.miEspacio)
         }
-        .tint(FrameStudioBrand.hunter)
+        .tint(FrameStudioBrand.accent)
         .overlay {
             if router.isIngesting {
                 ZStack {
