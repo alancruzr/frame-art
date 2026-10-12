@@ -28,13 +28,15 @@ export default async (req: Request, context: Context) => {
   const device = (await devices.get(deviceKey, { type: "json" })) as DeviceRecord | null;
   if (!device) return json(401, { error: "unknown_key" }); // el cliente debe volver a atestiguar
 
+  let counter: number;
   try {
-    const counter = verifyAssertion({ assertionB64: assertion, challenge: nonce!, publicKeyPem: device.publicKeyPem, previousCounter: device.counter, app });
-    await devices.setJSON(deviceKey, { ...device, counter });
+    counter = verifyAssertion({ assertionB64: assertion, challenge: nonce!, publicKeyPem: device.publicKeyPem, previousCounter: device.counter, app });
   } catch (e) {
     console.warn("assert failed", (e as Error).message);
     return json(401, { error: "assertion_failed" });
   }
+  // Fuera del try: un fallo al guardar el contador es del servidor (500), no una aserción inválida (401).
+  await devices.setJSON(deviceKey, { ...device, counter });
 
   if ((await claimStudio(studio, keyId)) === "taken") return json(409, { error: "studio_taken" });
   return json(200, { token: issueSession({ keyId, studio }, secret) });

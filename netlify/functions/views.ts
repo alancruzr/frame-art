@@ -57,6 +57,7 @@ export default async (req: Request, context: Context) => {
     if (tokens?.tokens.length) {
       const payload = notificationPayload(studio, artwork, meta.title ?? null);
       const results = await Promise.all(tokens.tokens.map((t) => sendPush(cfg, t, payload)));
+      results.filter((s) => s !== 200).forEach((s) => console.warn("apns send failed", s));
       const alive = tokens.tokens.filter((_, i) => results[i] !== 410 && results[i] !== 400);
       if (alive.length !== tokens.tokens.length) await tokensStore.setJSON(studio, { tokens: alive });
     }

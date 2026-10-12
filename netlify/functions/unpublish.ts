@@ -1,6 +1,7 @@
 import type { Config, Context } from "@netlify/functions";
 import { authenticate, canWriteStudio, principalId } from "../lib/auth";
 import { RATE, allow, checkContentLength, tooMany } from "../lib/limits";
+import { viewsStore } from "../lib/push";
 import { artworksStore, blobKeys, isSlug } from "../lib/store";
 
 async function readTarget(req: Request): Promise<{ studio: string; artwork: string }> {
@@ -52,15 +53,19 @@ export default async (req: Request, context: Context) => {
 
   const store = artworksStore();
   const keys = blobKeys(studio, artwork);
-  await Promise.all(
-    [keys.poster, keys.usdz, keys.glb, keys.meta].map(async (key) => {
-      try {
-        await store.delete(key);
-      } catch {
-        // missing keys are fine
-      }
-    }),
-  );
+  // Borrar una clave inexistente no lanza en Netlify Blobs: cualquier error aquí es real y
+  // el cliente debe reintentar (antes se respondía 204 y el enlace podía seguir público).
+  const results = await Promise.allSettled([keys.poster, keys.usdz, keys.glb, keys.meta].map((key) => store.delete(key)));
+  const failed = results.filter((r) => r.status === "rejected");
+  if (failed.length) {
+    console.error("unpublish delete failed", failed.length);
+    return new Response(JSON.stringify({ error: "delete_failed" }), { status: 500, headers: { "Content-Type": "application/json" } });
+  }
+  try {
+    await viewsStore().delete(`${studio}/${artwork}`);
+  } catch (e) {
+    console.warn("unpublish views cleanup failed", (e as Error).message);
+  }
 
   return new Response(null, { status: 204 });
 };
