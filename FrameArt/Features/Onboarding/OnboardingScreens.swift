@@ -268,7 +268,7 @@ struct ProfileScreen: View {
 
     private var slugPreview: String {
         let source = slugEdited ? slug : name
-        let made = ArtistProfile.makeSlug(from: source)
+        let made = ArtistProfile.makeStudioSlug(from: source)
         return made.isEmpty ? "se asignará uno al azar" : made
     }
 
@@ -301,7 +301,7 @@ struct ProfileScreen: View {
                             if !applyingName {
                                 slugEdited = true
                             }
-                            let cleaned = ArtistProfile.makeSlug(from: newValue)
+                            let cleaned = ArtistProfile.makeSlug(from: newValue, keepTrailingDash: true)
                             if cleaned != newValue {
                                 applyingName = true
                                 slug = cleaned
