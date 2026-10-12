@@ -46,6 +46,7 @@
 		FA00000000000000000000B3 /* GLBExporterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000B2 /* GLBExporterTests.swift */; };
 		FA00000000000000000000B5 /* ArtworkPieceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000B4 /* ArtworkPieceTests.swift */; };
 		FBBEEA58B9BF05011A666A43 /* SubscriptionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB0CFC6C0ACBF9B5B0C2CDC9 /* SubscriptionTests.swift */; };
+		FB4519A5B3ACE28A2EF93244 /* OnboardingStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB8E6B622A7BE6062896FCE3 /* OnboardingStoreTests.swift */; };
 		FA00000000000000000000B7 /* FrameStudioSchema.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000B6 /* FrameStudioSchema.swift */; };
 		FA00000000000000000000B9 /* PersistenceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000B8 /* PersistenceController.swift */; };
 		FA00000000000000000000BC /* StorageErrorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000BB /* StorageErrorView.swift */; };
@@ -55,7 +56,6 @@
 		FB92F5A3F246CDD3B288DCFC /* FirebaseTelemetry.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBEF2425AD621CD10F094129 /* FirebaseTelemetry.swift */; };
 		FB88D1A5735E0B15B798A8EC /* SubscriptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB38EA2EB2AC565BB6FA2A1D /* SubscriptionManager.swift */; };
 		FBDE92CB33516F3D4703CC8F /* Analytics.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBCEAA6BB920BD75BB51AF9E /* Analytics.swift */; };
-		FB39F6C6ACA5D06AD9E232AD /* SharingReminders.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBAED8949FDA793B6CA899D6 /* SharingReminders.swift */; };
 		FA00000000000000000000C5 /* ARPlacementState.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000C4 /* ARPlacementState.swift */; };
 		FA00000000000000000000C7 /* WallPlacementMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000C6 /* WallPlacementMath.swift */; };
 		FA00000000000000000000C9 /* ArtworkARContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000C8 /* ArtworkARContainer.swift */; };
@@ -111,6 +111,7 @@
 		FA00000000000000000000B2 /* GLBExporterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GLBExporterTests.swift; sourceTree = "<group>"; };
 		FA00000000000000000000B4 /* ArtworkPieceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArtworkPieceTests.swift; sourceTree = "<group>"; };
 		FB0CFC6C0ACBF9B5B0C2CDC9 /* SubscriptionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionTests.swift; sourceTree = "<group>"; };
+		FB8E6B622A7BE6062896FCE3 /* OnboardingStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingStoreTests.swift; sourceTree = "<group>"; };
 		FA00000000000000000000B6 /* FrameStudioSchema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrameStudioSchema.swift; sourceTree = "<group>"; };
 		FA00000000000000000000B8 /* PersistenceController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceController.swift; sourceTree = "<group>"; };
 		FA00000000000000000000BB /* StorageErrorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageErrorView.swift; sourceTree = "<group>"; };
@@ -120,7 +121,6 @@
 		FBEF2425AD621CD10F094129 /* FirebaseTelemetry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseTelemetry.swift; sourceTree = "<group>"; };
 		FB38EA2EB2AC565BB6FA2A1D /* SubscriptionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionManager.swift; sourceTree = "<group>"; };
 		FBCEAA6BB920BD75BB51AF9E /* Analytics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Analytics.swift; sourceTree = "<group>"; };
-		FBAED8949FDA793B6CA899D6 /* SharingReminders.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharingReminders.swift; sourceTree = "<group>"; };
 		FA00000000000000000000C4 /* ARPlacementState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARPlacementState.swift; sourceTree = "<group>"; };
 		FA00000000000000000000C6 /* WallPlacementMath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WallPlacementMath.swift; sourceTree = "<group>"; };
 		FA00000000000000000000C8 /* ArtworkARContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArtworkARContainer.swift; sourceTree = "<group>"; };
@@ -389,6 +389,7 @@
 				FA00000000000000000000BD /* PersistenceTests.swift */,
 				FA00000000000000000000B4 /* ArtworkPieceTests.swift */,
 				FB0CFC6C0ACBF9B5B0C2CDC9 /* SubscriptionTests.swift */,
+				FB8E6B622A7BE6062896FCE3 /* OnboardingStoreTests.swift */,
 				FA00000000000000000000B2 /* GLBExporterTests.swift */,
 				FA00000000000000000000B0 /* USDZExporterTests.swift */,
 				FA00000000000000000000AE /* TestSupport.swift */,
@@ -411,7 +412,6 @@
 				FBEF2425AD621CD10F094129 /* FirebaseTelemetry.swift */,
 				FB38EA2EB2AC565BB6FA2A1D /* SubscriptionManager.swift */,
 				FBCEAA6BB920BD75BB51AF9E /* Analytics.swift */,
-				FBAED8949FDA793B6CA899D6 /* SharingReminders.swift */,
 				FA00000000000000000000C0 /* DeviceAuth.swift */,
 			);
 			path = Services;
@@ -540,7 +540,6 @@
 				FB92F5A3F246CDD3B288DCFC /* FirebaseTelemetry.swift in Sources */,
 				FB88D1A5735E0B15B798A8EC /* SubscriptionManager.swift in Sources */,
 				FBDE92CB33516F3D4703CC8F /* Analytics.swift in Sources */,
-				FB39F6C6ACA5D06AD9E232AD /* SharingReminders.swift in Sources */,
 				FA00000000000000000000C1 /* DeviceAuth.swift in Sources */,
 				FA00000000000000000000BC /* StorageErrorView.swift in Sources */,
 				FA00000000000000000000B9 /* PersistenceController.swift in Sources */,
@@ -586,6 +585,7 @@
 				FA00000000000000000000BE /* PersistenceTests.swift in Sources */,
 				FA00000000000000000000B5 /* ArtworkPieceTests.swift in Sources */,
 				FBBEEA58B9BF05011A666A43 /* SubscriptionTests.swift in Sources */,
+				FB4519A5B3ACE28A2EF93244 /* OnboardingStoreTests.swift in Sources */,
 				FA00000000000000000000B3 /* GLBExporterTests.swift in Sources */,
 				FA00000000000000000000B1 /* USDZExporterTests.swift in Sources */,
 				FA00000000000000000000AF /* TestSupport.swift in Sources */,

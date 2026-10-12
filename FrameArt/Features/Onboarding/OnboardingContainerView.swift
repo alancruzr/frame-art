@@ -65,7 +65,6 @@ struct OnboardingContainerView: View {
         case .goal: GoalScreen(store: store)
         case .pain: PainScreen(store: store)
         case .studio: ProfileScreen(store: store)
-        case .commitment: SharingCommitmentScreen(store: store)
         case .permissions: PermissionsChecklistScreen(store: store)
         case .demo: DemoTryScreen(store: store)
         case .demoResult: DemoResultScreen(store: store)

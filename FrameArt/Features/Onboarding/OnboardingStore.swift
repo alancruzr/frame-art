@@ -99,10 +99,10 @@ enum OnboardingPainID: String, CaseIterable, Equatable {
     }
 }
 
-/// Pantallas del onboarding. Mismo orden que Clarity (welcome → goal → dolor → compromiso →
+/// Pantallas del onboarding. Mismo orden que Clarity (welcome → goal → dolor →
 /// permisos → prueba → resultado → prueba social → paywall), con el paso del estudio conservado.
 enum OnboardingStep: Int, CaseIterable {
-    case welcome, goal, pain, studio, commitment, permissions, demo, demoResult, socialProof, paywall
+    case welcome, goal, pain, studio, permissions, demo, demoResult, socialProof, paywall
 
     var analyticsName: String {
         switch self {
@@ -110,7 +110,6 @@ enum OnboardingStep: Int, CaseIterable {
         case .goal: return "goal"
         case .pain: return "practical_help"
         case .studio: return "studio"
-        case .commitment: return "sharing_commitment"
         case .permissions: return "permissions"
         case .demo: return "demo_try"
         case .demoResult: return "demo_result"
@@ -127,7 +126,7 @@ final class OnboardingStore {
     static let userDefaultsKey = "onboardingComplete.v2"
     static let selectedGoalKey = "onboardingSelectedGoal"
     static let selectedPainKey = "onboardingSelectedPain"
-    static let resumeStepKey = "onboardingResumeStep.v3"
+    static let resumeStepKey = "onboardingResumeStep.v4"
 
     var step: Int = 0 {
         didSet { persistResumeStep() }
@@ -136,10 +135,6 @@ final class OnboardingStore {
     var navigationDirection: Int = 1
     var selectedGoal: OnboardingGoalID?
     var selectedPain: OnboardingPainID?
-
-    // Compromiso (pantalla 4)
-    var sharingWeekdays: Set<Int> = []
-    var reminderTime: Date
 
     // Prueba (pantallas 6–7)
     var demoImage: UIImage?
@@ -160,7 +155,6 @@ final class OnboardingStore {
             .flatMap(OnboardingGoalID.init(rawValue:))
         selectedPain = defaults.string(forKey: Self.selectedPainKey)
             .flatMap(OnboardingPainID.init(rawValue:))
-        reminderTime = Calendar.current.date(bySettingHour: 10, minute: 0, second: 0, of: .now) ?? .now
         if !isComplete {
             let saved = defaults.integer(forKey: Self.resumeStepKey)
             // Como Clarity: se reanuda donde quedó, pero nunca dentro de la prueba (la imagen no persiste).
@@ -179,8 +173,6 @@ final class OnboardingStore {
 
     /// Atrás solo en las pantallas de preguntas; tras pedir permisos ya no se vuelve.
     var canGoBack: Bool { step > 0 && step < OnboardingStep.permissions.rawValue }
-
-    var canContinueCommitment: Bool { !sharingWeekdays.isEmpty }
 
     func trackCurrentStepIfNeeded() {
         guard trackedSteps.insert(step).inserted else { return }
@@ -223,35 +215,6 @@ final class OnboardingStore {
         defaults.set(pain.rawValue, forKey: Self.selectedPainKey)
         Analytics.log(.onboardingPainSelected(pain.rawValue))
         advanceAfterSelection()
-    }
-
-    func toggleWeekday(_ weekday: Int) {
-        guard (1...7).contains(weekday) else { return }
-        UISelectionFeedbackGenerator().selectionChanged()
-        if sharingWeekdays.contains(weekday) {
-            sharingWeekdays.remove(weekday)
-        } else {
-            sharingWeekdays.insert(weekday)
-        }
-    }
-
-    func saveCommitment(remindersEnabled: Bool) async {
-        let parts = Calendar.current.dateComponents([.hour, .minute], from: reminderTime)
-        await SharingReminders.shared.configure(
-            weekdays: sharingWeekdays,
-            hour: parts.hour ?? 10,
-            minute: parts.minute ?? 0,
-            enabled: remindersEnabled
-        )
-        Analytics.log(.onboardingCommitment(days: sharingWeekdays.count, reminders: remindersEnabled))
-        next()
-    }
-
-    func deferCommitment() {
-        sharingWeekdays.removeAll()
-        Task { await SharingReminders.shared.configure(weekdays: [], hour: 10, minute: 0, enabled: false) }
-        Analytics.log(.onboardingCommitment(days: 0, reminders: false))
-        next()
     }
 
     func complete() {

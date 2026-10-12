@@ -22,18 +22,18 @@ Al terminar: `RootView` → pestaña Taller (lista vacía, o `StudioNameView` si
 9. **Sin reanudar**: si la app se cierra a mitad, vuelve a la pantalla 1 (Clarity persiste la pantalla).
 10. **Atrás disponible en todo el flujo**, incluido después de pedir permisos (Clarity solo permite atrás en las primeras pantallas).
 
-## Recorrido propuesto (espejo de Clarity, 10 pantallas)
+## Recorrido propuesto (espejo de Clarity, 9 pantallas)
 | # | Clarity | Frame Studio |
 |---|---------|--------------|
 | 0 | welcome | Bienvenida con ícono animado |
 | 1 | goal | ¿Qué vas a mostrar primero? |
 | 2 | practical_help (dolor) | ¿Qué se pierde con una foto? |
 | 3 | — (se conserva) | Nombre del estudio + slug |
-| 4 | creator_commitment | ¿Qué días compartes obra? + hora + recordatorios (notificaciones) |
-| 5 | permissions | Checklist: cámara + notificaciones |
-| 6 | demo_recording | Prueba: elige una foto (o la de ejemplo) y ajusta el ancho real |
-| 7 | demo_replay | Así la verá tu cliente: obra en pared + resultado personalizado por dolor |
-| 8 | social_proof | Resultados (lo que acabas de hacer), sin reseñas inventadas |
-| 9 | paywall | Paywall suave (X tras unos segundos) |
+| — | creator_commitment | Omitido a pedido de Alan (sin recordatorios ni permiso de notificaciones) |
+| 4 | permissions | Solo cámara, explicada (foto + AR) |
+| 5 | demo_recording | Prueba: elige una foto (o la de ejemplo) y ajusta el ancho real |
+| 6 | demo_replay | Así la verá tu cliente: obra en pared + resultado personalizado por dolor |
+| 7 | social_proof | Resultados (lo que acabas de hacer), sin reseñas inventadas |
+| 8 | paywall | Paywall suave (X tras unos segundos) |
 
 Sin ATT/IDFA: Clarity tampoco lo usa (FirebaseAnalyticsCore, sin AdSupport).

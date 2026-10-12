@@ -1,97 +1,19 @@
 import AVFoundation
 import PhotosUI
 import SwiftUI
-import UserNotifications
 
-// MARK: - Pantalla 4: compromiso para compartir (Clarity: CreatorCommitmentOnboardingScreen)
-
-struct SharingCommitmentScreen: View {
-    var store: OnboardingStore
-    @State private var saving = false
-
-    private let weekdaySymbols: [(Int, String)] = {
-        let symbols = Calendar.current.veryShortStandaloneWeekdaySymbols
-        let first = Calendar.current.firstWeekday
-        return (0..<7).map { offset in
-            let weekday = (first - 1 + offset) % 7 + 1
-            return (weekday, symbols[weekday - 1])
-        }
-    }()
-
-    var body: some View {
-        OnboardingScreenFrame {
-            VStack(spacing: 0) {
-                VStack(spacing: 8) {
-                    OnboardingTitle(text: "¿Qué días le muestras\nobra a tus clientes?")
-                    OnboardingSubtitle(text: "Te recordamos compartir una pieza esos días. Puedes cambiarlo después.")
-                }
-
-                Spacer().frame(height: 24)
-
-                HStack(spacing: 8) {
-                    ForEach(weekdaySymbols, id: \.0) { weekday, symbol in
-                        let selected = store.sharingWeekdays.contains(weekday)
-                        Button { store.toggleWeekday(weekday) } label: {
-                            Text(symbol)
-                                .font(.system(size: 15, weight: .semibold))
-                                .foregroundStyle(selected ? Color.white : .primary)
-                                .frame(width: 40, height: 44)
-                                .background(
-                                    selected ? FrameStudioBrand.buttonFill : FrameStudioBrand.surface,
-                                    in: RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                )
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                        .stroke(selected ? FrameStudioBrand.accent.opacity(0.55) : Color(uiColor: .separator), lineWidth: 1)
-                                )
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityLabel(Calendar.current.standaloneWeekdaySymbols[weekday - 1])
-                        .accessibilityAddTraits(selected ? .isSelected : [])
-                    }
-                }
-                .padding(.horizontal, 24)
-
-                Spacer().frame(height: 18)
-
-                DatePicker("Hora del recordatorio", selection: Binding(
-                    get: { store.reminderTime },
-                    set: { store.reminderTime = $0 }
-                ), displayedComponents: .hourAndMinute)
-                    .font(.system(size: 15, weight: .medium))
-                    .padding(16)
-                    .background(FrameStudioBrand.surface, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-                    .padding(.horizontal, 24)
-
-                VStack(spacing: 12) {
-                    OnboardingPrimaryButton(title: "Activar recordatorios", enabled: store.canContinueCommitment && !saving) {
-                        saving = true
-                        Task {
-                            await store.saveCommitment(remindersEnabled: true)
-                            saving = false
-                        }
-                    }
-                    OnboardingSecondaryButton(title: "Ahora no") { store.deferCommitment() }
-                }
-                .padding(.top, 28)
-            }
-        }
-    }
-}
-
-// MARK: - Pantalla 5: checklist de permisos (Clarity: OnboardingPermissionsChecklistScreen)
+// MARK: - Pantalla 4: permiso de cámara (Clarity: OnboardingPermissionsChecklistScreen)
 
 struct PermissionsChecklistScreen: View {
     var store: OnboardingStore
     @State private var cameraStatus: AVAuthorizationStatus = .notDetermined
-    @State private var notificationStatus: UNAuthorizationStatus = .notDetermined
 
     var body: some View {
         OnboardingScreenFrame {
             VStack(spacing: 0) {
                 VStack(spacing: 8) {
-                    OnboardingTitle(text: "Dos permisos y listo")
-                    OnboardingSubtitle(text: "Las fotos de la galería se eligen con el selector del sistema; no hace falta acceso a Fotos.")
+                    OnboardingTitle(text: "Cámara para fotografiar\ny colgar la obra")
+                    OnboardingSubtitle(text: "La usas para fotografiar tus obras y para verlas en una pared real con AR, a tamaño real. Las fotos de la galería se eligen con el selector del sistema; no pedimos acceso a Fotos.")
                 }
 
                 Spacer().frame(height: 24)
@@ -104,14 +26,6 @@ struct PermissionsChecklistScreen: View {
                         granted: cameraStatus == .authorized,
                         blocked: cameraStatus == .denied || cameraStatus == .restricted
                     ) { Task { await handleCamera() } }
-
-                    PermissionRow(
-                        icon: "bell.badge.fill",
-                        title: "Notificaciones",
-                        detail: store.sharingWeekdays.isEmpty ? "Avisos cuando un cliente abre tu obra" : "Tus recordatorios para compartir",
-                        granted: [.authorized, .provisional, .ephemeral].contains(notificationStatus),
-                        blocked: notificationStatus == .denied
-                    ) { Task { await handleNotifications() } }
                 }
                 .padding(.horizontal, 24)
 
@@ -123,7 +37,6 @@ struct PermissionsChecklistScreen: View {
         }
         .task {
             cameraStatus = AVCaptureDevice.authorizationStatus(for: .video)
-            notificationStatus = await SharingReminders.shared.authorizationStatus()
         }
     }
 
@@ -138,15 +51,6 @@ struct PermissionsChecklistScreen: View {
         default:
             cameraStatus = AVCaptureDevice.authorizationStatus(for: .video)
         }
-    }
-
-    private func handleNotifications() async {
-        if notificationStatus == .denied {
-            FrameStudioSettings.open()
-            return
-        }
-        _ = await SharingReminders.shared.requestAuthorizationIfNeeded()
-        notificationStatus = await SharingReminders.shared.authorizationStatus()
     }
 }
 
@@ -403,9 +307,6 @@ struct SocialProofScreen: View {
             ("ruler", "Obra a tamaño real", "\(Int(store.demoWidthCentimeters)) cm, como en su pared"),
             ("link", "Un enlace para WhatsApp", "El cliente no instala nada: abre y la cuelga en AR")
         ]
-        if !store.sharingWeekdays.isEmpty {
-            rows.append(("bell.badge", "Tu ritmo", "\(store.sharingWeekdays.count) días por semana para compartir"))
-        }
         return rows
     }
 

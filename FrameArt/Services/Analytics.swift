@@ -6,7 +6,6 @@ enum AnalyticsEvent: Equatable {
     case onboardingStep(index: Int, name: String)
     case onboardingGoalSelected(String)
     case onboardingPainSelected(String)
-    case onboardingCommitment(days: Int, reminders: Bool)
     case onboardingDemoImage(source: String)
     case onboardingCompleted
     case permissionResult(kind: String, granted: Bool)
@@ -29,7 +28,6 @@ enum AnalyticsEvent: Equatable {
         case .onboardingStep: return "onboarding_step"
         case .onboardingGoalSelected: return "onboarding_goal_selected"
         case .onboardingPainSelected: return "onboarding_pain_selected"
-        case .onboardingCommitment: return "onboarding_commitment"
         case .onboardingDemoImage: return "onboarding_demo_image"
         case .onboardingCompleted: return "onboarding_completed"
         case .permissionResult: return "permission_result"
@@ -54,7 +52,6 @@ enum AnalyticsEvent: Equatable {
         case .onboardingStep(let index, let name): return ["step_index": index, "step_name": name]
         case .onboardingGoalSelected(let goal): return ["goal": goal]
         case .onboardingPainSelected(let pain): return ["pain": pain]
-        case .onboardingCommitment(let days, let reminders): return ["days_count": days, "reminders": reminders ? 1 : 0]
         case .onboardingDemoImage(let source): return ["source": source]
         case .onboardingCompleted: return [:]
         case .permissionResult(let kind, let granted): return ["kind": kind, "granted": granted ? 1 : 0]
