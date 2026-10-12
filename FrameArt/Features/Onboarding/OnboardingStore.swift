@@ -160,6 +160,14 @@ final class OnboardingStore {
             // Como Clarity: se reanuda donde quedó, pero nunca dentro de la prueba (la imagen no persiste).
             step = min(saved, OnboardingStep.permissions.rawValue)
         }
+        #if DEBUG
+        // Capturas/QA: `-OnboardingDebugStep N` abre el onboarding en la pantalla N (0 = bienvenida).
+        if let raw = UserDefaults.standard.string(forKey: "OnboardingDebugStep"), let forced = Int(raw),
+           OnboardingStep(rawValue: forced) != nil {
+            isComplete = false
+            step = forced
+        }
+        #endif
     }
 
     var currentStep: OnboardingStep { OnboardingStep(rawValue: step) ?? .welcome }
