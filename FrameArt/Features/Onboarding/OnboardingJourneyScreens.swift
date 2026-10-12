@@ -222,18 +222,6 @@ struct WallPreview: View {
     }
 }
 
-/// Obra de ejemplo generada (no requiere asset).
-struct SampleArtwork: View {
-    var body: some View {
-        ZStack {
-            LinearGradient(colors: [Color(red: 0.98, green: 0.80, blue: 0.62), Color(red: 0.62, green: 0.55, blue: 0.86)],
-                           startPoint: .topLeading, endPoint: .bottomTrailing)
-            Circle().fill(Color(red: 0.98, green: 0.93, blue: 0.70)).scaleEffect(0.38).offset(x: -18, y: -14)
-            Capsule().fill(Color(red: 0.36, green: 0.30, blue: 0.56).opacity(0.75)).scaleEffect(x: 1.2, y: 0.22).offset(y: 30)
-        }
-    }
-}
-
 // MARK: - Pantalla 7: resultado (Clarity: OnboardingDemoReplayScreen)
 
 struct DemoResultScreen: View {

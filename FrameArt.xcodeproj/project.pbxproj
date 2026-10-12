@@ -30,6 +30,7 @@
 		FA0000000000000000000085 /* Brand.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0000000000000000000084 /* Brand.swift */; };
 		FA0000000000000000000087 /* OnboardingStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0000000000000000000086 /* OnboardingStore.swift */; };
 		FB48EBB0FAF9FC64393B2DF9 /* OnboardingJourneyScreens.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB90C87CE69535C9A307B71D /* OnboardingJourneyScreens.swift */; };
+		FB810558D7A22830593A6089 /* SampleArtwork.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB3C976409EBE0EAD0487769 /* SampleArtwork.swift */; };
 		FBC651A8492B2B3928968BE1 /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBEC5599D07E6CE7EBF3CB0F /* PaywallView.swift */; };
 		FA0000000000000000000089 /* OnboardingContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0000000000000000000088 /* OnboardingContainerView.swift */; };
 		FA000000000000000000008B /* OnboardingScreens.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA000000000000000000008A /* OnboardingScreens.swift */; };
@@ -90,6 +91,7 @@
 		FA0000000000000000000084 /* Brand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Brand.swift; sourceTree = "<group>"; };
 		FA0000000000000000000086 /* OnboardingStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingStore.swift; sourceTree = "<group>"; };
 		FB90C87CE69535C9A307B71D /* OnboardingJourneyScreens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingJourneyScreens.swift; sourceTree = "<group>"; };
+		FB3C976409EBE0EAD0487769 /* SampleArtwork.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleArtwork.swift; sourceTree = "<group>"; };
 		FBEC5599D07E6CE7EBF3CB0F /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
 		FA0000000000000000000088 /* OnboardingContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingContainerView.swift; sourceTree = "<group>"; };
 		FA000000000000000000008A /* OnboardingScreens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingScreens.swift; sourceTree = "<group>"; };
@@ -366,6 +368,7 @@
 			children = (
 				FA0000000000000000000086 /* OnboardingStore.swift */,
 				FB90C87CE69535C9A307B71D /* OnboardingJourneyScreens.swift */,
+				FB3C976409EBE0EAD0487769 /* SampleArtwork.swift */,
 				FBEC5599D07E6CE7EBF3CB0F /* PaywallView.swift */,
 				FA0000000000000000000088 /* OnboardingContainerView.swift */,
 				FA000000000000000000008A /* OnboardingScreens.swift */,
@@ -563,6 +566,7 @@
 				FA0000000000000000000085 /* Brand.swift in Sources */,
 				FA0000000000000000000087 /* OnboardingStore.swift in Sources */,
 				FB48EBB0FAF9FC64393B2DF9 /* OnboardingJourneyScreens.swift in Sources */,
+				FB810558D7A22830593A6089 /* SampleArtwork.swift in Sources */,
 				FBC651A8492B2B3928968BE1 /* PaywallView.swift in Sources */,
 				FA0000000000000000000089 /* OnboardingContainerView.swift in Sources */,
 				FA000000000000000000008B /* OnboardingScreens.swift in Sources */,
