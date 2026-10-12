@@ -3,7 +3,7 @@ import Security
 
 /// Envoltorio mínimo de Keychain para strings (solo este dispositivo, sin iCloud).
 enum KeychainStore {
-    private static let service = "com.alancruzr.frameart.auth"
+    private static let service = "app.framestudio.ios.auth"
 
     static func get(_ account: String) -> String? {
         var query = baseQuery(account)

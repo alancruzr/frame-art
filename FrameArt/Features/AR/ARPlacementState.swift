@@ -3,7 +3,7 @@ import os
 import SwiftUI
 
 // Estado observable y textos de la colocación en pared.
-let arLog = Logger(subsystem: "com.alancruzr.frameart", category: "AR")
+let arLog = Logger(subsystem: "app.framestudio.ios", category: "AR")
 
 let searchCopy = "Apunta a una pared y deja el teléfono quieto unos segundos."
 let measuringCopy = "Sigue quieto. Midiendo la pared…"

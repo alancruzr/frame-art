@@ -26,7 +26,7 @@ describe("App Attest server identity", () => {
 
     expect(appIdentity()).toEqual({
       teamId: "TESTTEAM01",
-      bundleId: "com.alancruzr.frameart",
+      bundleId: "app.framestudio.ios",
       env: "production",
       allowDevelopment: false,
     });

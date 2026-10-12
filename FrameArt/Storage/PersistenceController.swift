@@ -10,7 +10,7 @@ enum PersistenceController {
         case failed(String)
     }
 
-    private static let log = Logger(subsystem: "com.alancruzr.frameart", category: "persistence")
+    private static let log = Logger(subsystem: "app.framestudio.ios", category: "persistence")
 
     static var schema: Schema { Schema(versionedSchema: FrameStudioSchemaV1.self) }
 

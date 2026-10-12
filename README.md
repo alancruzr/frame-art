@@ -1,6 +1,8 @@
 # Frame Studio
 
-Nombre en pantalla: **Frame Studio**. Bundle: `com.alancruzr.frameart` (no cambiar).
+Nombre en pantalla: **Frame Studio**. Bundle ID: `app.framestudio.ios` (tests: `app.framestudio.ios.tests`).
+
+> Cambio de bundle ID (antes `com.alancruzr.frameart`): es una app nueva para iOS. Requiere un App ID nuevo con App Attest y Associated Domains, un registro nuevo en App Store Connect y `APPLE_BUNDLE_ID=app.framestudio.ios` en Netlify. Las instalaciones nuevas crean su propio contenedor; el store de SwiftData (`default.store` en Application Support) no depende del bundle ID, pero los datos de la app anterior no se migran.
 
 App nativa de iOS (SwiftUI, Swift 6, SwiftData) para artistas. Añades la foto de una pintura —cámara, fototeca o Archivos— o un escaneo 3D (`.usdz` / `.reality`), la ves en tu pared con ARKit/RealityKit y la compartes para que un cliente la abra **sin instalar la app**.
 
@@ -39,7 +41,7 @@ Cuatro pasos breves (se puede **Saltar**): bienvenida, qué vas a compartir, qu�
 
 1. Abre `FrameArt.xcodeproj`.
 2. Elige un equipo de firma en el target **FrameArt**.
-3. Bundle ID: `com.alancruzr.frameart`.
+3. Bundle ID: `app.framestudio.ios`.
 4. Ejecuta en un iPhone o iPad real para AR. El simulador sirve para onboarding, lista, alta y exportación.
 
 Permisos (Info.plist generado): cámara y fototeca. El onboarding los pide; se pueden conceder después en Ajustes.

@@ -4,7 +4,7 @@ import { decodeCbor } from "../lib/cbor";
 import { APPLE_APP_ATTEST_ROOT_CA, extractNonce, parseAuthData, verifyAssertion, verifyAttestation } from "../lib/appattest";
 import { X509Certificate } from "node:crypto";
 
-const app = { teamId: "ML4VB5PQ6H", bundleId: "com.alancruzr.frameart", env: "production" as const };
+const app = { teamId: "ML4VB5PQ6H", bundleId: "app.framestudio.ios", env: "production" as const };
 const sha = (...b: Buffer[]) => { const h = createHash("sha256"); b.forEach((x) => h.update(x)); return h.digest(); };
 
 /** Codificador CBOR mínimo solo para los tests. */

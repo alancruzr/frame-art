@@ -13,7 +13,7 @@ export const CHALLENGE_TTL_MS = 5 * 60_000;
 
 export function appIdentity(): AppIdentity | null {
   const teamId = envGet("APPLE_TEAM_ID");
-  const bundleId = envGet("APPLE_BUNDLE_ID") || "com.alancruzr.frameart";
+  const bundleId = envGet("APPLE_BUNDLE_ID") || "app.framestudio.ios";
   const env = (envGet("APP_ATTEST_ENV") || "production") as AttestEnv;
   if (!teamId) return null;
   return { teamId, bundleId, env, allowDevelopment: (envGet("APP_ATTEST_ALLOW_DEVELOPMENT") || "false") === "true" };
