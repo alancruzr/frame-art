@@ -28,6 +28,9 @@ struct ArtworkARView: UIViewRepresentable {
         arView.session.run(config, options: [.resetTracking, .removeExistingAnchors])
 
         context.coordinator.attachCoaching(to: arView)
+        if placement.allowsAdjusting {
+            context.coordinator.installAdjustGestures(on: arView)
+        }
         context.coordinator.task = Task {
             await context.coordinator.bootstrap()
         }

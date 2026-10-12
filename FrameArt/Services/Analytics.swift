@@ -8,6 +8,8 @@ enum AnalyticsEvent: Equatable {
     case onboardingPainSelected(String)
     case onboardingDemoImage(source: String)
     case onboardingCompleted
+    case demoGuideStep(step: String, mode: String)
+    case demoGuideSkipped(step: String)
     case permissionResult(kind: String, granted: Bool)
     case paywallViewed(source: String)
     case paywallPlanSelected(productID: String)
@@ -30,6 +32,8 @@ enum AnalyticsEvent: Equatable {
         case .onboardingPainSelected: return "onboarding_pain_selected"
         case .onboardingDemoImage: return "onboarding_demo_image"
         case .onboardingCompleted: return "onboarding_completed"
+        case .demoGuideStep: return "demo_guide_step"
+        case .demoGuideSkipped: return "demo_guide_skipped"
         case .permissionResult: return "permission_result"
         case .paywallViewed: return "paywall_viewed"
         case .paywallPlanSelected: return "paywall_plan_selected"
@@ -54,6 +58,8 @@ enum AnalyticsEvent: Equatable {
         case .onboardingPainSelected(let pain): return ["pain": pain]
         case .onboardingDemoImage(let source): return ["source": source]
         case .onboardingCompleted: return [:]
+        case .demoGuideStep(let step, let mode): return ["step": step, "mode": mode]
+        case .demoGuideSkipped(let step): return ["step": step]
         case .permissionResult(let kind, let granted): return ["kind": kind, "granted": granted ? 1 : 0]
         case .paywallViewed(let source), .paywallDismissed(let source): return ["source": source]
         case .paywallPlanSelected(let id), .paywallPurchaseStarted(let id), .paywallPurchaseCompleted(let id),

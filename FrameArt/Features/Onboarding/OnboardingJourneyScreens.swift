@@ -99,56 +99,85 @@ private struct PermissionRow: View {
     }
 }
 
-// MARK: - Pantalla 6: prueba (Clarity: OnboardingDemoRecordingScreen)
+// MARK: - Pantalla 5: prueba guiada (Clarity: OnboardingDemoRecordingScreen)
 
+/// Paso (a): elegir la obra. Los pasos (b)–(e) viven en `GuidedDemoView` (AR real o pared simulada).
 struct DemoTryScreen: View {
     var store: OnboardingStore
     @State private var pickerItem: PhotosPickerItem?
     @State private var loading = false
+    @State private var showGuide = false
+
+    private var usingSample: Bool { store.demoUsedSample || store.demoImage == nil }
 
     var body: some View {
         OnboardingScreenFrame {
             VStack(spacing: 0) {
                 VStack(spacing: 8) {
-                    OnboardingTitle(text: "Prueba con una obra")
-                    OnboardingSubtitle(text: "Elige la foto de una pintura, o usa la de ejemplo, y dale su ancho real.")
+                    OnboardingTitle(text: "Cuelga una obra\nen tu pared")
+                    OnboardingSubtitle(text: "Usa la pintura de ejemplo o elige la foto de una tuya. Te guiamos paso a paso.")
                 }
 
                 Spacer().frame(height: 20)
 
-                WallPreview(image: store.demoImage, widthCentimeters: store.demoWidthCentimeters)
-                    .frame(height: 260)
+                WallPreview(image: usingSample ? SampleArtworkInfo.image : store.demoImage,
+                            widthCentimeters: store.demoWidthCentimeters)
+                    .frame(height: 240)
                     .padding(.horizontal, 24)
 
-                Spacer().frame(height: 16)
-
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("Ancho: \(Int(store.demoWidthCentimeters)) cm")
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundStyle(FrameStudioBrand.accent)
-                    Slider(value: Binding(
-                        get: { store.demoWidthCentimeters },
-                        set: { store.demoWidthCentimeters = $0.rounded() }
-                    ), in: 20...200)
-                    .accessibilityLabel("Ancho de la obra")
-                    .accessibilityValue("\(Int(store.demoWidthCentimeters)) centímetros")
+                if usingSample {
+                    Text(SampleArtworkInfo.credit)
+                        .font(.system(size: 11))
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 32)
+                        .padding(.top, 8)
+                } else {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Ancho real: \(Int(store.demoWidthCentimeters)) cm")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(FrameStudioBrand.accent)
+                        Slider(value: Binding(
+                            get: { store.demoWidthCentimeters },
+                            set: { store.demoWidthCentimeters = $0.rounded() }
+                        ), in: 20...200)
+                        .accessibilityLabel("Ancho de la obra")
+                        .accessibilityValue("\(Int(store.demoWidthCentimeters)) centímetros")
+                    }
+                    .padding(.horizontal, 24)
+                    .padding(.top, 12)
                 }
-                .padding(.horizontal, 24)
 
                 VStack(spacing: 12) {
-                    PhotosPicker(selection: $pickerItem, matching: .images) {
-                        Label(store.demoUsedSample ? "Elegir mi obra" : "Elegir otra foto", systemImage: "photo.on.rectangle")
-                            .font(.system(size: 15, weight: .semibold))
-                            .frame(minHeight: 44)
+                    OnboardingPrimaryButton(title: "Probar en mi pared") {
+                        Analytics.log(.onboardingDemoImage(source: usingSample ? "sample" : "photos"))
+                        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                        showGuide = true
                     }
                     .disabled(loading)
-                    OnboardingPrimaryButton(title: "Ver cómo la ve el cliente") {
-                        Analytics.log(.onboardingDemoImage(source: store.demoUsedSample ? "sample" : "photos"))
-                        store.next()
+                    HStack(spacing: 20) {
+                        PhotosPicker(selection: $pickerItem, matching: .images) {
+                            Label(usingSample ? "Usar mi obra" : "Otra foto", systemImage: "photo.on.rectangle")
+                                .font(.system(size: 15, weight: .semibold))
+                                .frame(minHeight: 44)
+                        }
+                        if !usingSample {
+                            Button("Usar la de ejemplo") {
+                                store.demoImage = nil
+                                store.demoUsedSample = true
+                                store.demoWidthCentimeters = SampleArtworkInfo.widthCentimeters
+                            }
+                            .font(.system(size: 15))
+                            .frame(minHeight: 44)
+                        }
                     }
+                    .disabled(loading)
                 }
                 .padding(.top, 20)
             }
+        }
+        .onAppear {
+            if usingSample { store.demoWidthCentimeters = SampleArtworkInfo.widthCentimeters }
         }
         .onChange(of: pickerItem) { _, item in
             guard let item else { return }
@@ -156,11 +185,32 @@ struct DemoTryScreen: View {
             Task {
                 if let data = try? await item.loadTransferable(type: Data.self),
                    let image = UIImage(data: data) {
-                    store.demoImage = image.preparingThumbnail(of: CGSize(width: 1200, height: 1200)) ?? image
+                    store.demoImage = (image.preparingThumbnail(of: CGSize(width: 1600, height: 1600)) ?? image).normalizedUpright()
                     store.demoUsedSample = false
+                    if store.demoWidthCentimeters == SampleArtworkInfo.widthCentimeters { store.demoWidthCentimeters = 80 }
                 }
                 loading = false
             }
+        }
+        .fullScreenCover(isPresented: $showGuide) {
+            guideView
+        }
+    }
+
+    @ViewBuilder
+    private var guideView: some View {
+        let image = (usingSample ? SampleArtworkInfo.image : store.demoImage) ?? UIImage()
+        let aspect = Double(image.size.height / max(image.size.width, 1))
+        let width = usingSample ? SampleArtworkInfo.widthCentimeters : store.demoWidthCentimeters
+        let height = usingSample ? SampleArtworkInfo.heightCentimeters : (width * aspect).rounded()
+        GuidedDemoView(
+            image: image,
+            widthCentimeters: width,
+            heightCentimeters: height,
+            title: usingSample ? SampleArtworkInfo.title : "Mi obra"
+        ) {
+            showGuide = false
+            store.next()
         }
     }
 }
@@ -222,7 +272,7 @@ struct WallPreview: View {
     }
 }
 
-// MARK: - Pantalla 7: resultado (Clarity: OnboardingDemoReplayScreen)
+// MARK: - Pantalla 6: resultado (Clarity: OnboardingDemoReplayScreen)
 
 struct DemoResultScreen: View {
     var store: OnboardingStore
@@ -282,7 +332,7 @@ struct DemoResultScreen: View {
     }
 }
 
-// MARK: - Pantalla 8: prueba social (Clarity: SocialProofScreen, modo "outcomes")
+// MARK: - Pantalla 7: prueba social (Clarity: SocialProofScreen, modo "outcomes")
 
 /// Como Clarity con pocas reseñas: muestra resultados verdaderos (lo que la persona acaba de
 /// configurar) en lugar de un muro de reseñas inventadas.

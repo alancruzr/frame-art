@@ -50,6 +50,7 @@ extension ArtworkARView.Coordinator {
             return
         }
 
+        if hasPlacement, !placement.followsCamera { return }
         if hasPlacement, let locked = smoothedNormal, let sp = smoothedPosition {
             let facing = simd_dot(locked, normal) < 0 ? -normal : normal
             guard simd_dot(locked, facing) > 0.85 else { return }
@@ -132,6 +133,7 @@ extension ArtworkARView.Coordinator {
         stableFrames = 0
         smoothedPosition = nil
         smoothedNormal = nil
+        placement.followsCamera = true
         ghost?.isEnabled = false
         if let ghost {
             PaintingEntityFactory.setOpacity(ghost, 0.82)

@@ -31,6 +31,9 @@
 		FA0000000000000000000087 /* OnboardingStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0000000000000000000086 /* OnboardingStore.swift */; };
 		FB48EBB0FAF9FC64393B2DF9 /* OnboardingJourneyScreens.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB90C87CE69535C9A307B71D /* OnboardingJourneyScreens.swift */; };
 		FB810558D7A22830593A6089 /* SampleArtwork.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB3C976409EBE0EAD0487769 /* SampleArtwork.swift */; };
+		FBBD5C5FA9C213DDD175DEDF /* GuidedDemoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBB51E9A120E169B977E4FDA /* GuidedDemoView.swift */; };
+		FB6D434EE15D828FA3F6DF49 /* HandGestureHint.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB41828819DB166569A74E70 /* HandGestureHint.swift */; };
+		FBABFEF68F75BF59798C56AB /* DemoGuide.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBBE2583DF7AA297700C8620 /* DemoGuide.swift */; };
 		FBC651A8492B2B3928968BE1 /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBEC5599D07E6CE7EBF3CB0F /* PaywallView.swift */; };
 		FA0000000000000000000089 /* OnboardingContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0000000000000000000088 /* OnboardingContainerView.swift */; };
 		FA000000000000000000008B /* OnboardingScreens.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA000000000000000000008A /* OnboardingScreens.swift */; };
@@ -47,6 +50,7 @@
 		FA00000000000000000000B3 /* GLBExporterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000B2 /* GLBExporterTests.swift */; };
 		FA00000000000000000000B5 /* ArtworkPieceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000B4 /* ArtworkPieceTests.swift */; };
 		FBBEEA58B9BF05011A666A43 /* SubscriptionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB0CFC6C0ACBF9B5B0C2CDC9 /* SubscriptionTests.swift */; };
+		FB366DE5EB53B1AC95C4CC31 /* DemoGuideTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB9FB50869021C91F27F55CC /* DemoGuideTests.swift */; };
 		FB4519A5B3ACE28A2EF93244 /* OnboardingStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB8E6B622A7BE6062896FCE3 /* OnboardingStoreTests.swift */; };
 		FA00000000000000000000B7 /* FrameStudioSchema.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000B6 /* FrameStudioSchema.swift */; };
 		FA00000000000000000000B9 /* PersistenceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000B8 /* PersistenceController.swift */; };
@@ -58,6 +62,7 @@
 		FB88D1A5735E0B15B798A8EC /* SubscriptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB38EA2EB2AC565BB6FA2A1D /* SubscriptionManager.swift */; };
 		FBDE92CB33516F3D4703CC8F /* Analytics.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBCEAA6BB920BD75BB51AF9E /* Analytics.swift */; };
 		FA00000000000000000000C5 /* ARPlacementState.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000C4 /* ARPlacementState.swift */; };
+		FB574312BDE57532EF29BF0D /* ARAdjustGestures.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB1ADACFE1CB26F07FB111B3 /* ARAdjustGestures.swift */; };
 		FA00000000000000000000C7 /* WallPlacementMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000C6 /* WallPlacementMath.swift */; };
 		FA00000000000000000000C9 /* ArtworkARContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000C8 /* ArtworkARContainer.swift */; };
 		FA00000000000000000000CB /* ARSessionCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000CA /* ARSessionCoordinator.swift */; };
@@ -92,6 +97,9 @@
 		FA0000000000000000000086 /* OnboardingStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingStore.swift; sourceTree = "<group>"; };
 		FB90C87CE69535C9A307B71D /* OnboardingJourneyScreens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingJourneyScreens.swift; sourceTree = "<group>"; };
 		FB3C976409EBE0EAD0487769 /* SampleArtwork.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleArtwork.swift; sourceTree = "<group>"; };
+		FBB51E9A120E169B977E4FDA /* GuidedDemoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuidedDemoView.swift; sourceTree = "<group>"; };
+		FB41828819DB166569A74E70 /* HandGestureHint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandGestureHint.swift; sourceTree = "<group>"; };
+		FBBE2583DF7AA297700C8620 /* DemoGuide.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoGuide.swift; sourceTree = "<group>"; };
 		FBEC5599D07E6CE7EBF3CB0F /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
 		FA0000000000000000000088 /* OnboardingContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingContainerView.swift; sourceTree = "<group>"; };
 		FA000000000000000000008A /* OnboardingScreens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingScreens.swift; sourceTree = "<group>"; };
@@ -113,6 +121,7 @@
 		FA00000000000000000000B2 /* GLBExporterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GLBExporterTests.swift; sourceTree = "<group>"; };
 		FA00000000000000000000B4 /* ArtworkPieceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArtworkPieceTests.swift; sourceTree = "<group>"; };
 		FB0CFC6C0ACBF9B5B0C2CDC9 /* SubscriptionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionTests.swift; sourceTree = "<group>"; };
+		FB9FB50869021C91F27F55CC /* DemoGuideTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoGuideTests.swift; sourceTree = "<group>"; };
 		FB8E6B622A7BE6062896FCE3 /* OnboardingStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingStoreTests.swift; sourceTree = "<group>"; };
 		FA00000000000000000000B6 /* FrameStudioSchema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrameStudioSchema.swift; sourceTree = "<group>"; };
 		FA00000000000000000000B8 /* PersistenceController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceController.swift; sourceTree = "<group>"; };
@@ -124,6 +133,7 @@
 		FB38EA2EB2AC565BB6FA2A1D /* SubscriptionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionManager.swift; sourceTree = "<group>"; };
 		FBCEAA6BB920BD75BB51AF9E /* Analytics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Analytics.swift; sourceTree = "<group>"; };
 		FA00000000000000000000C4 /* ARPlacementState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARPlacementState.swift; sourceTree = "<group>"; };
+		FB1ADACFE1CB26F07FB111B3 /* ARAdjustGestures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARAdjustGestures.swift; sourceTree = "<group>"; };
 		FA00000000000000000000C6 /* WallPlacementMath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WallPlacementMath.swift; sourceTree = "<group>"; };
 		FA00000000000000000000C8 /* ArtworkARContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArtworkARContainer.swift; sourceTree = "<group>"; };
 		FA00000000000000000000CA /* ARSessionCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARSessionCoordinator.swift; sourceTree = "<group>"; };
@@ -358,6 +368,7 @@
 				FA00000000000000000000C8 /* ArtworkARContainer.swift */,
 				FA00000000000000000000C6 /* WallPlacementMath.swift */,
 				FA00000000000000000000C4 /* ARPlacementState.swift */,
+				FB1ADACFE1CB26F07FB111B3 /* ARAdjustGestures.swift */,
 				FA0000000000000000000080 /* ArtworkARView.swift */,
 			);
 			path = AR;
@@ -369,6 +380,9 @@
 				FA0000000000000000000086 /* OnboardingStore.swift */,
 				FB90C87CE69535C9A307B71D /* OnboardingJourneyScreens.swift */,
 				FB3C976409EBE0EAD0487769 /* SampleArtwork.swift */,
+				FBB51E9A120E169B977E4FDA /* GuidedDemoView.swift */,
+				FB41828819DB166569A74E70 /* HandGestureHint.swift */,
+				FBBE2583DF7AA297700C8620 /* DemoGuide.swift */,
 				FBEC5599D07E6CE7EBF3CB0F /* PaywallView.swift */,
 				FA0000000000000000000088 /* OnboardingContainerView.swift */,
 				FA000000000000000000008A /* OnboardingScreens.swift */,
@@ -392,6 +406,7 @@
 				FA00000000000000000000BD /* PersistenceTests.swift */,
 				FA00000000000000000000B4 /* ArtworkPieceTests.swift */,
 				FB0CFC6C0ACBF9B5B0C2CDC9 /* SubscriptionTests.swift */,
+				FB9FB50869021C91F27F55CC /* DemoGuideTests.swift */,
 				FB8E6B622A7BE6062896FCE3 /* OnboardingStoreTests.swift */,
 				FA00000000000000000000B2 /* GLBExporterTests.swift */,
 				FA00000000000000000000B0 /* USDZExporterTests.swift */,
@@ -539,6 +554,7 @@
 				FA00000000000000000000C9 /* ArtworkARContainer.swift in Sources */,
 				FA00000000000000000000C7 /* WallPlacementMath.swift in Sources */,
 				FA00000000000000000000C5 /* ARPlacementState.swift in Sources */,
+				FB574312BDE57532EF29BF0D /* ARAdjustGestures.swift in Sources */,
 				FA00000000000000000000C3 /* KeychainStore.swift in Sources */,
 				FB92F5A3F246CDD3B288DCFC /* FirebaseTelemetry.swift in Sources */,
 				FB88D1A5735E0B15B798A8EC /* SubscriptionManager.swift in Sources */,
@@ -567,6 +583,9 @@
 				FA0000000000000000000087 /* OnboardingStore.swift in Sources */,
 				FB48EBB0FAF9FC64393B2DF9 /* OnboardingJourneyScreens.swift in Sources */,
 				FB810558D7A22830593A6089 /* SampleArtwork.swift in Sources */,
+				FBBD5C5FA9C213DDD175DEDF /* GuidedDemoView.swift in Sources */,
+				FB6D434EE15D828FA3F6DF49 /* HandGestureHint.swift in Sources */,
+				FBABFEF68F75BF59798C56AB /* DemoGuide.swift in Sources */,
 				FBC651A8492B2B3928968BE1 /* PaywallView.swift in Sources */,
 				FA0000000000000000000089 /* OnboardingContainerView.swift in Sources */,
 				FA000000000000000000008B /* OnboardingScreens.swift in Sources */,
@@ -589,6 +608,7 @@
 				FA00000000000000000000BE /* PersistenceTests.swift in Sources */,
 				FA00000000000000000000B5 /* ArtworkPieceTests.swift in Sources */,
 				FBBEEA58B9BF05011A666A43 /* SubscriptionTests.swift in Sources */,
+				FB366DE5EB53B1AC95C4CC31 /* DemoGuideTests.swift in Sources */,
 				FB4519A5B3ACE28A2EF93244 /* OnboardingStoreTests.swift in Sources */,
 				FA00000000000000000000B3 /* GLBExporterTests.swift in Sources */,
 				FA00000000000000000000B1 /* USDZExporterTests.swift in Sources */,

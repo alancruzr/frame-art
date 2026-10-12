@@ -28,6 +28,20 @@ final class ARPlacementState {
     var moveHandler: (() -> Void)?
     var pinHandler: (() -> Void)?
 
+    /// Pellizcar/arrastrar tras colocar (solo la prueba del onboarding lo activa).
+    var allowsAdjusting = false
+    /// Sube cada vez que termina un ajuste manual.
+    var adjustCount = 0
+    /// Escala aplicada por pellizco (1 = tamaño real).
+    var scale: Float = 1
+    var pinchBase: Float = 1
+    /// Tras colocar, la obra sigue el centro de la pantalla hasta que el usuario la ajusta a mano.
+    var followsCamera = true
+
+    nonisolated static func clampScale(_ value: Float) -> Float {
+        min(max(value, 0.5), 2)
+    }
+
     func place() { placeHandler?() }
     func move() { moveHandler?() }
     func pin() { pinHandler?() }
