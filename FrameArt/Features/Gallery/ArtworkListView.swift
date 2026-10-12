@@ -10,6 +10,7 @@ struct ArtworkListView: View {
     @State private var query = ""
     @State private var showAdd = false
     @State private var pendingDelete: ArtworkPiece?
+    @State private var deleteError: String?
     @State private var profile = ArtistProfile.shared
     @State private var router = DeepLinkRouter.shared
     @State private var openedPiece: ArtworkPiece?
@@ -108,6 +109,14 @@ struct ArtworkListView: View {
                 AddArtworkView()
             }
         }
+        .alert("Borrar obra", isPresented: Binding(
+            get: { deleteError != nil },
+            set: { if !$0 { deleteError = nil } }
+        )) {
+            Button("Aceptar", role: .cancel) {}
+        } message: {
+            Text(deleteError ?? "")
+        }
         .confirmationDialog(
             "¿Eliminar esta obra?",
             isPresented: Binding(
@@ -143,11 +152,22 @@ struct ArtworkListView: View {
     private func delete(_ piece: ArtworkPiece) {
         let studio = ArtistProfile.shared.slug
         let artwork = piece.publicSlug
-        ArtworkFileStore.deleteFiles(for: piece)
         modelContext.delete(piece)
+        do {
+            try modelContext.save()
+        } catch {
+            modelContext.rollback()
+            ErrorReporter.record(error, context: "delete.save")
+            deleteError = "No se pudo borrar la obra. Inténtalo de nuevo."
+            return
+        }
+        ArtworkFileStore.deleteFiles(forID: piece.id)
         guard !studio.isEmpty, !artwork.isEmpty else { return }
         Task {
-            await ArtworkPublisher.unpublishBestEffort(studio: studio, artwork: artwork)
+            if await !ArtworkPublisher.unpublish(studio: studio, artwork: artwork) {
+                PendingUnpublish.add(studio: studio, artwork: artwork)
+                deleteError = "La obra se borró del taller, pero su enlace sigue público porque no hubo conexión. Lo retiraremos en cuanto se pueda."
+            }
         }
     }
 }

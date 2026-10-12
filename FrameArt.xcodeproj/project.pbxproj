@@ -60,6 +60,7 @@
 		FA00000000000000000000BE /* PersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000BD /* PersistenceTests.swift */; };
 		FA00000000000000000000C1 /* DeviceAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000C0 /* DeviceAuth.swift */; };
 		FA00000000000000000000C3 /* KeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000C2 /* KeychainStore.swift */; };
+		FE3F409F19B277D41C64B208 /* ErrorReporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE292ADBA6275A66A40E1324 /* ErrorReporter.swift */; };
 		FB3DAA6FB1EC5FD3BA893E14 /* ViewCounter.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBDE1A94E79F8D81E9F380B2 /* ViewCounter.swift */; };
 		FB79D70762F59C4EC9FD1F63 /* PushNotifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBA8CBB1A90F3AE4A98D6574 /* PushNotifications.swift */; };
 		FB92F5A3F246CDD3B288DCFC /* FirebaseTelemetry.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBEF2425AD621CD10F094129 /* FirebaseTelemetry.swift */; };
@@ -135,6 +136,7 @@
 		FA00000000000000000000BD /* PersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceTests.swift; sourceTree = "<group>"; };
 		FA00000000000000000000C0 /* DeviceAuth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceAuth.swift; sourceTree = "<group>"; };
 		FA00000000000000000000C2 /* KeychainStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStore.swift; sourceTree = "<group>"; };
+		FE292ADBA6275A66A40E1324 /* ErrorReporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorReporter.swift; sourceTree = "<group>"; };
 		FBDE1A94E79F8D81E9F380B2 /* ViewCounter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewCounter.swift; sourceTree = "<group>"; };
 		FBA8CBB1A90F3AE4A98D6574 /* PushNotifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushNotifications.swift; sourceTree = "<group>"; };
 		FBEF2425AD621CD10F094129 /* FirebaseTelemetry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseTelemetry.swift; sourceTree = "<group>"; };
@@ -437,6 +439,7 @@
 			isa = PBXGroup;
 			children = (
 				FA00000000000000000000C2 /* KeychainStore.swift */,
+				FE292ADBA6275A66A40E1324 /* ErrorReporter.swift */,
 				FBDE1A94E79F8D81E9F380B2 /* ViewCounter.swift */,
 				FBA8CBB1A90F3AE4A98D6574 /* PushNotifications.swift */,
 				FBEF2425AD621CD10F094129 /* FirebaseTelemetry.swift */,
@@ -568,6 +571,7 @@
 				FA00000000000000000000C5 /* ARPlacementState.swift in Sources */,
 				FB574312BDE57532EF29BF0D /* ARAdjustGestures.swift in Sources */,
 				FA00000000000000000000C3 /* KeychainStore.swift in Sources */,
+				FE3F409F19B277D41C64B208 /* ErrorReporter.swift in Sources */,
 				FB3DAA6FB1EC5FD3BA893E14 /* ViewCounter.swift in Sources */,
 				FB79D70762F59C4EC9FD1F63 /* PushNotifications.swift in Sources */,
 				FB92F5A3F246CDD3B288DCFC /* FirebaseTelemetry.swift in Sources */,

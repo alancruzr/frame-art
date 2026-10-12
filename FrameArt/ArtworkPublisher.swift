@@ -10,8 +10,22 @@ enum ArtworkPublisher {
         URL(string: "\(ClientViewer.origin)/api/unpublish")!
     }
 
+    /// Publica la obra. Si falla y la obra no estaba publicada, deshace el slug público para que
+    /// no cuente como publicada (límite gratis) ni parezca compartida.
     @MainActor
     static func publish(_ piece: ArtworkPiece) async throws -> URL {
+        let wasPublished = !piece.publicSlug.isEmpty
+        do {
+            return try await publishUnchecked(piece)
+        } catch {
+            if !wasPublished { piece.publicSlug = "" }
+            ErrorReporter.record(error, context: "publish")
+            throw error
+        }
+    }
+
+    @MainActor
+    private static func publishUnchecked(_ piece: ArtworkPiece) async throws -> URL {
         let profile = ArtistProfile.shared
         if profile.slug.isEmpty {
             profile.save(displayName: profile.displayName, slug: ArtistProfile.randomSlug())
@@ -78,9 +92,17 @@ enum ArtworkPublisher {
         return ClientViewer.shareURL(studio: studio, artwork: artwork)
     }
 
-    static func unpublishBestEffort(studio: String, artwork: String) async {
-        guard !studio.isEmpty, !artwork.isEmpty,
-              let auth = try? await authorization(for: studio) else { return }
+    /// Retira la publicación. Devuelve false si no se pudo (se reintenta luego vía `PendingUnpublish`).
+    @MainActor
+    static func unpublish(studio: String, artwork: String) async -> Bool {
+        guard !studio.isEmpty, !artwork.isEmpty else { return true }
+        let auth: String
+        do {
+            auth = try await authorization(for: studio)
+        } catch {
+            ErrorReporter.record(error, context: "unpublish.auth")
+            return false
+        }
         var request = URLRequest(url: unpublishEndpoint)
         request.httpMethod = "POST"
         request.setValue(auth, forHTTPHeaderField: "Authorization")
@@ -90,7 +112,18 @@ enum ArtworkPublisher {
             "studio": studio,
             "artwork": artwork,
         ])
-        _ = try? await URLSession.shared.data(for: request)
+        do {
+            let (_, response) = try await URLSession.shared.data(for: request)
+            let status = (response as? HTTPURLResponse)?.statusCode ?? 0
+            guard (200...299).contains(status) else {
+                ErrorReporter.record(PublishError.unpublishFailed(status), context: "unpublish.status")
+                return false
+            }
+            return true
+        } catch {
+            ErrorReporter.record(error, context: "unpublish.network")
+            return false
+        }
     }
 
     /// Límites alineados con netlify/lib/limits.ts.
@@ -165,6 +198,7 @@ enum ArtworkPublisher {
         case fileTooLarge
         case rateLimited
         case studioTaken
+        case unpublishFailed(Int)
 
         var errorDescription: String? {
             switch self {
@@ -180,6 +214,8 @@ enum ArtworkPublisher {
                 "Has publicado muchas veces seguidas. Espera un rato e inténtalo de nuevo."
             case .studioTaken:
                 "Este nombre de estudio pertenece a otro dispositivo. Cámbialo en Mi espacio."
+            case .unpublishFailed(let status):
+                "No se pudo retirar el enlace (\(status)). Lo reintentaremos."
             }
         }
     }

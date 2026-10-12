@@ -57,7 +57,12 @@ struct GuidedDemoView: View {
         .task { await prepare() }
         .onDisappear { cleanup() }
         .onChange(of: placement.canPlace) { _, ready in
-            send(ready ? .wallDetected : .wallLost)
+            // Al colocar, `canPlace` también pasa a false: eso no es "pared perdida".
+            if ready {
+                send(.wallDetected)
+            } else if placement.phase == .searching {
+                send(.wallLost)
+            }
         }
         .onChange(of: placement.phase) { _, phase in
             if phase == .aiming { send(.placed) }

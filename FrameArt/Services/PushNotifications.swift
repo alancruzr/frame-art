@@ -24,7 +24,13 @@ final class PushNotifications: NSObject {
     }
 
     func requestAuthorization() async {
-        let granted = (try? await center.requestAuthorization(options: [.alert, .sound, .badge])) ?? false
+        let granted: Bool
+        do {
+            granted = try await center.requestAuthorization(options: [.alert, .sound, .badge])
+        } catch {
+            ErrorReporter.record(error, context: "push.authorization")
+            granted = false
+        }
         if granted {
             Analytics.log(.pushPermissionGranted)
             UIApplication.shared.registerForRemoteNotifications()
@@ -41,8 +47,17 @@ final class PushNotifications: NSObject {
 
     func didRegister(deviceToken: Data) {
         let hex = deviceToken.map { String(format: "%02x", $0) }.joined()
+        UserDefaults.standard.set(hex, forKey: Self.tokenKey)
+        syncToken()
+    }
+
+    static let tokenKey = "apnsDeviceToken"
+
+    /// Sube el último token conocido. Se llama al registrarse y tras publicar (el estudio puede no
+    /// existir todavía cuando llega el token).
+    func syncToken() {
         let studio = ArtistProfile.shared.slug
-        guard !studio.isEmpty else { return }
+        guard !studio.isEmpty, let hex = UserDefaults.standard.string(forKey: Self.tokenKey) else { return }
         Task { await upload(token: hex, studio: studio) }
     }
 
@@ -61,7 +76,10 @@ final class PushNotifications: NSObject {
             #endif
             request.httpBody = try JSONSerialization.data(withJSONObject: ["token": token, "environment": environment])
             let (_, response) = try await URLSession.shared.data(for: request)
-            logger.info("push token upload status \((response as? HTTPURLResponse)?.statusCode ?? 0)")
+            let status = (response as? HTTPURLResponse)?.statusCode ?? 0
+            if !(200...299).contains(status) {
+                ErrorReporter.record(URLError(.badServerResponse), context: "push.token.status.\(status)")
+            }
         } catch {
             // Sin App Attest (simulador) o servidor sin configurar: no hay avisos, la app sigue igual.
             logger.info("push token upload skipped: \(error.localizedDescription, privacy: .public)")
@@ -88,7 +106,9 @@ final class FrameStudioAppDelegate: NSObject, UIApplicationDelegate, UNUserNotif
         Task { @MainActor in PushNotifications.shared.didRegister(deviceToken: deviceToken) }
     }
 
-    func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {}
+    func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
+        Task { @MainActor in ErrorReporter.record(error, context: "push.register") }
+    }
 
     nonisolated func userNotificationCenter(
         _ center: UNUserNotificationCenter,

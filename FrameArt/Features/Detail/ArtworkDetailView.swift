@@ -305,6 +305,7 @@ struct ArtworkDetailView: View {
             publishedURL = url
             Analytics.log(.artworkPublished(isFirst: !alreadyPublished))
             Analytics.log(.artworkShared)
+            PushNotifications.shared.syncToken()
             if !alreadyPublished, await PushNotifications.shared.shouldPrompt() {
                 pendingPushAsk = true
             }

@@ -46,6 +46,9 @@ enum FirebaseTelemetry {
         Analytics.sinks.append { event in
             Crashlytics.crashlytics().log(event.name)
         }
+        ErrorReporter.sinks.append { error, context in
+            Crashlytics.crashlytics().record(error: error, userInfo: ["context": context])
+        }
         #endif
         logger.info("Firebase configured")
         #endif

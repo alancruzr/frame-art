@@ -11,6 +11,7 @@ struct FrameArtApp: App {
     init() {
         FirebaseTelemetry.configureIfAvailable()
         SubscriptionManager.shared.configure()
+        Task { await PendingUnpublish.retryAll() }
     }
 
     var body: some Scene {
