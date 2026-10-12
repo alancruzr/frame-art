@@ -20,6 +20,8 @@ struct ArtworkDetailView: View {
     @State private var replaceStatus = "Recortando el lienzo…"
     @State private var previewImage: UIImage?
     @State private var photoRevision = 0
+    @State private var showPaywall = false
+    @Environment(\.modelContext) private var modelContext
 
     var body: some View {
         List {
@@ -121,6 +123,9 @@ struct ArtworkDetailView: View {
         }
         .navigationTitle(piece.title.isEmpty ? "Obra" : piece.title)
         .navigationBarTitleDisplayMode(.inline)
+        .fullScreenCover(isPresented: $showPaywall) {
+            PaywallView(source: .publishLimit) { showPaywall = false }
+        }
         .fullScreenCover(isPresented: $showAR) {
             ArtworkARContainer(piece: piece)
         }
@@ -250,6 +255,19 @@ struct ArtworkDetailView: View {
 
     @MainActor
     private func publishAndShare() async {
+        let alreadyPublished = !piece.publicSlug.isEmpty
+        let publishedCount = (try? modelContext.fetchCount(
+            FetchDescriptor<ArtworkPiece>(predicate: #Predicate { !$0.publicSlug.isEmpty })
+        )) ?? 0
+        guard ProPlan.canPublish(
+            isPro: SubscriptionManager.shared.isPro,
+            publishedCount: publishedCount,
+            alreadyPublished: alreadyPublished
+        ) else {
+            Analytics.log(.publishLimitReached(limit: ProPlan.freePublishedLimit))
+            showPaywall = true
+            return
+        }
         isPublishing = true
         defer { isPublishing = false }
         do {

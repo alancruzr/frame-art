@@ -85,12 +85,17 @@ struct OnboardingContainerView: View {
     }
 }
 
-/// Último paso. El paywall real llega en el commit de paywall; por ahora completa el onboarding.
+/// Último paso: paywall suave, como en Clarity. Comprar, restaurar o cerrar completa el onboarding.
 struct OnboardingPaywallStep: View {
     var store: OnboardingStore
 
     var body: some View {
-        Color.clear.onAppear { store.complete() }
+        PaywallView(source: .onboarding, pain: store.selectedPain) {
+            store.complete()
+        }
+        .onAppear {
+            if SubscriptionManager.shared.isPro { store.complete() }
+        }
     }
 }
 

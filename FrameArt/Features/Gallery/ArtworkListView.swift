@@ -2,6 +2,9 @@ import SwiftData
 import SwiftUI
 
 struct ArtworkListView: View {
+    @State private var subscriptions = SubscriptionManager.shared
+    @State private var showPaywall = false
+    @Environment(\.openURL) private var openURL
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \ArtworkPiece.createdAt, order: .reverse) private var pieces: [ArtworkPiece]
     @State private var query = ""
@@ -61,6 +64,19 @@ struct ArtworkListView: View {
         .navigationTitle(profile.hasStudioName ? profile.displayName : "Obras")
         .searchable(text: $query, prompt: "Buscar obras")
         .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button {
+                    if subscriptions.isPro, let url = subscriptions.managementURL {
+                        openURL(url)
+                    } else {
+                        showPaywall = true
+                    }
+                } label: {
+                    Label(subscriptions.isPro ? "Pro activo" : "Mejorar a Pro",
+                          systemImage: subscriptions.isPro ? "checkmark.seal.fill" : "sparkles")
+                }
+                .accessibilityLabel(subscriptions.isPro ? "Gestionar Frame Studio Pro" : "Mejorar a Frame Studio Pro")
+            }
             ToolbarItem(placement: .primaryAction) {
                 Button {
                     showAdd = true
@@ -83,6 +99,9 @@ struct ArtworkListView: View {
         }
         .onAppear {
             openArtistPiece(id: router.artistPieceID)
+        }
+        .fullScreenCover(isPresented: $showPaywall) {
+            PaywallView(source: .settings, pain: OnboardingStore.shared.selectedPain) { showPaywall = false }
         }
         .sheet(isPresented: $showAdd) {
             NavigationStack {
