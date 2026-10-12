@@ -86,6 +86,38 @@ enum OnboardingPainID: String, CaseIterable, Equatable {
         case .chat: return "Ven la obra, no la foto del piso del taller."
         }
     }
+
+    /// Línea personalizada para el paywall, como `paywallHeadline` en Clarity.
+    var paywallHeadline: String {
+        switch self {
+        case .size: return "Que cada cliente vea\nel tamaño real"
+        case .wall: return "Tus obras, colgadas\nen su pared"
+        case .decide: return "Ayuda a tus clientes\na decidir"
+        case .visit: return "Muestra sin moverte\ndel taller"
+        case .chat: return "Tu obra, no una foto\naplastada"
+        }
+    }
+}
+
+/// Pantallas del onboarding. Mismo orden que Clarity (welcome → goal → dolor → compromiso →
+/// permisos → prueba → resultado → prueba social → paywall), con el paso del estudio conservado.
+enum OnboardingStep: Int, CaseIterable {
+    case welcome, goal, pain, studio, commitment, permissions, demo, demoResult, socialProof, paywall
+
+    var analyticsName: String {
+        switch self {
+        case .welcome: return "welcome"
+        case .goal: return "goal"
+        case .pain: return "practical_help"
+        case .studio: return "studio"
+        case .commitment: return "sharing_commitment"
+        case .permissions: return "permissions"
+        case .demo: return "demo_try"
+        case .demoResult: return "demo_result"
+        case .socialProof: return "social_proof"
+        case .paywall: return "paywall"
+        }
+    }
 }
 
 @MainActor
@@ -95,29 +127,64 @@ final class OnboardingStore {
     static let userDefaultsKey = "onboardingComplete.v2"
     static let selectedGoalKey = "onboardingSelectedGoal"
     static let selectedPainKey = "onboardingSelectedPain"
+    static let resumeStepKey = "onboardingResumeStep.v3"
 
-    /// 0 welcome, 1 goal, 2 pain, 3 solution, 4 studio, 5 camera
-    var step: Int = 0
+    var step: Int = 0 {
+        didSet { persistResumeStep() }
+    }
     var isComplete: Bool
     var navigationDirection: Int = 1
     var selectedGoal: OnboardingGoalID?
     var selectedPain: OnboardingPainID?
 
+    // Compromiso (pantalla 4)
+    var sharingWeekdays: Set<Int> = []
+    var reminderTime: Date
+
+    // Prueba (pantallas 6–7)
+    var demoImage: UIImage?
+    var demoWidthCentimeters: Double = 80
+    var demoUsedSample = true
+
     var resolvedPain: OnboardingPainID { selectedPain ?? .wall }
 
-    private static let lastStep = 5
+    static let lastStep = OnboardingStep.paywall.rawValue
     private var pendingAdvance: Task<Void, Never>?
+    private var trackedSteps: Set<Int> = []
+    private let defaults: UserDefaults
 
-    private init() {
-        isComplete = UserDefaults.standard.bool(forKey: Self.userDefaultsKey)
-        selectedGoal = UserDefaults.standard.string(forKey: Self.selectedGoalKey)
+    init(defaults: UserDefaults = .standard) {
+        self.defaults = defaults
+        isComplete = defaults.bool(forKey: Self.userDefaultsKey)
+        selectedGoal = defaults.string(forKey: Self.selectedGoalKey)
             .flatMap(OnboardingGoalID.init(rawValue:))
-        selectedPain = UserDefaults.standard.string(forKey: Self.selectedPainKey)
+        selectedPain = defaults.string(forKey: Self.selectedPainKey)
             .flatMap(OnboardingPainID.init(rawValue:))
+        reminderTime = Calendar.current.date(bySettingHour: 10, minute: 0, second: 0, of: .now) ?? .now
+        if !isComplete {
+            let saved = defaults.integer(forKey: Self.resumeStepKey)
+            // Como Clarity: se reanuda donde quedó, pero nunca dentro de la prueba (la imagen no persiste).
+            step = min(saved, OnboardingStep.permissions.rawValue)
+        }
     }
+
+    var currentStep: OnboardingStep { OnboardingStep(rawValue: step) ?? .welcome }
 
     var progress: Double {
         Double(step) / Double(Self.lastStep)
+    }
+
+    /// Barra superior solo antes de la prueba, igual que Clarity (`currentScreen < 5`).
+    var showsTopBar: Bool { step < OnboardingStep.demo.rawValue }
+
+    /// Atrás solo en las pantallas de preguntas; tras pedir permisos ya no se vuelve.
+    var canGoBack: Bool { step > 0 && step < OnboardingStep.permissions.rawValue }
+
+    var canContinueCommitment: Bool { !sharingWeekdays.isEmpty }
+
+    func trackCurrentStepIfNeeded() {
+        guard trackedSteps.insert(step).inserted else { return }
+        Analytics.log(.onboardingStep(index: step, name: currentStep.analyticsName))
     }
 
     func next() {
@@ -131,25 +198,60 @@ final class OnboardingStore {
 
     func back() {
         pendingAdvance?.cancel()
+        guard canGoBack else { return }
         UIImpactFeedbackGenerator(style: .light).impactOccurred()
         navigationDirection = -1
-        if step > 0 {
-            step -= 1
-        }
+        step -= 1
+    }
+
+    func showPaywall() {
+        navigationDirection = 1
+        step = OnboardingStep.paywall.rawValue
     }
 
     func selectGoal(_ goal: OnboardingGoalID) {
         UISelectionFeedbackGenerator().selectionChanged()
         selectedGoal = goal
-        UserDefaults.standard.set(goal.rawValue, forKey: Self.selectedGoalKey)
+        defaults.set(goal.rawValue, forKey: Self.selectedGoalKey)
+        Analytics.log(.onboardingGoalSelected(goal.rawValue))
         advanceAfterSelection()
     }
 
     func selectPain(_ pain: OnboardingPainID) {
         UISelectionFeedbackGenerator().selectionChanged()
         selectedPain = pain
-        UserDefaults.standard.set(pain.rawValue, forKey: Self.selectedPainKey)
+        defaults.set(pain.rawValue, forKey: Self.selectedPainKey)
+        Analytics.log(.onboardingPainSelected(pain.rawValue))
         advanceAfterSelection()
+    }
+
+    func toggleWeekday(_ weekday: Int) {
+        guard (1...7).contains(weekday) else { return }
+        UISelectionFeedbackGenerator().selectionChanged()
+        if sharingWeekdays.contains(weekday) {
+            sharingWeekdays.remove(weekday)
+        } else {
+            sharingWeekdays.insert(weekday)
+        }
+    }
+
+    func saveCommitment(remindersEnabled: Bool) async {
+        let parts = Calendar.current.dateComponents([.hour, .minute], from: reminderTime)
+        await SharingReminders.shared.configure(
+            weekdays: sharingWeekdays,
+            hour: parts.hour ?? 10,
+            minute: parts.minute ?? 0,
+            enabled: remindersEnabled
+        )
+        Analytics.log(.onboardingCommitment(days: sharingWeekdays.count, reminders: remindersEnabled))
+        next()
+    }
+
+    func deferCommitment() {
+        sharingWeekdays.removeAll()
+        Task { await SharingReminders.shared.configure(weekdays: [], hour: 10, minute: 0, enabled: false) }
+        Analytics.log(.onboardingCommitment(days: 0, reminders: false))
+        next()
     }
 
     func complete() {
@@ -157,9 +259,19 @@ final class OnboardingStore {
         if ArtistProfile.shared.slug.isEmpty {
             ArtistProfile.shared.save(displayName: ArtistProfile.shared.displayName, slug: "")
         }
+        if !isComplete {
+            Analytics.log(.onboardingCompleted)
+        }
         UINotificationFeedbackGenerator().notificationOccurred(.success)
         isComplete = true
-        UserDefaults.standard.set(true, forKey: Self.userDefaultsKey)
+        demoImage = nil
+        defaults.set(true, forKey: Self.userDefaultsKey)
+        defaults.removeObject(forKey: Self.resumeStepKey)
+    }
+
+    private func persistResumeStep() {
+        guard !isComplete else { return }
+        defaults.set(step, forKey: Self.resumeStepKey)
     }
 
     private func advanceAfterSelection() {

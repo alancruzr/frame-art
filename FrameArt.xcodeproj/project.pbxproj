@@ -29,6 +29,7 @@
 		FA00000000000000000000A1 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000A0 /* PrivacyInfo.xcprivacy */; };
 		FA0000000000000000000085 /* Brand.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0000000000000000000084 /* Brand.swift */; };
 		FA0000000000000000000087 /* OnboardingStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0000000000000000000086 /* OnboardingStore.swift */; };
+		FB48EBB0FAF9FC64393B2DF9 /* OnboardingJourneyScreens.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB90C87CE69535C9A307B71D /* OnboardingJourneyScreens.swift */; };
 		FA0000000000000000000089 /* OnboardingContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0000000000000000000088 /* OnboardingContainerView.swift */; };
 		FA000000000000000000008B /* OnboardingScreens.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA000000000000000000008A /* OnboardingScreens.swift */; };
 		FA000000000000000000008D /* ArtistProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA000000000000000000008C /* ArtistProfile.swift */; };
@@ -49,6 +50,8 @@
 		FA00000000000000000000BE /* PersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000BD /* PersistenceTests.swift */; };
 		FA00000000000000000000C1 /* DeviceAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000C0 /* DeviceAuth.swift */; };
 		FA00000000000000000000C3 /* KeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000C2 /* KeychainStore.swift */; };
+		FBDE92CB33516F3D4703CC8F /* Analytics.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBCEAA6BB920BD75BB51AF9E /* Analytics.swift */; };
+		FB39F6C6ACA5D06AD9E232AD /* SharingReminders.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBAED8949FDA793B6CA899D6 /* SharingReminders.swift */; };
 		FA00000000000000000000C5 /* ARPlacementState.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000C4 /* ARPlacementState.swift */; };
 		FA00000000000000000000C7 /* WallPlacementMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000C6 /* WallPlacementMath.swift */; };
 		FA00000000000000000000C9 /* ArtworkARContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000C8 /* ArtworkARContainer.swift */; };
@@ -79,6 +82,7 @@
 		FA0000000000000000000082 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		FA0000000000000000000084 /* Brand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Brand.swift; sourceTree = "<group>"; };
 		FA0000000000000000000086 /* OnboardingStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingStore.swift; sourceTree = "<group>"; };
+		FB90C87CE69535C9A307B71D /* OnboardingJourneyScreens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingJourneyScreens.swift; sourceTree = "<group>"; };
 		FA0000000000000000000088 /* OnboardingContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingContainerView.swift; sourceTree = "<group>"; };
 		FA000000000000000000008A /* OnboardingScreens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingScreens.swift; sourceTree = "<group>"; };
 		FA000000000000000000008C /* ArtistProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArtistProfile.swift; sourceTree = "<group>"; };
@@ -103,6 +107,8 @@
 		FA00000000000000000000BD /* PersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceTests.swift; sourceTree = "<group>"; };
 		FA00000000000000000000C0 /* DeviceAuth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceAuth.swift; sourceTree = "<group>"; };
 		FA00000000000000000000C2 /* KeychainStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStore.swift; sourceTree = "<group>"; };
+		FBCEAA6BB920BD75BB51AF9E /* Analytics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Analytics.swift; sourceTree = "<group>"; };
+		FBAED8949FDA793B6CA899D6 /* SharingReminders.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharingReminders.swift; sourceTree = "<group>"; };
 		FA00000000000000000000C4 /* ARPlacementState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARPlacementState.swift; sourceTree = "<group>"; };
 		FA00000000000000000000C6 /* WallPlacementMath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WallPlacementMath.swift; sourceTree = "<group>"; };
 		FA00000000000000000000C8 /* ArtworkARContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArtworkARContainer.swift; sourceTree = "<group>"; };
@@ -306,6 +312,7 @@
 			isa = PBXGroup;
 			children = (
 				FA0000000000000000000086 /* OnboardingStore.swift */,
+				FB90C87CE69535C9A307B71D /* OnboardingJourneyScreens.swift */,
 				FA0000000000000000000088 /* OnboardingContainerView.swift */,
 				FA000000000000000000008A /* OnboardingScreens.swift */,
 			);
@@ -346,6 +353,8 @@
 			isa = PBXGroup;
 			children = (
 				FA00000000000000000000C2 /* KeychainStore.swift */,
+				FBCEAA6BB920BD75BB51AF9E /* Analytics.swift */,
+				FBAED8949FDA793B6CA899D6 /* SharingReminders.swift */,
 				FA00000000000000000000C0 /* DeviceAuth.swift */,
 			);
 			path = Services;
@@ -464,6 +473,8 @@
 				FA00000000000000000000C7 /* WallPlacementMath.swift in Sources */,
 				FA00000000000000000000C5 /* ARPlacementState.swift in Sources */,
 				FA00000000000000000000C3 /* KeychainStore.swift in Sources */,
+				FBDE92CB33516F3D4703CC8F /* Analytics.swift in Sources */,
+				FB39F6C6ACA5D06AD9E232AD /* SharingReminders.swift in Sources */,
 				FA00000000000000000000C1 /* DeviceAuth.swift in Sources */,
 				FA00000000000000000000BC /* StorageErrorView.swift in Sources */,
 				FA00000000000000000000B9 /* PersistenceController.swift in Sources */,
@@ -486,6 +497,7 @@
 				FA0000000000000000000081 /* ArtworkARView.swift in Sources */,
 				FA0000000000000000000085 /* Brand.swift in Sources */,
 				FA0000000000000000000087 /* OnboardingStore.swift in Sources */,
+				FB48EBB0FAF9FC64393B2DF9 /* OnboardingJourneyScreens.swift in Sources */,
 				FA0000000000000000000089 /* OnboardingContainerView.swift in Sources */,
 				FA000000000000000000008B /* OnboardingScreens.swift in Sources */,
 				FA000000000000000000008D /* ArtistProfile.swift in Sources */,

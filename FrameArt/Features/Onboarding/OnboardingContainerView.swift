@@ -13,10 +13,12 @@ struct OnboardingContainerView: View {
             FrameStudioBrand.canvas.ignoresSafeArea()
 
             VStack(spacing: 0) {
-                topBar
-                    .padding(.horizontal, 24)
-                    .padding(.top, 8)
-                    .padding(.bottom, 8)
+                if store.showsTopBar {
+                    topBar
+                        .padding(.horizontal, 24)
+                        .padding(.top, 8)
+                        .padding(.bottom, 8)
+                }
 
                 stepContent
                     .id(store.step)
@@ -26,11 +28,13 @@ struct OnboardingContainerView: View {
             }
         }
         .tint(FrameStudioBrand.accent)
+        .onAppear { store.trackCurrentStepIfNeeded() }
+        .onChange(of: store.step) { _, _ in store.trackCurrentStepIfNeeded() }
     }
 
     private var topBar: some View {
         HStack(spacing: 12) {
-            if store.step > 0 {
+            if store.canGoBack {
                 Button {
                     store.back()
                 } label: {
@@ -47,7 +51,7 @@ struct OnboardingContainerView: View {
             ProgressView(value: store.progress)
                 .tint(FrameStudioBrand.accent)
                 .accessibilityLabel("Progreso")
-                .accessibilityValue("Paso \(store.step + 1) de 6")
+                .accessibilityValue("Paso \(store.step + 1) de \(OnboardingStore.lastStep + 1)")
 
             Spacer().frame(width: 44)
         }
@@ -56,19 +60,17 @@ struct OnboardingContainerView: View {
 
     @ViewBuilder
     private var stepContent: some View {
-        switch store.step {
-        case 0:
-            WelcomeScreen(store: store)
-        case 1:
-            GoalScreen(store: store)
-        case 2:
-            PainScreen(store: store)
-        case 3:
-            SolutionScreen(store: store)
-        case 4:
-            ProfileScreen(store: store)
-        default:
-            PermissionsScreen(store: store)
+        switch store.currentStep {
+        case .welcome: WelcomeScreen(store: store)
+        case .goal: GoalScreen(store: store)
+        case .pain: PainScreen(store: store)
+        case .studio: ProfileScreen(store: store)
+        case .commitment: SharingCommitmentScreen(store: store)
+        case .permissions: PermissionsChecklistScreen(store: store)
+        case .demo: DemoTryScreen(store: store)
+        case .demoResult: DemoResultScreen(store: store)
+        case .socialProof: SocialProofScreen(store: store)
+        case .paywall: OnboardingPaywallStep(store: store)
         }
     }
 
@@ -80,6 +82,15 @@ struct OnboardingContainerView: View {
             insertion: .opacity.combined(with: .move(edge: insertion)),
             removal: .opacity.combined(with: .move(edge: removal))
         )
+    }
+}
+
+/// Último paso. El paywall real llega en el commit de paywall; por ahora completa el onboarding.
+struct OnboardingPaywallStep: View {
+    var store: OnboardingStore
+
+    var body: some View {
+        Color.clear.onAppear { store.complete() }
     }
 }
 
