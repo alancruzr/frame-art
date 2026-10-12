@@ -62,6 +62,9 @@
             ReferencedContainer = "container:FrameArt.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
+         <StoreKitConfigurationFileReference
+         identifier = "../FrameArt/FrameStudio.storekit">
+      </StoreKitConfigurationFileReference>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"

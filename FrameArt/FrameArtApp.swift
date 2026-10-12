@@ -7,6 +7,10 @@ struct FrameArtApp: App {
     @State private var onboarding = OnboardingStore.shared
     @State private var router = DeepLinkRouter.shared
 
+    init() {
+        SubscriptionManager.shared.configure()
+    }
+
     var body: some Scene {
         WindowGroup {
             switch persistence {
