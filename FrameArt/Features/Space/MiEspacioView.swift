@@ -35,6 +35,7 @@ struct MiEspacioView: View {
                         Section(section.name) {
                             ForEach(section.items, id: \.id) { piece in
                                 Button {
+                                    Analytics.log(.arOpened(source: "received"))
                                     arPiece = piece
                                 } label: {
                                     ReceivedPieceRow(piece: piece)

@@ -87,3 +87,9 @@ La opción A unifica iPhone y Android en **un** enlace. Un enlace único por obr
 ## Licencia
 
 MIT. Copyright Alan Cruz.
+
+## Suscripciones (RevenueCat) y analítica (Firebase)
+
+- **RevenueCat**: pon `REVENUECAT_API_KEY` (clave pública iOS, `appl_…`) en `Config/Secrets.env` o como variable de entorno en CI. Sin clave la app funciona: el paywall muestra "no configurado" en DEBUG y publicar queda limitado a `ProPlan.defaultFreePublishedLimit` (3) obras. Entitlement `pro`, offering `default`, productos `app.framestudio.ios.pro.monthly`, `.annual`, `.lifetime`. Para probar sin App Store Connect, el esquema usa `FrameArt/FrameStudio.storekit`. El límite gratis se cambia sin recompilar con el argumento de arranque `-FreePublishedLimit N`.
+- **Firebase**: descarga `GoogleService-Info.plist` (app iOS `app.framestudio.ios`) a `Config/GoogleService-Info.plist` (en .gitignore). Una fase de build lo copia al bundle; sin él, Firebase no se configura. Se usa `FirebaseAnalyticsCore` (sin IDFA/AdSupport, sin ATT) y Crashlytics (apagado en DEBUG/simulador; fuerza con `-FrameStudioCrashReportingEnabled YES`). Los dSYMs se suben solo en Archive y solo si el plist existe (`scripts/upload_crashlytics_dsyms.sh`).
+- Eventos (`FrameArt/Services/Analytics.swift`): `onboarding_step`, `onboarding_*`, `paywall_viewed/plan_selected/purchase_*/restore/dismissed`, `artwork_added`, `artwork_published`, `artwork_shared`, `publish_limit_reached`, `ar_opened`. Nunca se envían títulos, nombres, slugs ni URLs.

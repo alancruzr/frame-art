@@ -8,6 +8,7 @@ struct FrameArtApp: App {
     @State private var router = DeepLinkRouter.shared
 
     init() {
+        FirebaseTelemetry.configureIfAvailable()
         SubscriptionManager.shared.configure()
     }
 

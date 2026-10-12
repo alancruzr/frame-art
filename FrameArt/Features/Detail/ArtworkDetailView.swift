@@ -83,6 +83,7 @@ struct ArtworkDetailView: View {
 
             Section {
                 Button {
+                    Analytics.log(.arOpened(source: "artist_detail"))
                     showAR = true
                 } label: {
                     Label("Ver en mi espacio", systemImage: "cube.transparent")
@@ -273,6 +274,8 @@ struct ArtworkDetailView: View {
         do {
             let url = try await ArtworkPublisher.publish(piece)
             publishedURL = url
+            Analytics.log(.artworkPublished(isFirst: !alreadyPublished))
+            Analytics.log(.artworkShared)
             showShareSheet = true
         } catch {
             errorMessage = error.localizedDescription

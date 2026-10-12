@@ -254,6 +254,7 @@ struct AddArtworkView: View {
             try ArtworkExporter.exportShareMeshes(for: piece)
             modelContext.insert(piece)
             try modelContext.save()
+            Analytics.log(.artworkAdded(kind: piece.kind == .scan3D ? "scan3d" : "photo"))
             dismiss()
         } catch {
             ArtworkFileStore.deleteFiles(for: piece)

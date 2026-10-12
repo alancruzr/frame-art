@@ -52,6 +52,7 @@
 		FA00000000000000000000BE /* PersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000BD /* PersistenceTests.swift */; };
 		FA00000000000000000000C1 /* DeviceAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000C0 /* DeviceAuth.swift */; };
 		FA00000000000000000000C3 /* KeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000C2 /* KeychainStore.swift */; };
+		FB92F5A3F246CDD3B288DCFC /* FirebaseTelemetry.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBEF2425AD621CD10F094129 /* FirebaseTelemetry.swift */; };
 		FB88D1A5735E0B15B798A8EC /* SubscriptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB38EA2EB2AC565BB6FA2A1D /* SubscriptionManager.swift */; };
 		FBDE92CB33516F3D4703CC8F /* Analytics.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBCEAA6BB920BD75BB51AF9E /* Analytics.swift */; };
 		FB39F6C6ACA5D06AD9E232AD /* SharingReminders.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBAED8949FDA793B6CA899D6 /* SharingReminders.swift */; };
@@ -63,6 +64,8 @@
 		FA00000000000000000000CF /* WallPlacementController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000CE /* WallPlacementController.swift */; };
 		FA00000000000000000000D1 /* WallPlacementMathTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000D0 /* WallPlacementMathTests.swift */; };
 		FC804A0DAC3E20F8603AC3D4 /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = FC7101D437699F8AD57FB578 /* RevenueCat */; };
+		FCA764AE2A82FDC07D494007 /* FirebaseAnalyticsCore in Frameworks */ = {isa = PBXBuildFile; productRef = FCDFF4F795E77C50C4617927 /* FirebaseAnalyticsCore */; };
+		FC4E02A12EDD79E25A5DD307 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = FCCE5C22441D334F05E5A9C3 /* FirebaseCrashlytics */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -114,6 +117,7 @@
 		FA00000000000000000000BD /* PersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceTests.swift; sourceTree = "<group>"; };
 		FA00000000000000000000C0 /* DeviceAuth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceAuth.swift; sourceTree = "<group>"; };
 		FA00000000000000000000C2 /* KeychainStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStore.swift; sourceTree = "<group>"; };
+		FBEF2425AD621CD10F094129 /* FirebaseTelemetry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseTelemetry.swift; sourceTree = "<group>"; };
 		FB38EA2EB2AC565BB6FA2A1D /* SubscriptionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionManager.swift; sourceTree = "<group>"; };
 		FBCEAA6BB920BD75BB51AF9E /* Analytics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Analytics.swift; sourceTree = "<group>"; };
 		FBAED8949FDA793B6CA899D6 /* SharingReminders.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharingReminders.swift; sourceTree = "<group>"; };
@@ -148,6 +152,43 @@
 			shellPath = /bin/sh;
 			shellScript = "\"${SRCROOT}/scripts/generate_secrets.sh\"\n";
 		};
+		FDA6245A69260869F7DAED32 /* Copy GoogleService-Info */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/scripts/copy_google_service_info.sh",
+			);
+			name = "Copy GoogleService-Info";
+			outputPaths = (
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/GoogleService-Info.plist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "sh \"$SRCROOT/scripts/copy_google_service_info.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		FD07E09B193361F1A6D2BF1B /* Upload Crashlytics dSYMs */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 0;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/scripts/upload_crashlytics_dsyms.sh",
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}",
+				"$(TARGET_BUILD_DIR)/$(EXECUTABLE_PATH)",
+			);
+			name = "Upload Crashlytics dSYMs";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "sh \"$SRCROOT/scripts/upload_crashlytics_dsyms.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXContainerItemProxy section */
@@ -173,6 +214,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FC4E02A12EDD79E25A5DD307 /* FirebaseCrashlytics in Frameworks */,
+				FCA764AE2A82FDC07D494007 /* FirebaseAnalyticsCore in Frameworks */,
 				FC804A0DAC3E20F8603AC3D4 /* RevenueCat in Frameworks */,
 				262A03A994282AFFABC26890 /* BuildFile in Frameworks */,
 				D1867BEC51EB4BD0550E5A19 /* BuildFile in Frameworks */,
@@ -365,6 +408,7 @@
 			isa = PBXGroup;
 			children = (
 				FA00000000000000000000C2 /* KeychainStore.swift */,
+				FBEF2425AD621CD10F094129 /* FirebaseTelemetry.swift */,
 				FB38EA2EB2AC565BB6FA2A1D /* SubscriptionManager.swift */,
 				FBCEAA6BB920BD75BB51AF9E /* Analytics.swift */,
 				FBAED8949FDA793B6CA899D6 /* SharingReminders.swift */,
@@ -384,6 +428,8 @@
 				FA0000000000000000000007 /* Sources */,
 				FA0000000000000000000009 /* Frameworks */,
 				FA0000000000000000000008 /* Resources */,
+				FDA6245A69260869F7DAED32 /* Copy GoogleService-Info */,
+				FD07E09B193361F1A6D2BF1B /* Upload Crashlytics dSYMs */,
 			);
 			buildRules = (
 			);
@@ -391,6 +437,8 @@
 			);
 			name = FrameArt;
 			packageProductDependencies = (
+				FCCE5C22441D334F05E5A9C3 /* FirebaseCrashlytics */,
+				FCDFF4F795E77C50C4617927 /* FirebaseAnalyticsCore */,
 				FC7101D437699F8AD57FB578 /* RevenueCat */,
 			);
 			productName = FrameArt;
@@ -445,6 +493,7 @@
 			);
 			mainGroup = FA0000000000000000000002;
 			packageReferences = (
+				FCB0C334FF545E93696915BE /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				FC3FD474E86AAD4523EAD865 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */,
 			);
 			productRefGroup = FA0000000000000000000003 /* Products */;
@@ -488,6 +537,7 @@
 				FA00000000000000000000C7 /* WallPlacementMath.swift in Sources */,
 				FA00000000000000000000C5 /* ARPlacementState.swift in Sources */,
 				FA00000000000000000000C3 /* KeychainStore.swift in Sources */,
+				FB92F5A3F246CDD3B288DCFC /* FirebaseTelemetry.swift in Sources */,
 				FB88D1A5735E0B15B798A8EC /* SubscriptionManager.swift in Sources */,
 				FBDE92CB33516F3D4703CC8F /* Analytics.swift in Sources */,
 				FB39F6C6ACA5D06AD9E232AD /* SharingReminders.swift in Sources */,
@@ -760,6 +810,16 @@
 			package = FC3FD474E86AAD4523EAD865 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */;
 			productName = RevenueCat;
 		};
+		FCDFF4F795E77C50C4617927 /* FirebaseAnalyticsCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FCB0C334FF545E93696915BE /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalyticsCore;
+		};
+		FCCE5C22441D334F05E5A9C3 /* FirebaseCrashlytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FCB0C334FF545E93696915BE /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCrashlytics;
+		};
 /* End XCSwiftPackageProductDependency section */
 
 /* Begin XCRemoteSwiftPackageReference section */
@@ -769,6 +829,14 @@
 			requirement = {
 				kind = exactVersion;
 				version = 5.83.2;
+			};
+		};
+		FCB0C334FF545E93696915BE /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk.git";
+			requirement = {
+				kind = exactVersion;
+				version = 12.14.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */

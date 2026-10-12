@@ -64,3 +64,6 @@ web/o/
 scripts/__pycache__/
 
 Config/Secrets.env
+
+# Firebase (por entorno, no versionar)
+Config/GoogleService-Info.plist
