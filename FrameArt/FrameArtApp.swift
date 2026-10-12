@@ -3,6 +3,7 @@ import SwiftUI
 
 @main
 struct FrameArtApp: App {
+    @UIApplicationDelegateAdaptor(FrameStudioAppDelegate.self) private var appDelegate
     @State private var persistence = PersistenceController.make()
     @State private var onboarding = OnboardingStore.shared
     @State private var router = DeepLinkRouter.shared
@@ -36,6 +37,11 @@ struct FrameArtApp: App {
             } else {
                 OnboardingContainerView(store: onboarding)
             }
+        }
+        .onChange(of: router.pendingURL) { _, url in
+            guard let url else { return }
+            router.pendingURL = nil
+            handleIncoming(url, container: container)
         }
         .onOpenURL { url in
             handleIncoming(url, container: container)

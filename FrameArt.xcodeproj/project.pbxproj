@@ -50,6 +50,7 @@
 		FA00000000000000000000B3 /* GLBExporterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000B2 /* GLBExporterTests.swift */; };
 		FA00000000000000000000B5 /* ArtworkPieceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000B4 /* ArtworkPieceTests.swift */; };
 		FBBEEA58B9BF05011A666A43 /* SubscriptionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB0CFC6C0ACBF9B5B0C2CDC9 /* SubscriptionTests.swift */; };
+		FBEE5480C4C559F1FC13EB86 /* PushTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBE2D861004BCD975DB99D1D /* PushTests.swift */; };
 		FB366DE5EB53B1AC95C4CC31 /* DemoGuideTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB9FB50869021C91F27F55CC /* DemoGuideTests.swift */; };
 		FB4519A5B3ACE28A2EF93244 /* OnboardingStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB8E6B622A7BE6062896FCE3 /* OnboardingStoreTests.swift */; };
 		FA00000000000000000000B7 /* FrameStudioSchema.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000B6 /* FrameStudioSchema.swift */; };
@@ -58,6 +59,8 @@
 		FA00000000000000000000BE /* PersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000BD /* PersistenceTests.swift */; };
 		FA00000000000000000000C1 /* DeviceAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000C0 /* DeviceAuth.swift */; };
 		FA00000000000000000000C3 /* KeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000C2 /* KeychainStore.swift */; };
+		FB3DAA6FB1EC5FD3BA893E14 /* ViewCounter.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBDE1A94E79F8D81E9F380B2 /* ViewCounter.swift */; };
+		FB79D70762F59C4EC9FD1F63 /* PushNotifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBA8CBB1A90F3AE4A98D6574 /* PushNotifications.swift */; };
 		FB92F5A3F246CDD3B288DCFC /* FirebaseTelemetry.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBEF2425AD621CD10F094129 /* FirebaseTelemetry.swift */; };
 		FB88D1A5735E0B15B798A8EC /* SubscriptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB38EA2EB2AC565BB6FA2A1D /* SubscriptionManager.swift */; };
 		FBDE92CB33516F3D4703CC8F /* Analytics.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBCEAA6BB920BD75BB51AF9E /* Analytics.swift */; };
@@ -121,6 +124,7 @@
 		FA00000000000000000000B2 /* GLBExporterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GLBExporterTests.swift; sourceTree = "<group>"; };
 		FA00000000000000000000B4 /* ArtworkPieceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArtworkPieceTests.swift; sourceTree = "<group>"; };
 		FB0CFC6C0ACBF9B5B0C2CDC9 /* SubscriptionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionTests.swift; sourceTree = "<group>"; };
+		FBE2D861004BCD975DB99D1D /* PushTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushTests.swift; sourceTree = "<group>"; };
 		FB9FB50869021C91F27F55CC /* DemoGuideTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoGuideTests.swift; sourceTree = "<group>"; };
 		FB8E6B622A7BE6062896FCE3 /* OnboardingStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingStoreTests.swift; sourceTree = "<group>"; };
 		FA00000000000000000000B6 /* FrameStudioSchema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrameStudioSchema.swift; sourceTree = "<group>"; };
@@ -129,6 +133,8 @@
 		FA00000000000000000000BD /* PersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceTests.swift; sourceTree = "<group>"; };
 		FA00000000000000000000C0 /* DeviceAuth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceAuth.swift; sourceTree = "<group>"; };
 		FA00000000000000000000C2 /* KeychainStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStore.swift; sourceTree = "<group>"; };
+		FBDE1A94E79F8D81E9F380B2 /* ViewCounter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewCounter.swift; sourceTree = "<group>"; };
+		FBA8CBB1A90F3AE4A98D6574 /* PushNotifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushNotifications.swift; sourceTree = "<group>"; };
 		FBEF2425AD621CD10F094129 /* FirebaseTelemetry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseTelemetry.swift; sourceTree = "<group>"; };
 		FB38EA2EB2AC565BB6FA2A1D /* SubscriptionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionManager.swift; sourceTree = "<group>"; };
 		FBCEAA6BB920BD75BB51AF9E /* Analytics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Analytics.swift; sourceTree = "<group>"; };
@@ -406,6 +412,7 @@
 				FA00000000000000000000BD /* PersistenceTests.swift */,
 				FA00000000000000000000B4 /* ArtworkPieceTests.swift */,
 				FB0CFC6C0ACBF9B5B0C2CDC9 /* SubscriptionTests.swift */,
+				FBE2D861004BCD975DB99D1D /* PushTests.swift */,
 				FB9FB50869021C91F27F55CC /* DemoGuideTests.swift */,
 				FB8E6B622A7BE6062896FCE3 /* OnboardingStoreTests.swift */,
 				FA00000000000000000000B2 /* GLBExporterTests.swift */,
@@ -427,6 +434,8 @@
 			isa = PBXGroup;
 			children = (
 				FA00000000000000000000C2 /* KeychainStore.swift */,
+				FBDE1A94E79F8D81E9F380B2 /* ViewCounter.swift */,
+				FBA8CBB1A90F3AE4A98D6574 /* PushNotifications.swift */,
 				FBEF2425AD621CD10F094129 /* FirebaseTelemetry.swift */,
 				FB38EA2EB2AC565BB6FA2A1D /* SubscriptionManager.swift */,
 				FBCEAA6BB920BD75BB51AF9E /* Analytics.swift */,
@@ -556,6 +565,8 @@
 				FA00000000000000000000C5 /* ARPlacementState.swift in Sources */,
 				FB574312BDE57532EF29BF0D /* ARAdjustGestures.swift in Sources */,
 				FA00000000000000000000C3 /* KeychainStore.swift in Sources */,
+				FB3DAA6FB1EC5FD3BA893E14 /* ViewCounter.swift in Sources */,
+				FB79D70762F59C4EC9FD1F63 /* PushNotifications.swift in Sources */,
 				FB92F5A3F246CDD3B288DCFC /* FirebaseTelemetry.swift in Sources */,
 				FB88D1A5735E0B15B798A8EC /* SubscriptionManager.swift in Sources */,
 				FBDE92CB33516F3D4703CC8F /* Analytics.swift in Sources */,
@@ -608,6 +619,7 @@
 				FA00000000000000000000BE /* PersistenceTests.swift in Sources */,
 				FA00000000000000000000B5 /* ArtworkPieceTests.swift in Sources */,
 				FBBEEA58B9BF05011A666A43 /* SubscriptionTests.swift in Sources */,
+				FBEE5480C4C559F1FC13EB86 /* PushTests.swift in Sources */,
 				FB366DE5EB53B1AC95C4CC31 /* DemoGuideTests.swift in Sources */,
 				FB4519A5B3ACE28A2EF93244 /* OnboardingStoreTests.swift in Sources */,
 				FA00000000000000000000B3 /* GLBExporterTests.swift in Sources */,

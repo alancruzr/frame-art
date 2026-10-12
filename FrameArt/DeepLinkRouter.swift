@@ -19,6 +19,8 @@ final class DeepLinkRouter {
     var errorMessage: String?
     /// Share links skip artist onboarding for this session so Mi espacio can open AR.
     var deferOnboarding = false
+    /// Enlace pendiente de abrir (p. ej. al tocar un aviso de push).
+    var pendingURL: URL?
 
     private init() {}
 

@@ -24,6 +24,9 @@ enum AnalyticsEvent: Equatable {
     case artworkShared
     case publishLimitReached(limit: Int)
     case arOpened(source: String)
+    case pushPermissionPrompted
+    case pushPermissionGranted
+    case clientLinkOpenedNotificationTapped
 
     var name: String {
         switch self {
@@ -48,6 +51,9 @@ enum AnalyticsEvent: Equatable {
         case .artworkShared: return "artwork_shared"
         case .publishLimitReached: return "publish_limit_reached"
         case .arOpened: return "ar_opened"
+        case .pushPermissionPrompted: return "push_permission_prompted"
+        case .pushPermissionGranted: return "push_permission_granted"
+        case .clientLinkOpenedNotificationTapped: return "client_link_opened_notification_tapped"
         }
     }
 
@@ -71,6 +77,7 @@ enum AnalyticsEvent: Equatable {
         case .artworkShared: return [:]
         case .publishLimitReached(let limit): return ["limit": limit]
         case .arOpened(let source): return ["source": source]
+        case .pushPermissionPrompted, .pushPermissionGranted, .clientLinkOpenedNotificationTapped: return [:]
         }
     }
 }
