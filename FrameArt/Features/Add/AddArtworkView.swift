@@ -72,7 +72,7 @@ struct AddArtworkView: View {
                         if isCroppingCanvas {
                             VStack(spacing: 8) {
                                 ProgressView()
-                                    .tint(FrameStudioBrand.gold)
+                                    .tint(FrameStudioBrand.blue)
                                 Text(cropStatusMessage)
                                     .font(.footnote)
                                     .foregroundStyle(.secondary)
@@ -90,13 +90,13 @@ struct AddArtworkView: View {
                         Button("Usar foto completa") {
                             restoreOriginalPhoto()
                         }
-                        .foregroundStyle(FrameStudioBrand.hunter)
+                        .foregroundStyle(FrameStudioBrand.accent)
                         .frame(minHeight: 44, alignment: .leading)
                     } else if originalImage != nil, !isCroppingCanvas {
                         Button("Recortar lienzo") {
                             startCanvasCrop()
                         }
-                        .foregroundStyle(FrameStudioBrand.hunter)
+                        .foregroundStyle(FrameStudioBrand.accent)
                         .frame(minHeight: 44, alignment: .leading)
                     }
 
@@ -254,6 +254,7 @@ struct AddArtworkView: View {
             try ArtworkExporter.exportShareMeshes(for: piece)
             modelContext.insert(piece)
             try modelContext.save()
+            Analytics.log(.artworkAdded(kind: piece.kind == .scan3D ? "scan3d" : "photo"))
             dismiss()
         } catch {
             ArtworkFileStore.deleteFiles(for: piece)

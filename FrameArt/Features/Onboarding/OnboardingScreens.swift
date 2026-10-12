@@ -27,7 +27,7 @@ struct OnboardingTitle: View {
     var body: some View {
         Text(text)
             .font(.system(size: 28, weight: .bold))
-            .foregroundStyle(.white)
+            .foregroundStyle(.primary)
             .multilineTextAlignment(.center)
             .lineSpacing(2)
             .minimumScaleFactor(0.86)
@@ -43,7 +43,7 @@ struct OnboardingSubtitle: View {
     var body: some View {
         Text(text)
             .font(.system(size: 16))
-            .foregroundStyle(.white.opacity(0.65))
+            .foregroundStyle(.secondary)
             .multilineTextAlignment(.center)
             .lineSpacing(2)
             .frame(maxWidth: 360)
@@ -61,11 +61,11 @@ struct OnboardingPrimaryButton: View {
         Button(action: action) {
             Text(title)
                 .font(.system(size: 17, weight: .semibold))
-                .foregroundStyle(FrameStudioBrand.hunter)
+                .foregroundStyle(enabled ? Color.white : Color.secondary)
                 .frame(maxWidth: .infinity)
                 .frame(height: 50)
                 .background(
-                    FrameStudioBrand.gold.opacity(enabled ? 1 : 0.4),
+                    enabled ? FrameStudioBrand.buttonFill : FrameStudioBrand.softLavender,
                     in: RoundedRectangle(cornerRadius: 16, style: .continuous)
                 )
         }
@@ -75,38 +75,47 @@ struct OnboardingPrimaryButton: View {
     }
 }
 
-private struct OnboardingHeroAppIcon: View {
+struct OnboardingHeroAppIcon: View {
+    var size: CGFloat = 158
+    var glowSize: CGFloat = 218
+    var cornerRadius: CGFloat = 36
+    /// Resplandor que respira (paywall), como el de Clarity. Quieto con Reducir movimiento.
+    var animated = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var breathing = false
+
     var body: some View {
         ZStack {
             Circle()
                 .fill(
                     RadialGradient(
                         colors: [
-                            FrameStudioBrand.gold.opacity(0.28),
-                            FrameStudioBrand.gold.opacity(0.10),
+                            FrameStudioBrand.accent.opacity(animated ? 0.34 : 0.20),
+                            FrameStudioBrand.blue.opacity(animated ? 0.18 : 0.10),
                             .clear
                         ],
                         center: .center,
                         startRadius: 6,
-                        endRadius: 109
+                        endRadius: glowSize / 2
                     )
                 )
-                .frame(width: 218, height: 218)
-                .blur(radius: 10)
+                .frame(width: glowSize, height: glowSize)
+                .blur(radius: animated ? 16 : 10)
+                .scaleEffect(breathing ? 1.08 : 0.96)
 
             Image("OnboardingAppIcon")
                 .resizable()
                 .scaledToFit()
-                .frame(width: 158, height: 158)
-                .clipShape(RoundedRectangle(cornerRadius: 36, style: .continuous))
+                .frame(width: size, height: size)
+                .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
                 .overlay {
-                    RoundedRectangle(cornerRadius: 36, style: .continuous)
+                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                         .stroke(
                             LinearGradient(
                                 colors: [
                                     .white.opacity(0.42),
                                     .white.opacity(0.10),
-                                    FrameStudioBrand.gold.opacity(0.28)
+                                    FrameStudioBrand.accent.opacity(0.20)
                                 ],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
@@ -115,14 +124,18 @@ private struct OnboardingHeroAppIcon: View {
                         )
                 }
                 .shadow(color: .black.opacity(0.34), radius: 26, y: 18)
-                .shadow(color: FrameStudioBrand.gold.opacity(0.24), radius: 34, y: 12)
+                .shadow(color: FrameStudioBrand.accent.opacity(0.14), radius: 34, y: 12)
         }
-        .frame(width: 218, height: 218)
+        .frame(width: glowSize, height: glowSize)
         .accessibilityLabel("Icono de Frame Studio")
+        .onAppear {
+            guard animated, !reduceMotion else { return }
+            withAnimation(.easeInOut(duration: 3.6).repeatForever(autoreverses: true)) { breathing = true }
+        }
     }
 }
 
-private struct OnboardingChoiceCard: View {
+struct OnboardingChoiceCard: View {
     let title: String
     let systemImage: String
     let selected: Bool
@@ -133,25 +146,25 @@ private struct OnboardingChoiceCard: View {
             HStack(spacing: 14) {
                 Image(systemName: systemImage)
                     .font(.system(size: 21, weight: .semibold))
-                    .foregroundStyle(FrameStudioBrand.gold)
+                    .foregroundStyle(FrameStudioBrand.accent)
                     .frame(width: 24)
                     .accessibilityHidden(true)
                 Text(title)
                     .font(.system(size: 15, weight: .medium))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(.primary)
                     .multilineTextAlignment(.leading)
                 Spacer(minLength: 8)
                 Image(systemName: selected ? "checkmark.circle.fill" : "circle")
-                    .foregroundStyle(selected ? FrameStudioBrand.gold : .white.opacity(0.3))
+                    .foregroundStyle(selected ? FrameStudioBrand.accent : .secondary)
                     .accessibilityHidden(true)
             }
             .padding(16)
             .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
-            .background(selected ? FrameStudioBrand.gold.opacity(0.18) : Color.white.opacity(0.10))
+            .background(selected ? FrameStudioBrand.softLavender : FrameStudioBrand.surface)
             .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .stroke(selected ? FrameStudioBrand.gold.opacity(0.5) : .clear, lineWidth: 1)
+                    .stroke(selected ? FrameStudioBrand.accent.opacity(0.55) : Color(uiColor: .separator), lineWidth: 1)
             )
         }
         .buttonStyle(.plain)
@@ -177,7 +190,7 @@ struct WelcomeScreen: View {
                 }
 
                 VStack(spacing: 12) {
-                    OnboardingPrimaryButton(title: "Empezar") { store.next() }
+                    OnboardingPrimaryButton(title: "Probar con una obra") { store.next() }
                 }
                 .padding(.top, 34)
             }
@@ -245,64 +258,6 @@ struct PainScreen: View {
     }
 }
 
-struct SolutionScreen: View {
-    var store: OnboardingStore
-
-    private var pain: OnboardingPainID { store.resolvedPain }
-
-    private var rows: [(icon: String, label: String, text: String)] {
-        [
-            (pain.icon, "Lo que se pierde", pain.problem),
-            ("sparkles", "Cómo ayuda Frame Studio", pain.action),
-            ("checkmark.circle.fill", "Qué se vuelve más fácil", pain.outcome)
-        ]
-    }
-
-    var body: some View {
-        OnboardingScreenFrame {
-            VStack(spacing: 0) {
-                VStack(spacing: 8) {
-                    OnboardingTitle(text: "Frame Studio está hecho\npara ese momento")
-                    OnboardingSubtitle(text: "Cuando la obra está lista, pero en una foto no se entiende.")
-                }
-
-                Spacer().frame(height: 24)
-
-                VStack(spacing: 14) {
-                    ForEach(rows, id: \.label) { item in
-                        HStack(alignment: .top, spacing: 14) {
-                            Image(systemName: item.icon)
-                                .font(.system(size: 22))
-                                .foregroundStyle(FrameStudioBrand.gold)
-                                .frame(width: 44)
-                                .accessibilityHidden(true)
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text(item.label)
-                                    .font(.system(size: 12, weight: .semibold))
-                                    .foregroundStyle(FrameStudioBrand.gold)
-                                Text(item.text)
-                                    .font(.system(size: 15, weight: .medium))
-                                    .foregroundStyle(.white)
-                                    .fixedSize(horizontal: false, vertical: true)
-                            }
-                        }
-                        .padding(16)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(Color.white.opacity(0.10))
-                        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-                    }
-                }
-                .padding(.horizontal, 24)
-
-                VStack(spacing: 12) {
-                    OnboardingPrimaryButton(title: "Continuar") { store.next() }
-                }
-                .padding(.top, 18)
-            }
-        }
-    }
-}
-
 struct ProfileScreen: View {
     var store: OnboardingStore
     @State private var name: String = ArtistProfile.shared.displayName
@@ -313,7 +268,7 @@ struct ProfileScreen: View {
 
     private var slugPreview: String {
         let source = slugEdited ? slug : name
-        let made = ArtistProfile.makeSlug(from: source)
+        let made = ArtistProfile.makeStudioSlug(from: source)
         return made.isEmpty ? "se asignará uno al azar" : made
     }
 
@@ -346,7 +301,7 @@ struct ProfileScreen: View {
                             if !applyingName {
                                 slugEdited = true
                             }
-                            let cleaned = ArtistProfile.makeSlug(from: newValue)
+                            let cleaned = ArtistProfile.makeSlug(from: newValue, keepTrailingDash: true)
                             if cleaned != newValue {
                                 applyingName = true
                                 slug = cleaned
@@ -356,7 +311,7 @@ struct ProfileScreen: View {
 
                     Text("Tu espacio: \(slugPreview)")
                         .font(.footnote)
-                        .foregroundStyle(.white.opacity(0.55))
+                        .foregroundStyle(.secondary)
                         .accessibilityLabel("Vista previa del enlace, \(slugPreview)")
                 }
                 .padding(.horizontal, 24)
@@ -379,85 +334,13 @@ struct ProfileScreen: View {
         VStack(alignment: .leading, spacing: 8) {
             Text(title)
                 .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(FrameStudioBrand.gold)
+                .foregroundStyle(FrameStudioBrand.accent)
             TextField(placeholder, text: text)
-                .foregroundStyle(.white)
+                .foregroundStyle(.primary)
                 .padding(14)
                 .frame(minHeight: 44)
-                .background(Color.white.opacity(0.10), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .background(FrameStudioBrand.surface, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
         }
     }
 }
 
-struct PermissionsScreen: View {
-    var store: OnboardingStore
-    @State private var cameraStatus: AVAuthorizationStatus = .notDetermined
-
-    private var cameraGranted: Bool { cameraStatus == .authorized }
-    private var cameraBlocked: Bool { cameraStatus == .denied || cameraStatus == .restricted }
-
-    var body: some View {
-        OnboardingScreenFrame {
-            VStack(spacing: 0) {
-                VStack(spacing: 8) {
-                    OnboardingTitle(text: "Cámara para fotografiar\nla obra")
-                    OnboardingSubtitle(text: "También para verla en AR. Las fotos de la galería se eligen con el selector del sistema.")
-                }
-
-                Spacer().frame(height: 24)
-
-                Button {
-                    Task { await handleCameraTap() }
-                } label: {
-                    HStack(spacing: 14) {
-                        Image(systemName: cameraGranted ? "checkmark.circle.fill" : (cameraBlocked ? "gear" : "camera.fill"))
-                            .font(.system(size: 21, weight: .semibold))
-                            .foregroundStyle(FrameStudioBrand.gold)
-                            .frame(width: 24)
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(cameraBlocked ? "Abrir Ajustes" : "Cámara")
-                                .font(.system(size: 15, weight: .medium))
-                                .foregroundStyle(.white)
-                            Text(cameraGranted ? "Permitida" : "Para la foto y el AR")
-                                .font(.system(size: 13))
-                                .foregroundStyle(.white.opacity(0.55))
-                        }
-                        Spacer()
-                    }
-                    .padding(16)
-                    .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
-                    .background(cameraGranted ? FrameStudioBrand.gold.opacity(0.18) : Color.white.opacity(0.10))
-                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12, style: .continuous)
-                            .stroke(cameraGranted ? FrameStudioBrand.gold.opacity(0.5) : .clear, lineWidth: 1)
-                    )
-                }
-                .buttonStyle(.plain)
-                .padding(.horizontal, 24)
-                .accessibilityLabel(cameraBlocked ? "Abrir Ajustes" : "Cámara")
-                .accessibilityValue(cameraGranted ? "Permitido" : "No permitido")
-
-                VStack(spacing: 12) {
-                    OnboardingPrimaryButton(title: "Entrar al taller") { store.complete() }
-                }
-                .padding(.top, 34)
-            }
-        }
-        .onAppear {
-            cameraStatus = AVCaptureDevice.authorizationStatus(for: .video)
-        }
-    }
-
-    private func handleCameraTap() async {
-        switch AVCaptureDevice.authorizationStatus(for: .video) {
-        case .notDetermined:
-            let granted = await AVCaptureDevice.requestAccess(for: .video)
-            cameraStatus = granted ? .authorized : .denied
-        case .denied, .restricted:
-            FrameStudioSettings.open()
-        default:
-            cameraStatus = AVCaptureDevice.authorizationStatus(for: .video)
-        }
-    }
-}

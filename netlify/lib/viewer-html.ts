@@ -45,38 +45,38 @@ export function viewerHTML(title: string, posterAbs: string): string {
   <style>
     :root {
       color-scheme: light dark;
-      --hunter: #1f3d2b;
-      --gold: #d4b073;
-      --fg: #1c1916;
-      --muted: #5e584f;
-      --bg: #f3eee6;
-      --stage: #e7e0d4;
+      --brand-deep: #402e63;
+      --brand-accent: #402e63;
+      --fg: #1d1a26;
+      --muted: #5f5a70;
+      --bg: #f5f2fc;
+      --stage: #e8e0fa;
       --btn-fg: #fff;
     }
     @media (prefers-color-scheme: dark) {
       :root:not([data-theme="day"]) {
-        --gold: #d4b073;
-        --fg: #f4efe6;
-        --muted: #c4b8a4;
-        --bg: #0f1712;
-        --stage: #162018;
+        --brand-accent: #d1c4fa;
+        --fg: #f5f2fc;
+        --muted: #b9b0d0;
+        --bg: #0e0c14;
+        --stage: #14121c;
       }
     }
     html[data-theme="day"] {
       color-scheme: light;
-      --gold: #d4b073;
-      --fg: #1c1916;
-      --muted: #5e584f;
-      --bg: #f3eee6;
-      --stage: #e7e0d4;
+      --brand-accent: #402e63;
+      --fg: #1d1a26;
+      --muted: #5f5a70;
+      --bg: #f5f2fc;
+      --stage: #e8e0fa;
     }
     html[data-theme="night"] {
       color-scheme: dark;
-      --gold: #d4b073;
-      --fg: #f4efe6;
-      --muted: #c4b8a4;
-      --bg: #0f1712;
-      --stage: #162018;
+      --brand-accent: #d1c4fa;
+      --fg: #f5f2fc;
+      --muted: #b9b0d0;
+      --bg: #0e0c14;
+      --stage: #14121c;
     }
     * { box-sizing: border-box; }
     html, body {
@@ -101,7 +101,7 @@ export function viewerHTML(title: string, posterAbs: string): string {
       font-weight: 650;
       letter-spacing: 0.14em;
       text-transform: uppercase;
-      color: var(--gold);
+      color: var(--brand-accent);
     }
     header h1 {
       font-size: 1.35rem;
@@ -186,7 +186,7 @@ export function viewerHTML(title: string, posterAbs: string): string {
       border: none;
     }
     .btn.primary {
-      background: var(--hunter);
+      background: var(--brand-deep);
       color: var(--btn-fg);
     }
     .btn.secondary {
@@ -199,7 +199,7 @@ export function viewerHTML(title: string, posterAbs: string): string {
       width: 100%;
       margin-top: 0.45rem;
       background: transparent;
-      color: var(--gold);
+      color: var(--brand-accent);
       border: none;
       font-weight: 500;
       font-size: 0.92rem;
@@ -418,6 +418,26 @@ export function viewerHTML(title: string, posterAbs: string): string {
           }, 1500);
         });
       }
+    })();
+  </script>
+  <script>
+    (function () {
+      try {
+        var parts = location.pathname.split("/").filter(Boolean);
+        if (parts.length < 2) return;
+        var params = new URLSearchParams(location.search);
+        var owner = false;
+        try {
+          if (params.has("owner")) localStorage.setItem("fs-owner:" + parts[0], "1");
+          owner = localStorage.getItem("fs-owner:" + parts[0]) === "1";
+        } catch (e) {}
+        var body = JSON.stringify({ studio: parts[0], artwork: parts[1], owner: owner });
+        if (navigator.sendBeacon) {
+          navigator.sendBeacon("/api/views", new Blob([body], { type: "application/json" }));
+        } else {
+          fetch("/api/views", { method: "POST", headers: { "content-type": "application/json" }, body: body, keepalive: true });
+        }
+      } catch (e) {}
     })();
   </script>
 </body>

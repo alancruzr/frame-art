@@ -1,9 +1,18 @@
 {
   "images" : [
     {
-      "filename" : "OnboardingAppIcon.png",
       "idiom" : "universal",
       "scale" : "1x"
+    },
+    {
+      "filename" : "OnboardingIcon@2x.jpg",
+      "idiom" : "universal",
+      "scale" : "2x"
+    },
+    {
+      "filename" : "OnboardingIcon@3x.jpg",
+      "idiom" : "universal",
+      "scale" : "3x"
     }
   ],
   "info" : {
