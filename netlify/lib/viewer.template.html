@@ -403,5 +403,25 @@
       }
     })();
   </script>
+  <script>
+    (function () {
+      try {
+        var parts = location.pathname.split("/").filter(Boolean);
+        if (parts.length < 2) return;
+        var params = new URLSearchParams(location.search);
+        var owner = false;
+        try {
+          if (params.has("owner")) localStorage.setItem("fs-owner:" + parts[0], "1");
+          owner = localStorage.getItem("fs-owner:" + parts[0]) === "1";
+        } catch (e) {}
+        var body = JSON.stringify({ studio: parts[0], artwork: parts[1], owner: owner });
+        if (navigator.sendBeacon) {
+          navigator.sendBeacon("/api/views", new Blob([body], { type: "application/json" }));
+        } else {
+          fetch("/api/views", { method: "POST", headers: { "content-type": "application/json" }, body: body, keepalive: true });
+        }
+      } catch (e) {}
+    })();
+  </script>
 </body>
 </html>
