@@ -11,6 +11,7 @@ import {
   tooMany,
   validateBody,
 } from "../lib/limits";
+import { parseMeta, sanitizeMeta } from "../lib/artwork-meta";
 import { artworksStore, blobKeys, isSlug, isStudioSlug, publicArtworkURL } from "../lib/store";
 
 const KINDS = new Set(["poster", "usdz", "glb", "meta"]);
@@ -120,23 +121,16 @@ export default async (req: Request, context: Context) => {
   }
 
   if (kind === "meta") {
-    let createdAt = new Date().toISOString();
-    let metaTitle = title;
+    let raw: unknown = {};
     if (payload.body && payload.body.byteLength > 0) {
       try {
-        const parsed = JSON.parse(new TextDecoder().decode(payload.body));
-        if (typeof parsed.title === "string" && parsed.title.trim()) {
-          metaTitle = parsed.title.trim();
-        }
-        if (typeof parsed.createdAt === "string" && parsed.createdAt.trim()) {
-          createdAt = parsed.createdAt.trim();
-        }
+        raw = JSON.parse(new TextDecoder().decode(payload.body));
       } catch {
         // raw body is not JSON; keep title from query
       }
     }
-    const meta = JSON.stringify({ title: (metaTitle || artwork).slice(0, MAX_TITLE), createdAt });
-    await store.set(key, meta, { metadata: { contentType } });
+    const meta = sanitizeMeta(raw, { title: title || artwork, createdAt: new Date().toISOString() });
+    await store.set(key, JSON.stringify(meta), { metadata: { contentType } });
   } else {
     if (!payload.body || payload.body.byteLength === 0) {
       return json(400, { error: "missing_file" });
@@ -144,16 +138,9 @@ export default async (req: Request, context: Context) => {
     await store.set(key, payload.body, { metadata: { contentType } });
     if (title) {
       const existing = await store.get(keys.meta, { type: "text" });
-      let createdAt = new Date().toISOString();
-      if (existing) {
-        try {
-          const parsed = JSON.parse(existing);
-          if (typeof parsed.createdAt === "string") createdAt = parsed.createdAt;
-        } catch {
-          // replace
-        }
-      }
-      await store.set(keys.meta, JSON.stringify({ title, createdAt }), {
+      const meta = existing ? parseMeta(existing, title) : sanitizeMeta({}, { title, createdAt: new Date().toISOString() });
+      meta.title = title;
+      await store.set(keys.meta, JSON.stringify(meta), {
         metadata: { contentType: CONTENT_TYPE.meta },
       });
     }

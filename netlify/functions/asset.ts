@@ -1,5 +1,6 @@
 import type { Config, Context } from "@netlify/functions";
 import { artworksStore, blobKeys, isSlug, SITE_ORIGIN } from "../lib/store";
+import { parseMeta } from "../lib/artwork-meta";
 import { viewerHTML } from "../lib/viewer-html";
 
 const TYPES: Record<string, string> = {
@@ -36,19 +37,9 @@ export default async (req: Request, context: Context) => {
     if (!metaText && !posterMeta) {
       return notFound(true);
     }
-    let title = artwork;
-    if (metaText) {
-      try {
-        const parsed = JSON.parse(metaText);
-        if (typeof parsed.title === "string" && parsed.title.trim()) {
-          title = parsed.title.trim();
-        }
-      } catch {
-        // keep slug
-      }
-    }
+    const meta = parseMeta(metaText, artwork);
     const posterAbs = `${SITE_ORIGIN}/${studio}/${artwork}/poster.jpg`;
-    const html = viewerHTML(title, posterAbs);
+    const html = viewerHTML(meta.title, posterAbs, meta);
     return new Response(html, {
       status: 200,
       headers: {

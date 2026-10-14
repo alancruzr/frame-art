@@ -1,3 +1,4 @@
+import { type ArtworkMeta, contactHref, formatSize, quickLookFragment } from "./artwork-meta";
 export function escapeHtml(value: string): string {
   return value.replace(/[&<>"']/g, (ch) => {
     switch (ch) {
@@ -11,8 +12,23 @@ export function escapeHtml(value: string): string {
   });
 }
 
-export function viewerHTML(title: string, posterAbs: string): string {
+/** JSON seguro dentro de <script>. */
+function scriptJSON(value: unknown): string {
+  return JSON.stringify(value ?? null).replace(/</g, "\\u003c").replace(/\u2028|\u2029/g, "");
+}
+
+export function viewerHTML(title: string, posterAbs: string, meta?: ArtworkMeta): string {
   const safeTitle = escapeHtml(title || "Frame Studio");
+  const size = meta ? formatSize(meta) : undefined;
+  const contact = meta ? contactHref(meta.contact, meta.title) : undefined;
+  const qlFragment = meta ? quickLookFragment(meta) : "#allowsContentScaling=0";
+  const card = meta && (meta.artist || size || contact)
+    ? `<section class="card" aria-label="Datos de la obra">
+        ${meta.artist ? `<p class="card-artist">${escapeHtml(meta.artist)}</p>` : ""}
+        ${size ? `<p class="card-size">${escapeHtml(size)}</p>` : ""}
+        ${contact ? `<a class="btn primary card-cta" id="btn-interest" href="${escapeHtml(contact)}" rel="noopener">Me interesa</a>` : ""}
+      </section>`
+    : "";
   const safePoster = escapeHtml(posterAbs);
   const pageTitle = `${safeTitle} — Frame Studio`;
   return `<!DOCTYPE html>
@@ -154,6 +170,18 @@ export function viewerHTML(title: string, posterAbs: string): string {
       overflow: hidden;
       clip: rect(0, 0, 0, 0);
     }
+    .card {
+      margin: 0 16px 8px;
+      padding: 12px 16px;
+      border-radius: 18px;
+      background: color-mix(in srgb, currentColor 6%, transparent);
+      display: grid;
+      gap: 4px;
+    }
+    .card p { margin: 0; }
+    .card-artist { font-weight: 650; }
+    .card-size { opacity: .75; font-variant-numeric: tabular-nums; }
+    .card-cta { margin-top: 8px; text-align: center; text-decoration: none; min-height: 44px; display: grid; place-items: center; }
     .dock {
       background: color-mix(in srgb, var(--bg) 86%, transparent);
       -webkit-backdrop-filter: blur(18px);
@@ -221,6 +249,7 @@ export function viewerHTML(title: string, posterAbs: string): string {
       <h1>Mi espacio</h1>
       <p class="piece" id="title">${safeTitle}</p>
     </header>
+    ${card}
     <div class="hero" id="hero">
       <img id="poster" src="poster.jpg" alt="${safeTitle}">
       <model-viewer
@@ -240,7 +269,7 @@ export function viewerHTML(title: string, posterAbs: string): string {
       >
         <button id="hidden-ar-btn" slot="ar-button" type="button" tabindex="-1" aria-hidden="true"></button>
       </model-viewer>
-      <a id="ios-ar" class="sr-ar" rel="ar" href="model.usdz#allowsContentScaling=0">
+      <a id="ios-ar" class="sr-ar" rel="ar" href="model.usdz${escapeHtml(qlFragment)}">
         <img alt="" width="1" height="1" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=">
       </a>
     </div>
@@ -289,9 +318,19 @@ export function viewerHTML(title: string, posterAbs: string): string {
       var params = new URLSearchParams(location.search);
       var titleEl = document.getElementById("title");
       var title = params.get("title") || (titleEl && titleEl.textContent) || "Frame Studio";
-      var glb = params.get("glb") || "model.glb";
-      var usdz = params.get("usdz") || "model.usdz";
-      var poster = params.get("poster") || "poster.jpg";
+      var QL_FRAGMENT = ${scriptJSON(qlFragment)};
+      var CONTACT_URL = ${scriptJSON(contact)};
+      // Solo rutas relativas o https: evita inyectar javascript: en enlaces vía query string.
+      function safeAsset(value, fallback) {
+        if (!value) return fallback;
+        try {
+          var u = new URL(value, location.href);
+          return u.protocol === "https:" || u.origin === location.origin ? value : fallback;
+        } catch (e) { return fallback; }
+      }
+      var glb = safeAsset(params.get("glb"), "model.glb");
+      var usdz = safeAsset(params.get("usdz"), "model.usdz");
+      var poster = safeAsset(params.get("poster"), "poster.jpg");
 
       document.title = title + " \u2014 Frame Studio";
       if (titleEl) titleEl.textContent = title;
@@ -309,7 +348,13 @@ export function viewerHTML(title: string, posterAbs: string): string {
       applyTheme();
 
       var ios = document.getElementById("ios-ar");
-      ios.href = usdz + "#allowsContentScaling=0";
+      ios.href = usdz + QL_FRAGMENT;
+      // Banner "Me interesa" de AR Quick Look (callToAction): Apple envía este mensaje al <a rel="ar">.
+      ios.addEventListener("message", function (event) {
+        if (event.data === "_apple_ar_quicklook_button_tapped" && CONTACT_URL) {
+          location.href = CONTACT_URL;
+        }
+      }, false);
       var glbURL = new URL(glb, location.href).href;
       var intent =
         "intent://arvr.google.com/scene-viewer/1.2?file=" +

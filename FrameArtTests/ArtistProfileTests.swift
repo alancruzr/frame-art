@@ -38,3 +38,16 @@ struct ArtistProfileEditingTests {
         #expect(ArtistProfile.makeSlug(from: "taller-") == "taller")
     }
 }
+
+struct ArtistContactTests {
+    @Test func acceptsEmailAndPhone() {
+        #expect(ArtistProfile.isValidContact("ana@estudio.mx"))
+        #expect(ArtistProfile.isValidContact("+52 55 1234 5678"))
+        #expect(ArtistProfile.isValidContact(""))
+    }
+
+    @Test func rejectsOther() {
+        #expect(!ArtistProfile.isValidContact("http://x.y"))
+        #expect(!ArtistProfile.isValidContact("123"))
+    }
+}

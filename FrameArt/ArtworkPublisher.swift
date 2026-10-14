@@ -78,7 +78,7 @@ enum ArtworkPublisher {
 
         let createdAt = ISO8601DateFormatter().string(from: piece.createdAt)
         let meta = try JSONSerialization.data(
-            withJSONObject: ["title": title.isEmpty ? "Obra" : title, "createdAt": createdAt]
+            withJSONObject: publicMeta(piece: piece, title: title, createdAt: createdAt)
         )
         try await upload(
             studio: studio,
@@ -124,6 +124,22 @@ enum ArtworkPublisher {
             ErrorReporter.record(error, context: "unpublish.network")
             return false
         }
+    }
+
+    /// Ficha pública de la obra (netlify/lib/artwork-meta.ts). El contacto solo se envía si es válido.
+    @MainActor
+    static func publicMeta(piece: ArtworkPiece, title: String, createdAt: String) -> [String: Any] {
+        let profile = ArtistProfile.shared
+        var meta: [String: Any] = [
+            "title": title.isEmpty ? "Obra" : title,
+            "createdAt": createdAt,
+            "widthCm": piece.widthCentimeters,
+            "heightCm": piece.heightCentimeters,
+        ]
+        if profile.hasStudioName { meta["artist"] = profile.displayName }
+        let contact = profile.contact.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !contact.isEmpty, ArtistProfile.isValidContact(contact) { meta["contact"] = contact }
+        return meta
     }
 
     /// Límites alineados con netlify/lib/limits.ts.

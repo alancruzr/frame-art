@@ -7,9 +7,14 @@ final class ArtistProfile {
     static let shared = ArtistProfile()
     static let nameKey = "artistDisplayName"
     static let slugKey = "artistSlug"
+    static let contactKey = "artistContact"
 
     var displayName: String
     var slug: String
+    /// Correo o WhatsApp público para el botón "Me interesa" del cliente (opcional).
+    var contact: String {
+        didSet { UserDefaults.standard.set(contact, forKey: Self.contactKey) }
+    }
 
     var hasStudioName: Bool {
         !displayName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
@@ -18,6 +23,16 @@ final class ArtistProfile {
     private init() {
         displayName = UserDefaults.standard.string(forKey: Self.nameKey) ?? ""
         slug = UserDefaults.standard.string(forKey: Self.slugKey) ?? ""
+        contact = UserDefaults.standard.string(forKey: Self.contactKey) ?? ""
+    }
+
+    /// Mismo criterio que netlify/lib/artwork-meta.ts `cleanContact`.
+    nonisolated static func isValidContact(_ raw: String) -> Bool {
+        let v = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        if v.isEmpty { return true }
+        if v.wholeMatch(of: /[^\s@<>"']{1,64}@[^\s@<>"']{1,190}\.[A-Za-z]{2,24}/) != nil { return true }
+        let digits = v.filter(\.isNumber)
+        return v.wholeMatch(of: /\+?[\d\s().-]+/) != nil && (8...15).contains(digits.count)
     }
 
     func save(displayName rawName: String, slug rawSlug: String) {

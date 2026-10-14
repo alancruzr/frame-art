@@ -6,6 +6,7 @@ struct SettingsView: View {
     @State private var profile = ArtistProfile.shared
     @State private var subscriptions = SubscriptionManager.shared
     @State private var studioName = ArtistProfile.shared.displayName
+    @State private var contact = ArtistProfile.shared.contact
     @State private var showPaywall = false
     @State private var restoring = false
     @State private var restoreMessage: String?
@@ -73,10 +74,22 @@ struct SettingsView: View {
             if !profile.slug.isEmpty {
                 LabeledContent("Enlace", value: "…/\(profile.slug)/")
             }
+            TextField("Correo o WhatsApp para clientes", text: $contact)
+                .textContentType(.emailAddress)
+                .keyboardType(.emailAddress)
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
+                .onSubmit(saveContact)
+                .onChange(of: contact) { _, _ in saveContact() }
+            if !ArtistProfile.isValidContact(contact) {
+                Label("Escribe un correo o un teléfono con lada (8 a 15 dígitos).", systemImage: "exclamationmark.circle")
+                    .font(.footnote)
+                    .foregroundStyle(.red)
+            }
         } header: {
             Text("Estudio")
         } footer: {
-            Text("El enlace no cambia al renombrar el estudio, así los enlaces enviados siguen funcionando.")
+            Text("El enlace no cambia al renombrar el estudio, así los enlaces enviados siguen funcionando. El contacto es público: aparece en el botón «Me interesa» de tus obras al volver a compartirlas.")
         }
     }
 
@@ -155,6 +168,11 @@ struct SettingsView: View {
         let name = studioName.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !name.isEmpty, name != profile.displayName else { return }
         profile.save(displayName: name, slug: profile.slug)
+    }
+
+    private func saveContact() {
+        let value = contact.trimmingCharacters(in: .whitespacesAndNewlines)
+        if ArtistProfile.isValidContact(value) { profile.contact = value }
     }
 
     private func restore() async {
