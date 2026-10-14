@@ -275,18 +275,24 @@ struct ArtworkSizeFields: View {
         return Double(image.size.height / image.size.width)
     }
 
+    @AppStorage(MeasureUnit.storageKey) private var unit: MeasureUnit = .centimeters
+
     var body: some View {
+        Picker("Unidad", selection: $unit) {
+            Text("Centímetros").tag(MeasureUnit.centimeters)
+            Text("Pulgadas").tag(MeasureUnit.inches)
+        }
+        .pickerStyle(.segmented)
+        Menu {
+            ForEach(StandardSize.all) { size in
+                Button(size.label(unit: unit)) { apply(size) }
+            }
+        } label: {
+            Label("Tamaños estándar", systemImage: "rectangle.ratio.3.to.4")
+        }
         Toggle("Mantener proporción de la foto", isOn: $lockAspect)
-        Stepper(value: $widthCentimeters, in: 10...400, step: 1) {
-            LabeledContent("Ancho") {
-                Text("\(Int(widthCentimeters.rounded())) cm")
-            }
-        }
-        Stepper(value: $heightCentimeters, in: 10...400, step: 1) {
-            LabeledContent("Alto") {
-                Text("\(Int(heightCentimeters.rounded())) cm")
-            }
-        }
+        dimensionRow("Ancho", value: $widthCentimeters)
+        dimensionRow("Alto", value: $heightCentimeters)
         .onChange(of: widthCentimeters) { _, newValue in
             guard lockAspect, !syncing, aspect > 0 else { return }
             syncing = true
@@ -318,6 +324,36 @@ struct ArtworkSizeFields: View {
         }
     }
 
+    private func dimensionRow(_ title: String, value: Binding<Double>) -> some View {
+        let display = Binding<Double>(
+            get: { (unit.fromCentimeters(value.wrappedValue) * 10).rounded() / 10 },
+            set: { value.wrappedValue = min(400, max(10, unit.toCentimeters($0))) }
+        )
+        return LabeledContent(title) {
+            HStack(spacing: 8) {
+                TextField(title, value: display, format: .number.precision(.fractionLength(0...1)))
+                    .keyboardType(.decimalPad)
+                    .multilineTextAlignment(.trailing)
+                    .monospacedDigit()
+                    .frame(minWidth: 56, maxWidth: 90)
+                    .accessibilityLabel("\(title) en \(unit.spokenName)")
+                Text(unit.rawValue).foregroundStyle(.secondary)
+                Stepper(title, value: display, in: unit.fromCentimeters(10)...unit.fromCentimeters(400),
+                        step: unit == .centimeters ? 1 : 0.5)
+                    .labelsHidden()
+            }
+        }
+    }
+
+    private func apply(_ size: StandardSize) {
+        let portrait = aspect >= 1
+        syncing = true
+        widthCentimeters = portrait ? size.shortCentimeters : size.longCentimeters
+        heightCentimeters = portrait ? size.longCentimeters : size.shortCentimeters
+        syncing = false
+        lockAspect = false
+    }
+
     private func applyAspectFromImage() {
         guard lockAspect, aspect > 0 else { return }
         syncing = true
@@ -326,3 +362,26 @@ struct ArtworkSizeFields: View {
     }
 }
 
+
+/// Formatos de lienzo comunes (cm). La orientación sigue a la foto.
+struct StandardSize: Identifiable, Hashable, Sendable {
+    let shortCentimeters: Double
+    let longCentimeters: Double
+    var id: String { "\(shortCentimeters)x\(longCentimeters)" }
+
+    static let all: [StandardSize] = [
+        .init(shortCentimeters: 20, longCentimeters: 25),
+        .init(shortCentimeters: 30, longCentimeters: 40),
+        .init(shortCentimeters: 40, longCentimeters: 50),
+        .init(shortCentimeters: 50, longCentimeters: 70),
+        .init(shortCentimeters: 60, longCentimeters: 80),
+        .init(shortCentimeters: 60, longCentimeters: 90),
+        .init(shortCentimeters: 70, longCentimeters: 100),
+        .init(shortCentimeters: 80, longCentimeters: 120),
+        .init(shortCentimeters: 100, longCentimeters: 150),
+    ]
+
+    func label(unit: MeasureUnit) -> String {
+        unit.format(width: shortCentimeters, height: longCentimeters)
+    }
+}

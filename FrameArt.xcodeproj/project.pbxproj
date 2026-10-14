@@ -50,6 +50,7 @@
 		FA00000000000000000000B3 /* GLBExporterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000B2 /* GLBExporterTests.swift */; };
 		FA00000000000000000000B5 /* ArtworkPieceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000B4 /* ArtworkPieceTests.swift */; };
 		FBBEEA58B9BF05011A666A43 /* SubscriptionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB0CFC6C0ACBF9B5B0C2CDC9 /* SubscriptionTests.swift */; };
+		FE85414B6D1FBD92FD8002FC /* MeasureTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE640EAEF1E2464285D94EAC /* MeasureTests.swift */; };
 		FE8B314022BA0927FCD33ACF /* ArtistProfileTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEC82446CD809ABC6B173E39 /* ArtistProfileTests.swift */; };
 		FBEE5480C4C559F1FC13EB86 /* PushTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBE2D861004BCD975DB99D1D /* PushTests.swift */; };
 		FB366DE5EB53B1AC95C4CC31 /* DemoGuideTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB9FB50869021C91F27F55CC /* DemoGuideTests.swift */; };
@@ -127,6 +128,7 @@
 		FA00000000000000000000B2 /* GLBExporterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GLBExporterTests.swift; sourceTree = "<group>"; };
 		FA00000000000000000000B4 /* ArtworkPieceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArtworkPieceTests.swift; sourceTree = "<group>"; };
 		FB0CFC6C0ACBF9B5B0C2CDC9 /* SubscriptionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionTests.swift; sourceTree = "<group>"; };
+		FE640EAEF1E2464285D94EAC /* MeasureTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeasureTests.swift; sourceTree = "<group>"; };
 		FEC82446CD809ABC6B173E39 /* ArtistProfileTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArtistProfileTests.swift; sourceTree = "<group>"; };
 		FBE2D861004BCD975DB99D1D /* PushTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushTests.swift; sourceTree = "<group>"; };
 		FB9FB50869021C91F27F55CC /* DemoGuideTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoGuideTests.swift; sourceTree = "<group>"; };
@@ -419,6 +421,7 @@
 				FA00000000000000000000BD /* PersistenceTests.swift */,
 				FA00000000000000000000B4 /* ArtworkPieceTests.swift */,
 				FB0CFC6C0ACBF9B5B0C2CDC9 /* SubscriptionTests.swift */,
+				FE640EAEF1E2464285D94EAC /* MeasureTests.swift */,
 				FEC82446CD809ABC6B173E39 /* ArtistProfileTests.swift */,
 				FBE2D861004BCD975DB99D1D /* PushTests.swift */,
 				FB9FB50869021C91F27F55CC /* DemoGuideTests.swift */,
@@ -630,6 +633,7 @@
 				FA00000000000000000000BE /* PersistenceTests.swift in Sources */,
 				FA00000000000000000000B5 /* ArtworkPieceTests.swift in Sources */,
 				FBBEEA58B9BF05011A666A43 /* SubscriptionTests.swift in Sources */,
+				FE85414B6D1FBD92FD8002FC /* MeasureTests.swift in Sources */,
 				FE8B314022BA0927FCD33ACF /* ArtistProfileTests.swift in Sources */,
 				FBEE5480C4C559F1FC13EB86 /* PushTests.swift in Sources */,
 				FB366DE5EB53B1AC95C4CC31 /* DemoGuideTests.swift in Sources */,
