@@ -10,13 +10,15 @@ struct OnboardingContainerView: View {
 
     var body: some View {
         ZStack {
-            FrameStudioBrand.hunter.ignoresSafeArea()
+            FrameStudioBrand.canvas.ignoresSafeArea()
 
             VStack(spacing: 0) {
-                topBar
-                    .padding(.horizontal, 24)
-                    .padding(.top, 8)
-                    .padding(.bottom, 8)
+                if store.showsTopBar {
+                    topBar
+                        .padding(.horizontal, 24)
+                        .padding(.top, 8)
+                        .padding(.bottom, 8)
+                }
 
                 stepContent
                     .id(store.step)
@@ -25,19 +27,20 @@ struct OnboardingContainerView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
-        .preferredColorScheme(.dark)
-        .tint(FrameStudioBrand.gold)
+        .tint(FrameStudioBrand.accent)
+        .onAppear { store.trackCurrentStepIfNeeded() }
+        .onChange(of: store.step) { _, _ in store.trackCurrentStepIfNeeded() }
     }
 
     private var topBar: some View {
         HStack(spacing: 12) {
-            if store.step > 0 {
+            if store.canGoBack {
                 Button {
                     store.back()
                 } label: {
                     Image(systemName: "chevron.left")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundStyle(.white.opacity(0.6))
+                        .font(.callout.weight(.semibold))
+                        .foregroundStyle(.secondary)
                         .frame(width: 44, height: 44)
                 }
                 .accessibilityLabel("Atrás")
@@ -46,9 +49,9 @@ struct OnboardingContainerView: View {
             }
 
             ProgressView(value: store.progress)
-                .tint(FrameStudioBrand.gold)
+                .tint(FrameStudioBrand.accent)
                 .accessibilityLabel("Progreso")
-                .accessibilityValue("Paso \(store.step + 1) de 6")
+                .accessibilityValue("Paso \(store.step + 1) de \(OnboardingStore.lastStep + 1)")
 
             Spacer().frame(width: 44)
         }
@@ -57,19 +60,14 @@ struct OnboardingContainerView: View {
 
     @ViewBuilder
     private var stepContent: some View {
-        switch store.step {
-        case 0:
-            WelcomeScreen(store: store)
-        case 1:
-            GoalScreen(store: store)
-        case 2:
-            PainScreen(store: store)
-        case 3:
-            SolutionScreen(store: store)
-        case 4:
-            ProfileScreen(store: store)
-        default:
-            PermissionsScreen(store: store)
+        switch store.currentStep {
+        case .welcome: WelcomeScreen(store: store)
+        case .needs: NeedsScreen(store: store)
+        case .permissions: PermissionsChecklistScreen(store: store)
+        case .demo: DemoTryScreen(store: store)
+        case .demoResult: DemoResultScreen(store: store)
+        case .socialProof: SocialProofScreen(store: store)
+        case .paywall: OnboardingPaywallStep(store: store)
         }
     }
 
@@ -81,6 +79,20 @@ struct OnboardingContainerView: View {
             insertion: .opacity.combined(with: .move(edge: insertion)),
             removal: .opacity.combined(with: .move(edge: removal))
         )
+    }
+}
+
+/// Último paso: paywall suave, como en Clarity. Comprar, restaurar o cerrar completa el onboarding.
+struct OnboardingPaywallStep: View {
+    var store: OnboardingStore
+
+    var body: some View {
+        PaywallView(source: .onboarding, pain: store.selectedPain) {
+            store.complete()
+        }
+        .onAppear {
+            if SubscriptionManager.shared.isPro { store.complete() }
+        }
     }
 }
 

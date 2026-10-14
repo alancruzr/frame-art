@@ -23,6 +23,8 @@ struct AddArtworkView: View {
     @State private var didCropCanvas = false
     @State private var cropStatusMessage = "Recortando el lienzo…"
     @State private var canvasCropTask: Task<Void, Never>?
+    @State private var cornerEditor: CornerEditorRequest?
+    @State private var autoCropFailed = false
 
     private var cameraAvailable: Bool {
         UIImagePickerController.isSourceTypeAvailable(.camera)
@@ -72,7 +74,7 @@ struct AddArtworkView: View {
                         if isCroppingCanvas {
                             VStack(spacing: 8) {
                                 ProgressView()
-                                    .tint(FrameStudioBrand.gold)
+                                    .tint(FrameStudioBrand.blue)
                                 Text(cropStatusMessage)
                                     .font(.footnote)
                                     .foregroundStyle(.secondary)
@@ -84,19 +86,31 @@ struct AddArtworkView: View {
                     .frame(maxWidth: .infinity)
                     .listRowInsets(EdgeInsets())
 
+                    if autoCropFailed, !isCroppingCanvas {
+                        Label("No encontramos el borde del lienzo. Ajusta las esquinas a mano.", systemImage: "exclamationmark.triangle")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+                    if originalImage != nil, !isCroppingCanvas {
+                        Button("Ajustar esquinas", systemImage: "crop") {
+                            openCornerEditor()
+                        }
+                        .foregroundStyle(FrameStudioBrand.accent)
+                        .frame(minHeight: 44, alignment: .leading)
+                    }
                     if didCropCanvas, !isCroppingCanvas {
                         Text("Lienzo recortado")
                             .foregroundStyle(.secondary)
                         Button("Usar foto completa") {
                             restoreOriginalPhoto()
                         }
-                        .foregroundStyle(FrameStudioBrand.hunter)
+                        .foregroundStyle(FrameStudioBrand.accent)
                         .frame(minHeight: 44, alignment: .leading)
                     } else if originalImage != nil, !isCroppingCanvas {
                         Button("Recortar lienzo") {
                             startCanvasCrop()
                         }
-                        .foregroundStyle(FrameStudioBrand.hunter)
+                        .foregroundStyle(FrameStudioBrand.accent)
                         .frame(minHeight: 44, alignment: .leading)
                     }
 
@@ -116,6 +130,13 @@ struct AddArtworkView: View {
                 Text("Obra")
             } footer: {
                 Text("Mide el marco. El alto sale de la foto; puedes corregir ancho y alto. Esos centímetros son los de la pared.")
+            }
+        }
+        .sheet(item: $cornerEditor) { request in
+            CornerCropEditor(image: request.image, initialQuad: request.quad) { cropped in
+                selectedImage = cropped
+                didCropCanvas = true
+                autoCropFailed = false
             }
         }
         .navigationTitle("Nueva obra")
@@ -229,6 +250,16 @@ struct AddArtworkView: View {
             selectedImage = result.image
             didCropCanvas = result.didCrop
             isCroppingCanvas = false
+            autoCropFailed = !result.didCrop
+            if !result.didCrop { openCornerEditor() }
+        }
+    }
+
+    private func openCornerEditor() {
+        guard let originalImage else { return }
+        Task {
+            let quad = await Task.detached { PaintingCanvasCropper.detectCorners(in: originalImage) }.value
+            cornerEditor = CornerEditorRequest(image: originalImage, quad: quad)
         }
     }
 
@@ -254,6 +285,7 @@ struct AddArtworkView: View {
             try ArtworkExporter.exportShareMeshes(for: piece)
             modelContext.insert(piece)
             try modelContext.save()
+            Analytics.log(.artworkAdded(kind: piece.kind == .scan3D ? "scan3d" : "photo"))
             dismiss()
         } catch {
             ArtworkFileStore.deleteFiles(for: piece)
@@ -274,18 +306,24 @@ struct ArtworkSizeFields: View {
         return Double(image.size.height / image.size.width)
     }
 
+    @AppStorage(MeasureUnit.storageKey) private var unit: MeasureUnit = .centimeters
+
     var body: some View {
+        Picker("Unidad", selection: $unit) {
+            Text("Centímetros").tag(MeasureUnit.centimeters)
+            Text("Pulgadas").tag(MeasureUnit.inches)
+        }
+        .pickerStyle(.segmented)
+        Menu {
+            ForEach(StandardSize.all) { size in
+                Button(size.label(unit: unit)) { apply(size) }
+            }
+        } label: {
+            Label("Tamaños estándar", systemImage: "rectangle.ratio.3.to.4")
+        }
         Toggle("Mantener proporción de la foto", isOn: $lockAspect)
-        Stepper(value: $widthCentimeters, in: 10...400, step: 1) {
-            LabeledContent("Ancho") {
-                Text("\(Int(widthCentimeters.rounded())) cm")
-            }
-        }
-        Stepper(value: $heightCentimeters, in: 10...400, step: 1) {
-            LabeledContent("Alto") {
-                Text("\(Int(heightCentimeters.rounded())) cm")
-            }
-        }
+        dimensionRow("Ancho", value: $widthCentimeters)
+        dimensionRow("Alto", value: $heightCentimeters)
         .onChange(of: widthCentimeters) { _, newValue in
             guard lockAspect, !syncing, aspect > 0 else { return }
             syncing = true
@@ -317,6 +355,36 @@ struct ArtworkSizeFields: View {
         }
     }
 
+    private func dimensionRow(_ title: String, value: Binding<Double>) -> some View {
+        let display = Binding<Double>(
+            get: { (unit.fromCentimeters(value.wrappedValue) * 10).rounded() / 10 },
+            set: { value.wrappedValue = min(400, max(10, unit.toCentimeters($0))) }
+        )
+        return LabeledContent(title) {
+            HStack(spacing: 8) {
+                TextField(title, value: display, format: .number.precision(.fractionLength(0...1)))
+                    .keyboardType(.decimalPad)
+                    .multilineTextAlignment(.trailing)
+                    .monospacedDigit()
+                    .frame(minWidth: 56, maxWidth: 90)
+                    .accessibilityLabel("\(title) en \(unit.spokenName)")
+                Text(unit.rawValue).foregroundStyle(.secondary)
+                Stepper(title, value: display, in: unit.fromCentimeters(10)...unit.fromCentimeters(400),
+                        step: unit == .centimeters ? 1 : 0.5)
+                    .labelsHidden()
+            }
+        }
+    }
+
+    private func apply(_ size: StandardSize) {
+        let portrait = aspect >= 1
+        syncing = true
+        widthCentimeters = portrait ? size.shortCentimeters : size.longCentimeters
+        heightCentimeters = portrait ? size.longCentimeters : size.shortCentimeters
+        syncing = false
+        lockAspect = false
+    }
+
     private func applyAspectFromImage() {
         guard lockAspect, aspect > 0 else { return }
         syncing = true
@@ -325,3 +393,32 @@ struct ArtworkSizeFields: View {
     }
 }
 
+
+/// Formatos de lienzo comunes (cm). La orientación sigue a la foto.
+struct StandardSize: Identifiable, Hashable, Sendable {
+    let shortCentimeters: Double
+    let longCentimeters: Double
+    var id: String { "\(shortCentimeters)x\(longCentimeters)" }
+
+    static let all: [StandardSize] = [
+        .init(shortCentimeters: 20, longCentimeters: 25),
+        .init(shortCentimeters: 30, longCentimeters: 40),
+        .init(shortCentimeters: 40, longCentimeters: 50),
+        .init(shortCentimeters: 50, longCentimeters: 70),
+        .init(shortCentimeters: 60, longCentimeters: 80),
+        .init(shortCentimeters: 60, longCentimeters: 90),
+        .init(shortCentimeters: 70, longCentimeters: 100),
+        .init(shortCentimeters: 80, longCentimeters: 120),
+        .init(shortCentimeters: 100, longCentimeters: 150),
+    ]
+
+    func label(unit: MeasureUnit) -> String {
+        unit.format(width: shortCentimeters, height: longCentimeters)
+    }
+}
+
+struct CornerEditorRequest: Identifiable {
+    let id = UUID()
+    let image: UIImage
+    let quad: CornerQuad?
+}

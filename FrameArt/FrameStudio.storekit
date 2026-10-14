@@ -1,0 +1,63 @@
+{
+  "identifier" : "7E2B3C10-5A1D-4E8B-9C3F-FA0000000001",
+  "nonRenewingSubscriptions" : [ ],
+  "products" : [
+    {
+      "displayPrice" : "59.99",
+      "familyShareable" : false,
+      "internalID" : "FS0000000003",
+      "localizations" : [ { "description" : "Frame Studio Pro para siempre", "displayName" : "Pro de por vida", "locale" : "es_MX" } ],
+      "productID" : "app.framestudio.ios.pro.lifetime",
+      "referenceName" : "Pro Lifetime",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : {
+    "_applicationInternalID" : "0",
+    "_developerTeamID" : "ML4VB5PQ6H",
+    "_failTransactionsEnabled" : false,
+    "_locale" : "es_MX",
+    "_storefront" : "MEX",
+    "_storeKitErrors" : [ ]
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "FS000000G001",
+      "localizations" : [ ],
+      "name" : "Frame Studio Pro",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [ ], "codeOffers" : [ ],
+          "displayPrice" : "4.99",
+          "familyShareable" : false,
+          "groupNumber" : 2,
+          "internalID" : "FS0000000001",
+          "introductoryOffer" : { "internalID" : "FS0000000I01", "paymentMode" : "free", "subscriptionPeriod" : "P1W" },
+          "localizations" : [ { "description" : "Obras publicadas ilimitadas", "displayName" : "Pro mensual", "locale" : "es_MX" } ],
+          "productID" : "app.framestudio.ios.pro.monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Pro Monthly",
+          "subscriptionGroupID" : "FS000000G001",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [ ]
+        },
+        {
+          "adHocOffers" : [ ], "codeOffers" : [ ],
+          "displayPrice" : "34.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "FS0000000002",
+          "introductoryOffer" : { "internalID" : "FS0000000I02", "paymentMode" : "free", "subscriptionPeriod" : "P3D" },
+          "localizations" : [ { "description" : "Obras publicadas ilimitadas", "displayName" : "Pro anual", "locale" : "es_MX" } ],
+          "productID" : "app.framestudio.ios.pro.annual",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "Pro Annual",
+          "subscriptionGroupID" : "FS000000G001",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [ ]
+        }
+      ]
+    }
+  ],
+  "version" : { "major" : 4, "minor" : 0 }
+}

@@ -20,6 +20,20 @@ struct ArtworkDetailView: View {
     @State private var replaceStatus = "Recortando el lienzo…"
     @State private var previewImage: UIImage?
     @State private var photoRevision = 0
+    @State private var showPaywall = false
+    @State private var pendingPushAsk = false
+    @State private var showPushAsk = false
+    @State private var viewCount: Int?
+    @State private var linkCopied = false
+    @State private var showQR = false
+    @State private var showStudioName = false
+
+    private var publishedLink: URL? {
+        let studio = ArtistProfile.shared.slug
+        guard !piece.publicSlug.isEmpty, !studio.isEmpty else { return nil }
+        return ClientViewer.shareURL(studio: studio, artwork: piece.publicSlug)
+    }
+    @Environment(\.modelContext) private var modelContext
 
     var body: some View {
         List {
@@ -81,6 +95,7 @@ struct ArtworkDetailView: View {
 
             Section {
                 Button {
+                    Analytics.log(.arOpened(source: "artist_detail"))
                     showAR = true
                 } label: {
                     Label("Ver en mi espacio", systemImage: "cube.transparent")
@@ -104,6 +119,27 @@ struct ArtworkDetailView: View {
                 }
                 .disabled(isPublishing || isExporting)
 
+                if let link = publishedLink {
+                    LabeledContent("Estado") { PublishedBadge(count: viewCount) }
+                    Button {
+                        UIPasteboard.general.url = link
+                        UINotificationFeedbackGenerator().notificationOccurred(.success)
+                        Analytics.log(.linkCopied)
+                        linkCopied = true
+                    } label: {
+                        Label(linkCopied ? "Enlace copiado" : "Copiar enlace",
+                              systemImage: linkCopied ? "checkmark" : "doc.on.doc")
+                            .frame(minHeight: 44, alignment: .leading)
+                    }
+                    Button {
+                        Analytics.log(.qrShown)
+                        showQR = true
+                    } label: {
+                        Label("Mostrar código QR", systemImage: "qrcode")
+                            .frame(minHeight: 44, alignment: .leading)
+                    }
+                }
+
                 if piece.kind == .scan3D, glbURL == nil {
                     Text("Este escaneo es USDZ (iPhone). Aún no hay GLB para Android.")
                         .font(.footnote)
@@ -116,11 +152,29 @@ struct ArtworkDetailView: View {
             } header: {
                 Text("Cliente")
             } footer: {
-                Text("WhatsApp recibe un enlace. El cliente abre la obra en su pared, sin instalar Frame Studio.")
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("WhatsApp recibe un enlace. El cliente abre la obra en su pared, sin instalar Frame Studio.")
+                }
             }
         }
         .navigationTitle(piece.title.isEmpty ? "Obra" : piece.title)
         .navigationBarTitleDisplayMode(.inline)
+        .fullScreenCover(isPresented: $showPaywall) {
+            PaywallView(source: .publishLimit) { showPaywall = false }
+        }
+        .sheet(isPresented: $showStudioName) {
+            NavigationStack {
+                StudioNameView {
+                    Task { await publishAndShare() }
+                }
+            }
+        }
+        .sheet(isPresented: $showQR) {
+            if let publishedLink {
+                QRCodeSheet(url: publishedLink, title: piece.title.isEmpty ? "Obra" : piece.title)
+                    .presentationDetents([.medium, .large])
+            }
+        }
         .fullScreenCover(isPresented: $showAR) {
             ArtworkARContainer(piece: piece)
         }
@@ -135,7 +189,27 @@ struct ArtworkDetailView: View {
         } message: {
             Text(errorMessage ?? "")
         }
-        .sheet(isPresented: $showShareSheet) {
+        .task(id: piece.publicSlug) {
+            guard !piece.publicSlug.isEmpty else { return }
+            viewCount = await ViewCounter.count(studio: ArtistProfile.shared.slug, artwork: piece.publicSlug)
+        }
+        .alert("Te avisamos cuando tu cliente abra la obra", isPresented: $showPushAsk) {
+            Button("Activar avisos") {
+                PushNotifications.shared.markPrompted()
+                Task { await PushNotifications.shared.requestAuthorization() }
+            }
+            Button("Ahora no", role: .cancel) {
+                PushNotifications.shared.markPrompted()
+            }
+        } message: {
+            Text("Recibirás un aviso cuando alguien abra el enlace de una obra (como mucho uno cada 30 minutos por obra). No vemos quién es.")
+        }
+        .sheet(isPresented: $showShareSheet, onDismiss: {
+            if pendingPushAsk {
+                pendingPushAsk = false
+                showPushAsk = true
+            }
+        }) {
             if let publishedURL {
                 ArtworkShareSheet(
                     url: publishedURL,
@@ -250,11 +324,34 @@ struct ArtworkDetailView: View {
 
     @MainActor
     private func publishAndShare() async {
+        guard ArtistProfile.shared.hasStudioName else {
+            showStudioName = true
+            return
+        }
+        let alreadyPublished = !piece.publicSlug.isEmpty
+        let publishedCount = (try? modelContext.fetchCount(
+            FetchDescriptor<ArtworkPiece>(predicate: #Predicate { !$0.publicSlug.isEmpty })
+        )) ?? 0
+        guard ProPlan.canPublish(
+            isPro: SubscriptionManager.shared.isPro,
+            publishedCount: publishedCount,
+            alreadyPublished: alreadyPublished
+        ) else {
+            Analytics.log(.publishLimitReached(limit: ProPlan.freePublishedLimit))
+            showPaywall = true
+            return
+        }
         isPublishing = true
         defer { isPublishing = false }
         do {
             let url = try await ArtworkPublisher.publish(piece)
             publishedURL = url
+            Analytics.log(.artworkPublished(isFirst: !alreadyPublished))
+            Analytics.log(.artworkShared)
+            PushNotifications.shared.syncToken()
+            if !alreadyPublished, await PushNotifications.shared.shouldPrompt() {
+                pendingPushAsk = true
+            }
             showShareSheet = true
         } catch {
             errorMessage = error.localizedDescription

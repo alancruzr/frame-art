@@ -2,11 +2,16 @@ import SwiftData
 import SwiftUI
 
 struct ArtworkListView: View {
+    @State private var subscriptions = SubscriptionManager.shared
+    @State private var showPaywall = false
+    @State private var showSettings = false
+    @Environment(\.openURL) private var openURL
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \ArtworkPiece.createdAt, order: .reverse) private var pieces: [ArtworkPiece]
     @State private var query = ""
     @State private var showAdd = false
     @State private var pendingDelete: ArtworkPiece?
+    @State private var deleteError: String?
     @State private var profile = ArtistProfile.shared
     @State private var router = DeepLinkRouter.shared
     @State private var openedPiece: ArtworkPiece?
@@ -61,6 +66,14 @@ struct ArtworkListView: View {
         .navigationTitle(profile.hasStudioName ? profile.displayName : "Obras")
         .searchable(text: $query, prompt: "Buscar obras")
         .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button {
+                    showSettings = true
+                } label: {
+                    Image(systemName: "gearshape")
+                }
+                .accessibilityLabel("Ajustes")
+            }
             ToolbarItem(placement: .primaryAction) {
                 Button {
                     showAdd = true
@@ -84,10 +97,24 @@ struct ArtworkListView: View {
         .onAppear {
             openArtistPiece(id: router.artistPieceID)
         }
+        .fullScreenCover(isPresented: $showPaywall) {
+            PaywallView(source: .settings, pain: OnboardingStore.shared.selectedPain) { showPaywall = false }
+        }
         .sheet(isPresented: $showAdd) {
             NavigationStack {
                 AddArtworkView()
             }
+        }
+        .alert("Borrar obra", isPresented: Binding(
+            get: { deleteError != nil },
+            set: { if !$0 { deleteError = nil } }
+        )) {
+            Button("Aceptar", role: .cancel) {}
+        } message: {
+            Text(deleteError ?? "")
+        }
+        .sheet(isPresented: $showSettings) {
+            SettingsView()
         }
         .confirmationDialog(
             "¿Eliminar esta obra?",
@@ -124,17 +151,29 @@ struct ArtworkListView: View {
     private func delete(_ piece: ArtworkPiece) {
         let studio = ArtistProfile.shared.slug
         let artwork = piece.publicSlug
-        ArtworkFileStore.deleteFiles(for: piece)
         modelContext.delete(piece)
+        do {
+            try modelContext.save()
+        } catch {
+            modelContext.rollback()
+            ErrorReporter.record(error, context: "delete.save")
+            deleteError = "No se pudo borrar la obra. Inténtalo de nuevo."
+            return
+        }
+        ArtworkFileStore.deleteFiles(forID: piece.id)
         guard !studio.isEmpty, !artwork.isEmpty else { return }
         Task {
-            await ArtworkPublisher.unpublishBestEffort(studio: studio, artwork: artwork)
+            if await !ArtworkPublisher.unpublish(studio: studio, artwork: artwork) {
+                PendingUnpublish.add(studio: studio, artwork: artwork)
+                deleteError = "La obra se borró del taller, pero su enlace sigue público porque no hubo conexión. Lo retiraremos en cuanto se pueda."
+            }
         }
     }
 }
 
 struct ArtworkGridItem: View {
     let piece: ArtworkPiece
+    @State private var viewCount: Int?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -146,10 +185,20 @@ struct ArtworkGridItem: View {
                 .foregroundStyle(.primary)
                 .lineLimit(2)
                 .fixedSize(horizontal: false, vertical: true)
-            Text("\(piece.kind.title) · \(Int(piece.widthCentimeters)) cm")
+            Text("\(piece.kind.title) · \(MeasureFormat.size(width: piece.widthCentimeters, height: piece.heightCentimeters))")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .lineLimit(2)
+            if !piece.publicSlug.isEmpty {
+                PublishedBadge(count: viewCount)
+            }
+        }
+        .task(id: piece.publicSlug) {
+            guard !piece.publicSlug.isEmpty else { return }
+            viewCount = ViewCounter.cached(artwork: piece.publicSlug)
+            if let fresh = await ViewCounter.count(studio: ArtistProfile.shared.slug, artwork: piece.publicSlug) {
+                viewCount = fresh
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .contentShape(Rectangle())
