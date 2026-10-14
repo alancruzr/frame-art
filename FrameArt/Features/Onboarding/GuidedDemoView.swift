@@ -82,6 +82,8 @@ struct GuidedDemoView: View {
                     guidanceCard
                 }
                 .dynamicTypeSize(...DynamicTypeSize.accessibility2)
+                // La etiqueta de tamaño real queda bajo la barra «Saltar prueba».
+                .safeAreaPadding(.top, 44)
             }
             topBar
         }
@@ -89,7 +91,6 @@ struct GuidedDemoView: View {
             handOverlay(anchors)
         }
         .animation(reduceMotion ? nil : .easeInOut(duration: 0.3), value: guide.step)
-        .preferredColorScheme(.dark)
         .task { await prepare() }
         .onDisappear { cleanup() }
         .onChange(of: placement.canPlace) { _, ready in
@@ -467,7 +468,8 @@ struct SampleWallScene: View {
     var body: some View {
         GeometryReader { geo in
             let scale = geo.size.width / wallWidthCentimeters
-            let floorY = geo.size.height * 0.80
+            // Suelo alto: la pared y la obra quedan por encima de la guía y los controles.
+            let floorY = geo.size.height * 0.60
             let sofaWidth = sofaWidthCentimeters * scale
             let artW = widthCentimeters * scale
             let artH = heightCentimeters * scale
