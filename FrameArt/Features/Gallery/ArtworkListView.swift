@@ -174,6 +174,7 @@ struct ArtworkListView: View {
 
 struct ArtworkGridItem: View {
     let piece: ArtworkPiece
+    @State private var viewCount: Int?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -185,10 +186,20 @@ struct ArtworkGridItem: View {
                 .foregroundStyle(.primary)
                 .lineLimit(2)
                 .fixedSize(horizontal: false, vertical: true)
-            Text("\(piece.kind.title) · \(Int(piece.widthCentimeters)) cm")
+            Text("\(piece.kind.title) · \(MeasureFormat.size(width: piece.widthCentimeters, height: piece.heightCentimeters))")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .lineLimit(2)
+            if !piece.publicSlug.isEmpty {
+                PublishedBadge(count: viewCount)
+            }
+        }
+        .task(id: piece.publicSlug) {
+            guard !piece.publicSlug.isEmpty else { return }
+            viewCount = ViewCounter.cached(artwork: piece.publicSlug)
+            if let fresh = await ViewCounter.count(studio: ArtistProfile.shared.slug, artwork: piece.publicSlug) {
+                viewCount = fresh
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .contentShape(Rectangle())

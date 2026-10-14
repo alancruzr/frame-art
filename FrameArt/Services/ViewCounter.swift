@@ -13,7 +13,21 @@ enum ViewCounter {
         guard let (data, response) = try? await URLSession.shared.data(for: request),
               (response as? HTTPURLResponse)?.statusCode == 200,
               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { return nil }
-        return json["count"] as? Int
+        let count = json["count"] as? Int
+        if let count { UserDefaults.standard.set(count, forKey: cacheKey(artwork)) }
+        return count
+    }
+
+    /// Último conteo conocido (para la cuadrícula sin pedir red por cada obra).
+    static func cached(artwork: String) -> Int? {
+        UserDefaults.standard.object(forKey: cacheKey(artwork)) as? Int
+    }
+
+    private static func cacheKey(_ artwork: String) -> String { "viewCount.\(artwork)" }
+
+    static func badge(_ count: Int?) -> String {
+        guard let count, count > 0 else { return "Publicada" }
+        return count == 1 ? "Publicada · 1 vista" : "Publicada · \(count) vistas"
     }
 
     static func label(_ count: Int) -> String {

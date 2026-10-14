@@ -24,6 +24,7 @@
 		FA000000000000000000007B /* CameraPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA000000000000000000007A /* CameraPicker.swift */; };
 		FA000000000000000000007D /* ArtworkUTTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA000000000000000000007C /* ArtworkUTTypes.swift */; };
 		FA000000000000000000007F /* ArtworkDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA000000000000000000007E /* ArtworkDetailView.swift */; };
+		FE99CE23A33DA299F8BD86AD /* ShareLinkTools.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEBD12C2F39491A874A82CEA /* ShareLinkTools.swift */; };
 		FA0000000000000000000081 /* ArtworkARView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0000000000000000000080 /* ArtworkARView.swift */; };
 		FA0000000000000000000083 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FA0000000000000000000082 /* Assets.xcassets */; };
 		FA00000000000000000000A1 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000A0 /* PrivacyInfo.xcprivacy */; };
@@ -99,6 +100,7 @@
 		FA000000000000000000007A /* CameraPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraPicker.swift; sourceTree = "<group>"; };
 		FA000000000000000000007C /* ArtworkUTTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArtworkUTTypes.swift; sourceTree = "<group>"; };
 		FA000000000000000000007E /* ArtworkDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArtworkDetailView.swift; sourceTree = "<group>"; };
+		FEBD12C2F39491A874A82CEA /* ShareLinkTools.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareLinkTools.swift; sourceTree = "<group>"; };
 		FA0000000000000000000080 /* ArtworkARView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArtworkARView.swift; sourceTree = "<group>"; };
 		FA0000000000000000000082 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		FA0000000000000000000084 /* Brand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Brand.swift; sourceTree = "<group>"; };
@@ -371,6 +373,7 @@
 			isa = PBXGroup;
 			children = (
 				FA000000000000000000007E /* ArtworkDetailView.swift */,
+				FEBD12C2F39491A874A82CEA /* ShareLinkTools.swift */,
 			);
 			path = Detail;
 			sourceTree = "<group>";
@@ -607,6 +610,7 @@
 				FA000000000000000000007B /* CameraPicker.swift in Sources */,
 				FA000000000000000000007D /* ArtworkUTTypes.swift in Sources */,
 				FA000000000000000000007F /* ArtworkDetailView.swift in Sources */,
+				FE99CE23A33DA299F8BD86AD /* ShareLinkTools.swift in Sources */,
 				FA0000000000000000000081 /* ArtworkARView.swift in Sources */,
 				FA0000000000000000000085 /* Brand.swift in Sources */,
 				FA0000000000000000000087 /* OnboardingStore.swift in Sources */,

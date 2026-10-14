@@ -24,6 +24,14 @@ struct ArtworkDetailView: View {
     @State private var pendingPushAsk = false
     @State private var showPushAsk = false
     @State private var viewCount: Int?
+    @State private var linkCopied = false
+    @State private var showQR = false
+
+    private var publishedLink: URL? {
+        let studio = ArtistProfile.shared.slug
+        guard !piece.publicSlug.isEmpty, !studio.isEmpty else { return nil }
+        return ClientViewer.shareURL(studio: studio, artwork: piece.publicSlug)
+    }
     @Environment(\.modelContext) private var modelContext
 
     var body: some View {
@@ -110,6 +118,27 @@ struct ArtworkDetailView: View {
                 }
                 .disabled(isPublishing || isExporting)
 
+                if let link = publishedLink {
+                    LabeledContent("Estado") { PublishedBadge(count: viewCount) }
+                    Button {
+                        UIPasteboard.general.url = link
+                        UINotificationFeedbackGenerator().notificationOccurred(.success)
+                        Analytics.log(.linkCopied)
+                        linkCopied = true
+                    } label: {
+                        Label(linkCopied ? "Enlace copiado" : "Copiar enlace",
+                              systemImage: linkCopied ? "checkmark" : "doc.on.doc")
+                            .frame(minHeight: 44, alignment: .leading)
+                    }
+                    Button {
+                        Analytics.log(.qrShown)
+                        showQR = true
+                    } label: {
+                        Label("Mostrar código QR", systemImage: "qrcode")
+                            .frame(minHeight: 44, alignment: .leading)
+                    }
+                }
+
                 if piece.kind == .scan3D, glbURL == nil {
                     Text("Este escaneo es USDZ (iPhone). Aún no hay GLB para Android.")
                         .font(.footnote)
@@ -124,10 +153,6 @@ struct ArtworkDetailView: View {
             } footer: {
                 VStack(alignment: .leading, spacing: 6) {
                     Text("WhatsApp recibe un enlace. El cliente abre la obra en su pared, sin instalar Frame Studio.")
-                    if let viewCount, viewCount > 0 {
-                        Label(ViewCounter.label(viewCount), systemImage: "eye")
-                            .foregroundStyle(FrameStudioBrand.accent)
-                    }
                 }
             }
         }
@@ -135,6 +160,12 @@ struct ArtworkDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .fullScreenCover(isPresented: $showPaywall) {
             PaywallView(source: .publishLimit) { showPaywall = false }
+        }
+        .sheet(isPresented: $showQR) {
+            if let publishedLink {
+                QRCodeSheet(url: publishedLink, title: piece.title.isEmpty ? "Obra" : piece.title)
+                    .presentationDetents([.medium, .large])
+            }
         }
         .fullScreenCover(isPresented: $showAR) {
             ArtworkARContainer(piece: piece)
