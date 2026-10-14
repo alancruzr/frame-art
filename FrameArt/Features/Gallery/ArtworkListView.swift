@@ -15,6 +15,8 @@ struct ArtworkListView: View {
     @State private var profile = ArtistProfile.shared
     @State private var router = DeepLinkRouter.shared
     @State private var openedPiece: ArtworkPiece?
+    @State private var firstSavedPiece: ArtworkPiece?
+    @AppStorage("firstArtworkFollowUpDone") private var firstArtworkFollowUpDone = false
 
     private var filtered: [ArtworkPiece] {
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -100,7 +102,20 @@ struct ArtworkListView: View {
         .fullScreenCover(isPresented: $showPaywall) {
             PaywallView(source: .settings, pain: OnboardingStore.shared.selectedPain) { showPaywall = false }
         }
-        .sheet(isPresented: $showAdd) {
+        .navigationDestination(isPresented: Binding(
+            get: { firstSavedPiece != nil },
+            set: { if !$0 { firstSavedPiece = nil } }
+        )) {
+            if let firstSavedPiece {
+                ArtworkDetailView(piece: firstSavedPiece, isFirstArtwork: true)
+            }
+        }
+        .sheet(isPresented: $showAdd, onDismiss: {
+            // Primera obra real guardada: se abre su ficha con la sugerencia de compartir y los avisos.
+            guard !firstArtworkFollowUpDone, pieces.count == 1, let first = pieces.first else { return }
+            firstArtworkFollowUpDone = true
+            firstSavedPiece = first
+        }) {
             NavigationStack {
                 AddArtworkView()
             }

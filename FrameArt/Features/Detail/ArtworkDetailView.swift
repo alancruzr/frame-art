@@ -6,6 +6,12 @@ import UIKit
 
 struct ArtworkDetailView: View {
     @Bindable var piece: ArtworkPiece
+    /// Recién guardada la primera obra: se piden los avisos y se sugiere compartir.
+    var isFirstArtwork = false
+    @AppStorage("shareTipDismissed") private var shareTipDismissed = false
+    @AppStorage("clientPreviewSeen") private var clientPreviewSeen = false
+    @State private var showClientPreview = false
+    @State private var publishAfterPreview = false
     @State private var showAR = false
     @State private var glbURL: URL?
     @State private var isExporting = false
@@ -93,6 +99,21 @@ struct ArtworkDetailView: View {
                 }
             }
 
+            if piece.publicSlug.isEmpty, !shareTipDismissed {
+                Section {
+                    ShareTipCard(
+                        onShare: {
+                            Analytics.log(.shareTipTapped)
+                            startShare()
+                        },
+                        onDismiss: {
+                            Analytics.log(.shareTipDismissed)
+                            withAnimation { shareTipDismissed = true }
+                        }
+                    )
+                }
+            }
+
             Section {
                 Button {
                     Analytics.log(.arOpened(source: "artist_detail"))
@@ -107,7 +128,7 @@ struct ArtworkDetailView: View {
 
             Section {
                 Button {
-                    Task { await publishAndShare() }
+                    startShare()
                 } label: {
                     if isPublishing {
                         ProgressView("Publicando la obra…")
@@ -161,6 +182,29 @@ struct ArtworkDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .fullScreenCover(isPresented: $showPaywall) {
             PaywallView(source: .publishLimit) { showPaywall = false }
+        }
+        .sheet(isPresented: $showClientPreview, onDismiss: {
+            if publishAfterPreview {
+                publishAfterPreview = false
+                Task { await publishAndShare() }
+            }
+        }) {
+            ClientLinkPreview(
+                image: previewImage ?? ArtworkFileStore.loadImage(for: piece) ?? UIImage(),
+                title: piece.title.isEmpty ? "Mi obra" : piece.title,
+                widthCentimeters: piece.widthCentimeters
+            ) {
+                clientPreviewSeen = true
+                publishAfterPreview = true
+                showClientPreview = false
+            }
+            .presentationDetents([.large])
+        }
+        .task {
+            // Avisos: se piden tras guardar la primera obra (ya no en el onboarding).
+            guard isFirstArtwork else { return }
+            try? await Task.sleep(for: .milliseconds(700))
+            if await PushNotifications.shared.shouldPrompt() { showPushAsk = true }
         }
         .sheet(isPresented: $showStudioName) {
             NavigationStack {
@@ -322,6 +366,15 @@ struct ArtworkDetailView: View {
         }
     }
 
+    /// La primera vez se enseña qué recibe el cliente; luego se pide el nombre del estudio (si falta) y se publica.
+    private func startShare() {
+        if clientPreviewSeen {
+            Task { await publishAndShare() }
+        } else {
+            showClientPreview = true
+        }
+    }
+
     @MainActor
     private func publishAndShare() async {
         guard ArtistProfile.shared.hasStudioName else {
@@ -348,6 +401,7 @@ struct ArtworkDetailView: View {
             publishedURL = url
             Analytics.log(.artworkPublished(isFirst: !alreadyPublished))
             Analytics.log(.artworkShared)
+            shareTipDismissed = true
             PushNotifications.shared.syncToken()
             if !alreadyPublished, await PushNotifications.shared.shouldPrompt() {
                 pendingPushAsk = true
@@ -356,5 +410,38 @@ struct ArtworkDetailView: View {
         } catch {
             errorMessage = error.localizedDescription
         }
+    }
+}
+
+/// Sugerencia contextual para compartir (sustituye al paso «Compartir» del onboarding).
+private struct ShareTipCard: View {
+    var onShare: () -> Void
+    var onDismiss: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(alignment: .firstTextBaseline) {
+                Label("¿Un cliente interesado?", systemImage: "person.2.wave.2")
+                    .font(.headline)
+                Spacer()
+                Button(action: onDismiss) {
+                    Image(systemName: "xmark")
+                        .font(.footnote.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                        .frame(width: 44, height: 44)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Ocultar sugerencia")
+            }
+            Text("Envíale un enlace: verá esta obra en su pared, a tamaño real, sin instalar nada.")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+            Button(action: onShare) {
+                Label("Enviar a un cliente", systemImage: "paperplane")
+                    .frame(maxWidth: .infinity, minHeight: 44)
+            }
+            .primaryButtonStyle()
+        }
+        .padding(.vertical, 4)
     }
 }
