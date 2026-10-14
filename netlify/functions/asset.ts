@@ -8,8 +8,12 @@ const TYPES: Record<string, string> = {
   "model.glb": "model/gltf-binary",
 };
 
-function notFound(): Response {
-  return new Response("Not found", { status: 404, headers: { "Content-Type": "text/plain; charset=utf-8" } });
+export const NOT_FOUND_HTML = `<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><meta name="color-scheme" content="light dark"><title>Obra no encontrada · Frame Studio</title><link rel="stylesheet" href="/assets/marketing.css"></head><body><header class="site-nav"><a class="brand" href="/">FRAME STUDIO</a></header><main class="legal-page"><h1>Esta obra ya no está disponible</h1><p>Puede que el artista la haya retirado o que el enlace esté incompleto. Pídele un enlace nuevo.</p><p><a href="/">Qué es Frame Studio</a> · <a href="/support/">Soporte</a></p></main></body></html>`;
+
+function notFound(html = false): Response {
+  return html
+    ? new Response(NOT_FOUND_HTML, { status: 404, headers: { "Content-Type": "text/html; charset=utf-8" } })
+    : new Response("Not found", { status: 404, headers: { "Content-Type": "text/plain; charset=utf-8" } });
 }
 
 export default async (req: Request, context: Context) => {
@@ -20,7 +24,7 @@ export default async (req: Request, context: Context) => {
   const file = (parts[2] || "").trim();
 
   if (!isSlug(studio) || !isSlug(artwork)) {
-    return notFound();
+    return notFound(!file || file === "index.html");
   }
 
   const store = artworksStore();
@@ -30,7 +34,7 @@ export default async (req: Request, context: Context) => {
     const metaText = await store.get(keys.meta, { type: "text" });
     const posterMeta = await store.getMetadata(keys.poster);
     if (!metaText && !posterMeta) {
-      return notFound();
+      return notFound(true);
     }
     let title = artwork;
     if (metaText) {
