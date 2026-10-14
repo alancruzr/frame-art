@@ -19,8 +19,10 @@
 		FA0000000000000000000073 /* GLBExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0000000000000000000072 /* GLBExporter.swift */; };
 		FA0000000000000000000075 /* ArtworkExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0000000000000000000074 /* ArtworkExporter.swift */; };
 		FA000000000000000000009F /* PaintingCanvasCropper.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA000000000000000000009E /* PaintingCanvasCropper.swift */; };
+		FE34FAB680FD85EF860A6A69 /* CornerCrop.swift in Sources */ = {isa = PBXBuildFile; fileRef = FECDA5C9F8F0C9DDA0AEB62F /* CornerCrop.swift */; };
 		FA0000000000000000000077 /* ArtworkListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0000000000000000000076 /* ArtworkListView.swift */; };
 		FA0000000000000000000079 /* AddArtworkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0000000000000000000078 /* AddArtworkView.swift */; };
+		FE5352B37461068A73CB0D67 /* CornerCropEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE7724BF3B5D65BDF5EFAFA4 /* CornerCropEditor.swift */; };
 		FA000000000000000000007B /* CameraPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA000000000000000000007A /* CameraPicker.swift */; };
 		FA000000000000000000007D /* ArtworkUTTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA000000000000000000007C /* ArtworkUTTypes.swift */; };
 		FA000000000000000000007F /* ArtworkDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA000000000000000000007E /* ArtworkDetailView.swift */; };
@@ -52,6 +54,7 @@
 		FA00000000000000000000B3 /* GLBExporterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000B2 /* GLBExporterTests.swift */; };
 		FA00000000000000000000B5 /* ArtworkPieceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000B4 /* ArtworkPieceTests.swift */; };
 		FBBEEA58B9BF05011A666A43 /* SubscriptionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB0CFC6C0ACBF9B5B0C2CDC9 /* SubscriptionTests.swift */; };
+		FE77D8AE71EF54FFDDA5BDBC /* CornerCropTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEFDDF7BC6D82481651789DC /* CornerCropTests.swift */; };
 		FE85414B6D1FBD92FD8002FC /* MeasureTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE640EAEF1E2464285D94EAC /* MeasureTests.swift */; };
 		FE8B314022BA0927FCD33ACF /* ArtistProfileTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEC82446CD809ABC6B173E39 /* ArtistProfileTests.swift */; };
 		FBEE5480C4C559F1FC13EB86 /* PushTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBE2D861004BCD975DB99D1D /* PushTests.swift */; };
@@ -96,8 +99,10 @@
 		FA0000000000000000000072 /* GLBExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GLBExporter.swift; sourceTree = "<group>"; };
 		FA0000000000000000000074 /* ArtworkExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArtworkExporter.swift; sourceTree = "<group>"; };
 		FA000000000000000000009E /* PaintingCanvasCropper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaintingCanvasCropper.swift; sourceTree = "<group>"; };
+		FECDA5C9F8F0C9DDA0AEB62F /* CornerCrop.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CornerCrop.swift; sourceTree = "<group>"; };
 		FA0000000000000000000076 /* ArtworkListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArtworkListView.swift; sourceTree = "<group>"; };
 		FA0000000000000000000078 /* AddArtworkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddArtworkView.swift; sourceTree = "<group>"; };
+		FE7724BF3B5D65BDF5EFAFA4 /* CornerCropEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CornerCropEditor.swift; sourceTree = "<group>"; };
 		FA000000000000000000007A /* CameraPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraPicker.swift; sourceTree = "<group>"; };
 		FA000000000000000000007C /* ArtworkUTTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArtworkUTTypes.swift; sourceTree = "<group>"; };
 		FA000000000000000000007E /* ArtworkDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArtworkDetailView.swift; sourceTree = "<group>"; };
@@ -133,6 +138,7 @@
 		FA00000000000000000000B2 /* GLBExporterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GLBExporterTests.swift; sourceTree = "<group>"; };
 		FA00000000000000000000B4 /* ArtworkPieceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArtworkPieceTests.swift; sourceTree = "<group>"; };
 		FB0CFC6C0ACBF9B5B0C2CDC9 /* SubscriptionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionTests.swift; sourceTree = "<group>"; };
+		FEFDDF7BC6D82481651789DC /* CornerCropTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CornerCropTests.swift; sourceTree = "<group>"; };
 		FE640EAEF1E2464285D94EAC /* MeasureTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeasureTests.swift; sourceTree = "<group>"; };
 		FEC82446CD809ABC6B173E39 /* ArtistProfileTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArtistProfileTests.swift; sourceTree = "<group>"; };
 		FBE2D861004BCD975DB99D1D /* PushTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushTests.swift; sourceTree = "<group>"; };
@@ -335,6 +341,7 @@
 				FA0000000000000000000072 /* GLBExporter.swift */,
 				FA0000000000000000000074 /* ArtworkExporter.swift */,
 				FA000000000000000000009E /* PaintingCanvasCropper.swift */,
+				FECDA5C9F8F0C9DDA0AEB62F /* CornerCrop.swift */,
 			);
 			path = Export;
 			sourceTree = "<group>";
@@ -365,6 +372,7 @@
 			isa = PBXGroup;
 			children = (
 				FA0000000000000000000078 /* AddArtworkView.swift */,
+				FE7724BF3B5D65BDF5EFAFA4 /* CornerCropEditor.swift */,
 				FA000000000000000000007A /* CameraPicker.swift */,
 				FA000000000000000000007C /* ArtworkUTTypes.swift */,
 			);
@@ -430,6 +438,7 @@
 				FA00000000000000000000BD /* PersistenceTests.swift */,
 				FA00000000000000000000B4 /* ArtworkPieceTests.swift */,
 				FB0CFC6C0ACBF9B5B0C2CDC9 /* SubscriptionTests.swift */,
+				FEFDDF7BC6D82481651789DC /* CornerCropTests.swift */,
 				FE640EAEF1E2464285D94EAC /* MeasureTests.swift */,
 				FEC82446CD809ABC6B173E39 /* ArtistProfileTests.swift */,
 				FBE2D861004BCD975DB99D1D /* PushTests.swift */,
@@ -608,8 +617,10 @@
 				FA0000000000000000000073 /* GLBExporter.swift in Sources */,
 				FA0000000000000000000075 /* ArtworkExporter.swift in Sources */,
 				FA000000000000000000009F /* PaintingCanvasCropper.swift in Sources */,
+				FE34FAB680FD85EF860A6A69 /* CornerCrop.swift in Sources */,
 				FA0000000000000000000077 /* ArtworkListView.swift in Sources */,
 				FA0000000000000000000079 /* AddArtworkView.swift in Sources */,
+				FE5352B37461068A73CB0D67 /* CornerCropEditor.swift in Sources */,
 				FA000000000000000000007B /* CameraPicker.swift in Sources */,
 				FA000000000000000000007D /* ArtworkUTTypes.swift in Sources */,
 				FA000000000000000000007F /* ArtworkDetailView.swift in Sources */,
@@ -645,6 +656,7 @@
 				FA00000000000000000000BE /* PersistenceTests.swift in Sources */,
 				FA00000000000000000000B5 /* ArtworkPieceTests.swift in Sources */,
 				FBBEEA58B9BF05011A666A43 /* SubscriptionTests.swift in Sources */,
+				FE77D8AE71EF54FFDDA5BDBC /* CornerCropTests.swift in Sources */,
 				FE85414B6D1FBD92FD8002FC /* MeasureTests.swift in Sources */,
 				FE8B314022BA0927FCD33ACF /* ArtistProfileTests.swift in Sources */,
 				FBEE5480C4C559F1FC13EB86 /* PushTests.swift in Sources */,

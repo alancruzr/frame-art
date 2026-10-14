@@ -23,6 +23,8 @@ struct AddArtworkView: View {
     @State private var didCropCanvas = false
     @State private var cropStatusMessage = "Recortando el lienzo…"
     @State private var canvasCropTask: Task<Void, Never>?
+    @State private var cornerEditor: CornerEditorRequest?
+    @State private var autoCropFailed = false
 
     private var cameraAvailable: Bool {
         UIImagePickerController.isSourceTypeAvailable(.camera)
@@ -84,6 +86,18 @@ struct AddArtworkView: View {
                     .frame(maxWidth: .infinity)
                     .listRowInsets(EdgeInsets())
 
+                    if autoCropFailed, !isCroppingCanvas {
+                        Label("No encontramos el borde del lienzo. Ajusta las esquinas a mano.", systemImage: "exclamationmark.triangle")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+                    if originalImage != nil, !isCroppingCanvas {
+                        Button("Ajustar esquinas", systemImage: "crop") {
+                            openCornerEditor()
+                        }
+                        .foregroundStyle(FrameStudioBrand.accent)
+                        .frame(minHeight: 44, alignment: .leading)
+                    }
                     if didCropCanvas, !isCroppingCanvas {
                         Text("Lienzo recortado")
                             .foregroundStyle(.secondary)
@@ -116,6 +130,13 @@ struct AddArtworkView: View {
                 Text("Obra")
             } footer: {
                 Text("Mide el marco. El alto sale de la foto; puedes corregir ancho y alto. Esos centímetros son los de la pared.")
+            }
+        }
+        .sheet(item: $cornerEditor) { request in
+            CornerCropEditor(image: request.image, initialQuad: request.quad) { cropped in
+                selectedImage = cropped
+                didCropCanvas = true
+                autoCropFailed = false
             }
         }
         .navigationTitle("Nueva obra")
@@ -229,6 +250,16 @@ struct AddArtworkView: View {
             selectedImage = result.image
             didCropCanvas = result.didCrop
             isCroppingCanvas = false
+            autoCropFailed = !result.didCrop
+            if !result.didCrop { openCornerEditor() }
+        }
+    }
+
+    private func openCornerEditor() {
+        guard let originalImage else { return }
+        Task {
+            let quad = await Task.detached { PaintingCanvasCropper.detectCorners(in: originalImage) }.value
+            cornerEditor = CornerEditorRequest(image: originalImage, quad: quad)
         }
     }
 
@@ -384,4 +415,10 @@ struct StandardSize: Identifiable, Hashable, Sendable {
     func label(unit: MeasureUnit) -> String {
         unit.format(width: shortCentimeters, height: longCentimeters)
     }
+}
+
+struct CornerEditorRequest: Identifiable {
+    let id = UUID()
+    let image: UIImage
+    let quad: CornerQuad?
 }
