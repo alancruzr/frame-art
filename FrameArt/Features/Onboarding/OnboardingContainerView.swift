@@ -39,7 +39,7 @@ struct OnboardingContainerView: View {
                     store.back()
                 } label: {
                     Image(systemName: "chevron.left")
-                        .font(.system(size: 16, weight: .semibold))
+                        .font(.callout.weight(.semibold))
                         .foregroundStyle(.secondary)
                         .frame(width: 44, height: 44)
                 }

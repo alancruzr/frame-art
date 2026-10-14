@@ -26,7 +26,7 @@ struct OnboardingTitle: View {
 
     var body: some View {
         Text(text)
-            .font(.system(size: 28, weight: .bold))
+            .font(.title.weight(.bold))
             .foregroundStyle(.primary)
             .multilineTextAlignment(.center)
             .lineSpacing(2)
@@ -42,7 +42,7 @@ struct OnboardingSubtitle: View {
 
     var body: some View {
         Text(text)
-            .font(.system(size: 16))
+            .font(.callout)
             .foregroundStyle(.secondary)
             .multilineTextAlignment(.center)
             .lineSpacing(2)
@@ -60,7 +60,7 @@ struct OnboardingPrimaryButton: View {
     var body: some View {
         Button(action: action) {
             Text(title)
-                .font(.system(size: 17, weight: .semibold))
+                .font(.body.weight(.semibold))
                 .foregroundStyle(enabled ? Color.white : Color.secondary)
                 .frame(maxWidth: .infinity)
                 .frame(height: 50)
@@ -145,12 +145,12 @@ struct OnboardingChoiceCard: View {
         Button(action: action) {
             HStack(spacing: 14) {
                 Image(systemName: systemImage)
-                    .font(.system(size: 21, weight: .semibold))
+                    .font(.title3.weight(.semibold))
                     .foregroundStyle(FrameStudioBrand.accent)
                     .frame(width: 24)
                     .accessibilityHidden(true)
                 Text(title)
-                    .font(.system(size: 15, weight: .medium))
+                    .font(.subheadline.weight(.medium))
                     .foregroundStyle(.primary)
                     .multilineTextAlignment(.leading)
                 Spacer(minLength: 8)
@@ -333,7 +333,7 @@ struct ProfileScreen: View {
     private func field(title: String, placeholder: String, text: Binding<String>) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(title)
-                .font(.system(size: 12, weight: .semibold))
+                .font(.caption.weight(.semibold))
                 .foregroundStyle(FrameStudioBrand.accent)
             TextField(placeholder, text: text)
                 .foregroundStyle(.primary)

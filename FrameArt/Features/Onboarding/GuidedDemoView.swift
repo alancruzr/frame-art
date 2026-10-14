@@ -50,6 +50,8 @@ struct GuidedDemoView: View {
             Color.black.ignoresSafeArea()
             stage
             overlay
+                // La capa va sobre la cámara: crece con Dynamic Type pero sin tapar la escena.
+                .dynamicTypeSize(...DynamicTypeSize.accessibility2)
         }
         .preferredColorScheme(.dark)
         .task { await prepare() }
@@ -153,14 +155,14 @@ struct GuidedDemoView: View {
         VStack(spacing: 0) {
             HStack {
                 Text(guide.mode == .ar ? "Prueba en tu pared" : "Prueba en una pared de ejemplo")
-                    .font(.system(size: 13, weight: .semibold))
+                    .font(.footnote.weight(.semibold))
                     .foregroundStyle(.white.opacity(0.85))
                 Spacer()
                 Button("Saltar prueba") {
                     Analytics.log(.demoGuideSkipped(step: guide.step.analyticsName))
                     finish()
                 }
-                .font(.system(size: 14, weight: .semibold))
+                .font(.subheadline.weight(.semibold))
                 .foregroundStyle(.white)
                 .frame(minHeight: 44)
             }
@@ -178,12 +180,12 @@ struct GuidedDemoView: View {
             VStack(spacing: 12) {
                 StepDots(current: guide.step, mode: guide.mode)
                 Text(instruction)
-                    .font(.system(size: 17, weight: .semibold))
+                    .font(.body.weight(.semibold))
                     .multilineTextAlignment(.center)
                     .foregroundStyle(.primary)
                     .fixedSize(horizontal: false, vertical: true)
                 if guide.mode == .ar, let message = placement.message, guide.step == .scanWall {
-                    Text(message).font(.system(size: 13)).foregroundStyle(.secondary).multilineTextAlignment(.center)
+                    Text(message).font(.footnote).foregroundStyle(.secondary).multilineTextAlignment(.center)
                 }
                 actions
             }
@@ -235,7 +237,7 @@ struct GuidedDemoView: View {
             .primaryButtonStyle()
         case .scanWall, .tapToPlace, .adjust:
             Button("Siguiente paso") { send(.skip) }
-                .font(.system(size: 14))
+                .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .frame(minHeight: 44)
         default:
@@ -333,15 +335,15 @@ struct ClientLinkPreview: View {
     var body: some View {
         VStack(spacing: 18) {
             Text("Esto recibe tu cliente")
-                .font(.system(size: 22, weight: .bold))
+                .font(.title3.weight(.bold))
                 .padding(.top, 24)
             VStack(alignment: .leading, spacing: 0) {
                 Image(uiImage: image).resizable().scaledToFill()
                     .frame(height: 200).frame(maxWidth: .infinity).clipped()
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(title).font(.system(size: 15, weight: .semibold))
-                    Text("Ver en mi pared · \(Int(widthCentimeters.rounded())) cm").font(.system(size: 13)).foregroundStyle(.secondary)
-                    Text(link).font(.system(size: 12)).foregroundStyle(FrameStudioBrand.blue).lineLimit(1)
+                    Text(title).font(.subheadline.weight(.semibold))
+                    Text("Ver en mi pared · \(Int(widthCentimeters.rounded())) cm").font(.footnote).foregroundStyle(.secondary)
+                    Text(link).font(.caption).foregroundStyle(FrameStudioBrand.blue).lineLimit(1)
                 }
                 .padding(12)
             }
@@ -350,7 +352,7 @@ struct ClientLinkPreview: View {
             .shadow(color: .black.opacity(0.15), radius: 12, y: 6)
             .padding(.horizontal, 24)
             Text("Lo abre en el navegador y cuelga la obra en su pared con la cámara. No tiene que instalar nada.")
-                .font(.system(size: 14)).foregroundStyle(.secondary).multilineTextAlignment(.center)
+                .font(.subheadline).foregroundStyle(.secondary).multilineTextAlignment(.center)
                 .padding(.horizontal, 32)
             Spacer()
             OnboardingPrimaryButton(title: "Continuar", action: onContinue)

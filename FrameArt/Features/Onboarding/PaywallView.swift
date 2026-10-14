@@ -40,7 +40,7 @@ struct PaywallView: View {
                     Spacer().frame(height: 16)
 
                     Text("FRAME STUDIO PRO")
-                        .font(.system(size: 10.5, weight: .bold))
+                        .font(.caption2.weight(.bold))
                         .tracking(1.1)
                         .foregroundStyle(FrameStudioBrand.blue)
                         .modifier(PaywallEntrance(visible: didAppear, order: 1, reduceMotion: reduceMotion))
@@ -68,7 +68,7 @@ struct PaywallView: View {
                     .background { PaywallButtonGlow(active: !reduceMotion).padding(.horizontal, 24) }
 
                     Text(disclosure)
-                        .font(.system(size: 12))
+                        .font(.caption)
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
                         .frame(maxWidth: 340, minHeight: 34, alignment: .top)
@@ -78,7 +78,7 @@ struct PaywallView: View {
                         Link("Términos", destination: termsURL)
                         Link("Privacidad", destination: privacyURL)
                     }
-                    .font(.system(size: 12, weight: .medium))
+                    .font(.caption.weight(.medium))
                     .foregroundStyle(.secondary)
                     .padding(.top, 8)
 
@@ -92,7 +92,7 @@ struct PaywallView: View {
             if showClose {
                 Button(action: dismiss) {
                     Image(systemName: "xmark")
-                        .font(.system(size: 14, weight: .bold))
+                        .font(.subheadline.weight(.bold))
                         .foregroundStyle(.primary)
                         .frame(width: 44, height: 44)
                         .background(FrameStudioBrand.softLavender, in: Circle())
@@ -231,14 +231,14 @@ struct PaywallView: View {
                 .foregroundStyle(FrameStudioBrand.accent)
             #if DEBUG
             Text("RevenueCat no está configurado")
-                .font(.system(size: 15, weight: .semibold))
+                .font(.subheadline.weight(.semibold))
             Text("Añade REVENUECAT_API_KEY en Config/Secrets.env y recompila.")
-                .font(.system(size: 13))
+                .font(.footnote)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
             #else
             Text("Los planes no están disponibles ahora.")
-                .font(.system(size: 15, weight: .semibold))
+                .font(.subheadline.weight(.semibold))
             #endif
         }
         .frame(maxWidth: .infinity, minHeight: 100)
@@ -355,19 +355,19 @@ struct PaywallPlanRow: View {
         Button(action: action) {
             HStack(spacing: 12) {
                 Image(systemName: selected ? "checkmark.circle.fill" : "circle")
-                    .font(.system(size: 20))
+                    .font(.title3)
                     .foregroundStyle(selected ? FrameStudioBrand.accent : .secondary)
                 VStack(alignment: .leading, spacing: 3) {
-                    Text(title).font(.system(size: 16, weight: .semibold)).foregroundStyle(.primary)
+                    Text(title).font(.callout.weight(.semibold)).foregroundStyle(.primary)
                     if let subtitle {
-                        Text(subtitle).font(.system(size: 12)).foregroundStyle(.secondary)
+                        Text(subtitle).font(.caption).foregroundStyle(.secondary)
                     }
                 }
                 Spacer(minLength: 8)
                 VStack(alignment: .trailing, spacing: 4) {
                     if let badge {
                         Text(badge)
-                            .font(.system(size: 9, weight: .heavy))
+                            .font(.caption2.weight(.heavy))
                             .foregroundStyle(Color.white)
                             .lineLimit(1)
                             .padding(.horizontal, 9).padding(.vertical, 3.5)
@@ -375,10 +375,10 @@ struct PaywallPlanRow: View {
                     }
                     HStack(alignment: .firstTextBaseline, spacing: 1) {
                         Text(package.storeProduct.localizedPriceString)
-                            .font(.system(size: 17, weight: .semibold))
+                            .font(.body.weight(.semibold))
                             .monospacedDigit()
                         if let suffix {
-                            Text(suffix).font(.system(size: 12, weight: .semibold)).foregroundStyle(.secondary)
+                            Text(suffix).font(.caption.weight(.semibold)).foregroundStyle(.secondary)
                         }
                     }
                 }

@@ -66,21 +66,21 @@ private struct PermissionRow: View {
         Button(action: action) {
             HStack(spacing: 14) {
                 Image(systemName: granted ? "checkmark.circle.fill" : (blocked ? "gear" : icon))
-                    .font(.system(size: 21, weight: .semibold))
+                    .font(.title3.weight(.semibold))
                     .foregroundStyle(FrameStudioBrand.accent)
                     .frame(width: 24)
                 VStack(alignment: .leading, spacing: 4) {
                     Text(blocked ? "\(title): abrir Ajustes" : title)
-                        .font(.system(size: 15, weight: .medium))
+                        .font(.subheadline.weight(.medium))
                         .foregroundStyle(.primary)
                     Text(granted ? "Permitido" : detail)
-                        .font(.system(size: 13))
+                        .font(.footnote)
                         .foregroundStyle(.secondary)
                 }
                 Spacer()
                 if !granted {
                     Text(blocked ? "Ajustes" : "Permitir")
-                        .font(.system(size: 13, weight: .semibold))
+                        .font(.footnote.weight(.semibold))
                         .foregroundStyle(FrameStudioBrand.accent)
                 }
             }
@@ -127,7 +127,7 @@ struct DemoTryScreen: View {
 
                 if usingSample {
                     Text(SampleArtworkInfo.credit)
-                        .font(.system(size: 11))
+                        .font(.caption2)
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 32)
@@ -135,7 +135,7 @@ struct DemoTryScreen: View {
                 } else {
                     VStack(alignment: .leading, spacing: 6) {
                         Text("Ancho real: \(Int(store.demoWidthCentimeters)) cm")
-                            .font(.system(size: 13, weight: .semibold))
+                            .font(.footnote.weight(.semibold))
                             .foregroundStyle(FrameStudioBrand.accent)
                         Slider(value: Binding(
                             get: { store.demoWidthCentimeters },
@@ -158,7 +158,7 @@ struct DemoTryScreen: View {
                     HStack(spacing: 20) {
                         PhotosPicker(selection: $pickerItem, matching: .images) {
                             Label(usingSample ? "Usar mi obra" : "Otra foto", systemImage: "photo.on.rectangle")
-                                .font(.system(size: 15, weight: .semibold))
+                                .font(.subheadline.weight(.semibold))
                                 .frame(minHeight: 44)
                         }
                         if !usingSample {
@@ -167,7 +167,7 @@ struct DemoTryScreen: View {
                                 store.demoUsedSample = true
                                 store.demoWidthCentimeters = SampleArtworkInfo.widthCentimeters
                             }
-                            .font(.system(size: 15))
+                            .font(.subheadline)
                             .frame(minHeight: 44)
                         }
                     }
@@ -313,16 +313,16 @@ struct DemoResultScreen: View {
     private func resultRow(icon: String, label: String, text: String) -> some View {
         HStack(alignment: .top, spacing: 14) {
             Image(systemName: icon)
-                .font(.system(size: 20))
+                .font(.title3)
                 .foregroundStyle(FrameStudioBrand.accent)
                 .frame(width: 32)
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 4) {
                 Text(label)
-                    .font(.system(size: 12, weight: .semibold))
+                    .font(.caption.weight(.semibold))
                     .foregroundStyle(FrameStudioBrand.accent)
                 Text(text)
-                    .font(.system(size: 15))
+                    .font(.subheadline)
                     .foregroundStyle(.primary)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -352,7 +352,7 @@ struct SocialProofScreen: View {
         OnboardingScreenFrame {
             VStack(spacing: 0) {
                 Image(systemName: "checkmark.seal.fill")
-                    .font(.system(size: 54))
+                    .font(.largeTitle).imageScale(.large)
                     .foregroundStyle(FrameStudioBrand.accent)
                     .accessibilityHidden(true)
 
@@ -369,12 +369,12 @@ struct SocialProofScreen: View {
                     ForEach(items, id: \.1) { icon, title, detail in
                         HStack(spacing: 14) {
                             Image(systemName: icon)
-                                .font(.system(size: 20, weight: .semibold))
+                                .font(.title3.weight(.semibold))
                                 .foregroundStyle(FrameStudioBrand.accent)
                                 .frame(width: 24)
                             VStack(alignment: .leading, spacing: 3) {
-                                Text(title).font(.system(size: 15, weight: .semibold))
-                                Text(detail).font(.system(size: 13)).foregroundStyle(.secondary)
+                                Text(title).font(.subheadline.weight(.semibold))
+                                Text(detail).font(.footnote).foregroundStyle(.secondary)
                             }
                             Spacer(minLength: 0)
                         }
@@ -401,7 +401,7 @@ struct OnboardingSecondaryButton: View {
     var body: some View {
         Button(action: action) {
             Text(title)
-                .font(.system(size: 15))
+                .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .frame(minHeight: 44)
         }

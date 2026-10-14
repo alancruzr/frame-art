@@ -48,7 +48,7 @@ struct HandGestureHint: View {
 
     private var hand: some View {
         Image(systemName: "hand.point.up.left.fill")
-            .font(.system(size: 46))
+            .font(.largeTitle).imageScale(.large)
             .foregroundStyle(.white)
             .shadow(color: FrameStudioBrand.accent.opacity(0.6), radius: 8)
     }
@@ -70,13 +70,13 @@ struct HandGestureHint: View {
     private var scan: some View {
         ZStack {
             Image(systemName: "iphone.gen3")
-                .font(.system(size: 54, weight: .light))
+                .font(.largeTitle.weight(.light)).imageScale(.large)
                 .foregroundStyle(.white)
                 .shadow(color: FrameStudioBrand.blue.opacity(0.6), radius: 8)
                 .rotationEffect(.degrees(on ? 8 : -8))
                 .offset(x: on ? 34 : -34)
             Image(systemName: "dot.radiowaves.left.and.right")
-                .font(.system(size: 20, weight: .semibold))
+                .font(.title3.weight(.semibold))
                 .foregroundStyle(FrameStudioBrand.softBlue)
                 .offset(x: on ? 34 : -34, y: -44)
                 .opacity(moving ? (on ? 1 : 0.4) : 1)
@@ -90,7 +90,7 @@ struct HandGestureHint: View {
             Circle().fill(FrameStudioBrand.softLavender).frame(width: 18, height: 18)
                 .offset(x: on ? 34 : 10, y: on ? 26 : 8)
             Image(systemName: "hand.pinch.fill")
-                .font(.system(size: 44))
+                .font(.largeTitle).imageScale(.large)
                 .foregroundStyle(.white)
                 .shadow(color: FrameStudioBrand.accent.opacity(0.6), radius: 8)
                 .scaleEffect(on ? 1.08 : 0.94)
