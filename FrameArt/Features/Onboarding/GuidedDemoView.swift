@@ -20,8 +20,6 @@ struct GuidedDemoView: View {
     @State private var simPlaced = false
     @State private var simOffset: CGSize = .zero
     @State private var simDragBase: CGSize = .zero
-    @State private var simScale: CGFloat = 1
-    @State private var simScaleBase: CGFloat = 1
     @State private var lastAdjust = 0
 
     init(image: UIImage, widthCentimeters: Double, heightCentimeters: Double, title: String, onFinish: @escaping () -> Void) {
@@ -70,16 +68,12 @@ struct GuidedDemoView: View {
         }
         .onChange(of: placement.adjustCount) { _, _ in send(.adjusted) }
         .sheet(isPresented: $showClientPreview) {
-            ClientLinkPreview(image: image, title: title, widthCentimeters: Double(Float(widthCentimeters) * placementScale)) {
+            ClientLinkPreview(image: image, title: title, widthCentimeters: widthCentimeters) {
                 showClientPreview = false
                 finish()
             }
             .presentationDetents([.large])
         }
-    }
-
-    private var placementScale: Float {
-        guide.mode == .ar ? placement.scale : Float(simScale)
     }
 
     // MARK: Escena
@@ -91,6 +85,12 @@ struct GuidedDemoView: View {
             if let piece {
                 ArtworkARView(piece: piece, placement: placement)
                     .ignoresSafeArea()
+                    .overlay(alignment: .top) {
+                        if placement.phase != .searching {
+                            TrueSizeLabel(widthCentimeters: widthCentimeters, heightCentimeters: heightCentimeters)
+                                .padding(.top, 64)
+                        }
+                    }
             } else {
                 ProgressView().tint(.white)
             }
@@ -103,8 +103,8 @@ struct GuidedDemoView: View {
     private var simulatedWall: some View {
         GeometryReader { geo in
             let scale = geo.size.width / 320
-            let w = widthCentimeters * scale * simScale
-            let h = heightCentimeters * scale * simScale
+            let w = widthCentimeters * scale
+            let h = heightCentimeters * scale
             ZStack {
                 LinearGradient(colors: [FrameStudioBrand.softLavender, FrameStudioBrand.softBlue], startPoint: .top, endPoint: .bottom)
                     .ignoresSafeArea()
@@ -122,6 +122,9 @@ struct GuidedDemoView: View {
                         .position(x: geo.size.width / 2 + simOffset.width, y: geo.size.height * 0.42 + simOffset.height)
                         .gesture(simAdjustGesture)
                         .transition(.scale(scale: 0.9).combined(with: .opacity))
+                    TrueSizeLabel(widthCentimeters: widthCentimeters, heightCentimeters: heightCentimeters)
+                        .position(x: geo.size.width / 2 + simOffset.width, y: geo.size.height * 0.42 + simOffset.height + h / 2 + 26)
+                        .allowsHitTesting(false)
                 }
             }
             .contentShape(Rectangle())
@@ -134,14 +137,9 @@ struct GuidedDemoView: View {
     }
 
     private var simAdjustGesture: some Gesture {
-        SimultaneousGesture(
-            DragGesture()
-                .onChanged { simOffset = CGSize(width: simDragBase.width + $0.translation.width, height: simDragBase.height + $0.translation.height) }
-                .onEnded { _ in simDragBase = simOffset; markSimAdjusted() },
-            MagnifyGesture()
-                .onChanged { simScale = min(max(simScaleBase * $0.magnification, 0.5), 2) }
-                .onEnded { _ in simScaleBase = simScale; markSimAdjusted() }
-        )
+        DragGesture()
+            .onChanged { simOffset = CGSize(width: simDragBase.width + $0.translation.width, height: simDragBase.height + $0.translation.height) }
+            .onEnded { _ in simDragBase = simOffset; markSimAdjusted() }
     }
 
     private func markSimAdjusted() {
@@ -201,7 +199,7 @@ struct GuidedDemoView: View {
         switch guide.step {
         case .scanWall: return .scan
         case .tapToPlace: return .tap
-        case .adjust: return lastAdjust % 2 == 0 ? .pinch : .drag
+        case .adjust: return .drag
         case .share: return .tap
         default: return nil
         }
@@ -212,7 +210,7 @@ struct GuidedDemoView: View {
         case (.scanWall, _): return "Apunta a una pared y mueve el teléfono despacio de lado a lado."
         case (.tapToPlace, .ar): return "Pared lista. Toca «Colocar aquí» para colgar la obra a tamaño real."
         case (.tapToPlace, .simulated): return "Toca la pared para colgar la obra."
-        case (.adjust, _): return "Pellizca para cambiar el tamaño o arrastra para moverla."
+        case (.adjust, _): return "Arrastra para moverla. El tamaño es el real: no cambia."
         case (.share, _): return "Toca «Compartir» para ver el enlace que recibe tu cliente."
         default: return "Listo."
         }

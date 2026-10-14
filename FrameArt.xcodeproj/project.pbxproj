@@ -68,6 +68,7 @@
 		FBDE92CB33516F3D4703CC8F /* Analytics.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBCEAA6BB920BD75BB51AF9E /* Analytics.swift */; };
 		FA00000000000000000000C5 /* ARPlacementState.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000C4 /* ARPlacementState.swift */; };
 		FB574312BDE57532EF29BF0D /* ARAdjustGestures.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB1ADACFE1CB26F07FB111B3 /* ARAdjustGestures.swift */; };
+		FE3E9010280AAC9790EDEACB /* TrueSizeLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE61207531CBA880E48FA983 /* TrueSizeLabel.swift */; };
 		FA00000000000000000000C7 /* WallPlacementMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000C6 /* WallPlacementMath.swift */; };
 		FA00000000000000000000C9 /* ArtworkARContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000C8 /* ArtworkARContainer.swift */; };
 		FA00000000000000000000CB /* ARSessionCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000CA /* ARSessionCoordinator.swift */; };
@@ -144,6 +145,7 @@
 		FBCEAA6BB920BD75BB51AF9E /* Analytics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Analytics.swift; sourceTree = "<group>"; };
 		FA00000000000000000000C4 /* ARPlacementState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARPlacementState.swift; sourceTree = "<group>"; };
 		FB1ADACFE1CB26F07FB111B3 /* ARAdjustGestures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARAdjustGestures.swift; sourceTree = "<group>"; };
+		FE61207531CBA880E48FA983 /* TrueSizeLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrueSizeLabel.swift; sourceTree = "<group>"; };
 		FA00000000000000000000C6 /* WallPlacementMath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WallPlacementMath.swift; sourceTree = "<group>"; };
 		FA00000000000000000000C8 /* ArtworkARContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArtworkARContainer.swift; sourceTree = "<group>"; };
 		FA00000000000000000000CA /* ARSessionCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARSessionCoordinator.swift; sourceTree = "<group>"; };
@@ -379,6 +381,7 @@
 				FA00000000000000000000C6 /* WallPlacementMath.swift */,
 				FA00000000000000000000C4 /* ARPlacementState.swift */,
 				FB1ADACFE1CB26F07FB111B3 /* ARAdjustGestures.swift */,
+				FE61207531CBA880E48FA983 /* TrueSizeLabel.swift */,
 				FA0000000000000000000080 /* ArtworkARView.swift */,
 			);
 			path = AR;
@@ -570,6 +573,7 @@
 				FA00000000000000000000C7 /* WallPlacementMath.swift in Sources */,
 				FA00000000000000000000C5 /* ARPlacementState.swift in Sources */,
 				FB574312BDE57532EF29BF0D /* ARAdjustGestures.swift in Sources */,
+				FE3E9010280AAC9790EDEACB /* TrueSizeLabel.swift in Sources */,
 				FA00000000000000000000C3 /* KeychainStore.swift in Sources */,
 				FE3F409F19B277D41C64B208 /* ErrorReporter.swift in Sources */,
 				FB3DAA6FB1EC5FD3BA893E14 /* ViewCounter.swift in Sources */,

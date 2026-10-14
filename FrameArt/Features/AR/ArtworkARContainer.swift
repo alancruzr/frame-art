@@ -21,6 +21,10 @@ struct ArtworkARContainer: View {
                         .ignoresSafeArea()
 
                     VStack(spacing: 8) {
+                        if placement.phase == .aiming || placement.phase == .pinned {
+                            TrueSizeLabel(widthCentimeters: piece.widthCentimeters, heightCentimeters: piece.heightCentimeters)
+                                .padding(.top, 8)
+                        }
                         Spacer()
                         if let message = placement.message {
                             Text(message)

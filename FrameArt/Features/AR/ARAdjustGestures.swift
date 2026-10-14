@@ -4,33 +4,14 @@ import simd
 import UIKit
 
 #if !targetEnvironment(simulator)
-/// Pellizcar (tamaño) y arrastrar (posición sobre la pared) tras colocar la obra.
+/// Arrastrar (posición sobre la pared) tras colocar la obra. Sin pellizco: la obra
+/// representa un cuadro real y su tamaño no debe cambiar (HIG Augmented reality).
 /// Solo se instalan cuando `ARPlacementState.allowsAdjusting` es true (prueba del onboarding).
 extension ArtworkARView.Coordinator {
     func installAdjustGestures(on arView: ARView) {
-        let pinch = UIPinchGestureRecognizer(target: self, action: #selector(handlePinch(_:)))
         let pan = UIPanGestureRecognizer(target: self, action: #selector(handlePan(_:)))
         pan.maximumNumberOfTouches = 1
-        arView.addGestureRecognizer(pinch)
         arView.addGestureRecognizer(pan)
-    }
-
-    @objc func handlePinch(_ gesture: UIPinchGestureRecognizer) {
-        guard hasPlacement, !isPinned, let ghost else { return }
-        switch gesture.state {
-        case .began:
-            placement.pinchBase = placement.scale
-        case .changed:
-            let s = ARPlacementState.clampScale(placement.pinchBase * Float(gesture.scale))
-            placement.scale = s
-            ghost.scale = SIMD3(repeating: s)
-        case .ended:
-            placement.followsCamera = false
-            placement.adjustCount += 1
-            UIImpactFeedbackGenerator(style: .light).impactOccurred()
-        default:
-            break
-        }
     }
 
     @objc func handlePan(_ gesture: UIPanGestureRecognizer) {
