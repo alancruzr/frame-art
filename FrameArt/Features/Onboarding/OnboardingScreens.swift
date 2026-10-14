@@ -198,50 +198,35 @@ struct WelcomeScreen: View {
     }
 }
 
-struct GoalScreen: View {
+/// Objetivo + dolor en una sola pantalla (HIG Onboarding: breve y sin memorizar).
+struct NeedsScreen: View {
     var store: OnboardingStore
+    private let columns = [GridItem(.adaptive(minimum: 150), spacing: 8)]
 
     var body: some View {
         OnboardingScreenFrame {
             VStack(spacing: 0) {
                 VStack(spacing: 8) {
-                    OnboardingTitle(text: "¿Qué vas a compartir primero?")
-                    OnboardingSubtitle(text: "Elige lo más cercano.")
+                    OnboardingTitle(text: "¿Qué quieres resolver?")
+                    OnboardingSubtitle(text: "Dos toques y te mostramos cómo.")
                 }
 
                 Spacer().frame(height: 20)
 
-                VStack(spacing: 10) {
-                    ForEach(OnboardingGoalID.allCases, id: \.self) { goal in
-                        OnboardingChoiceCard(
-                            title: goal.title,
-                            systemImage: goal.systemImage,
-                            selected: store.selectedGoal == goal
-                        ) {
-                            store.selectGoal(goal)
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Vas a compartir…")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                    LazyVGrid(columns: columns, spacing: 8) {
+                        ForEach(OnboardingGoalID.allCases, id: \.self) { goal in
+                            goalChip(goal)
                         }
                     }
-                }
-                .padding(.horizontal, 24)
-            }
-        }
-    }
-}
 
-struct PainScreen: View {
-    var store: OnboardingStore
-
-    var body: some View {
-        OnboardingScreenFrame {
-            VStack(spacing: 0) {
-                VStack(spacing: 8) {
-                    OnboardingTitle(text: "¿Qué se pierde con una foto de WhatsApp?")
-                    OnboardingSubtitle(text: "Elige lo primero que quieres resolver.")
-                }
-
-                Spacer().frame(height: 20)
-
-                VStack(spacing: 10) {
+                    Text("Lo que más te frena con una foto")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                        .padding(.top, 12)
                     ForEach(OnboardingPainID.allCases, id: \.self) { pain in
                         OnboardingChoiceCard(
                             title: pain.title,
@@ -253,94 +238,35 @@ struct PainScreen: View {
                     }
                 }
                 .padding(.horizontal, 24)
+
+                Spacer().frame(height: 20)
+
+                OnboardingPrimaryButton(title: "Continuar", enabled: store.selectedPain != nil) {
+                    store.next()
+                }
             }
         }
     }
-}
 
-struct ProfileScreen: View {
-    var store: OnboardingStore
-    @State private var name: String = ArtistProfile.shared.displayName
-    @State private var slug: String = ArtistProfile.shared.slug
-    @State private var slugEdited = false
-    @State private var applyingName = false
-    @FocusState private var nameFocused: Bool
-
-    private var slugPreview: String {
-        let source = slugEdited ? slug : name
-        let made = ArtistProfile.makeStudioSlug(from: source)
-        return made.isEmpty ? "se asignará uno al azar" : made
-    }
-
-    var body: some View {
-        OnboardingScreenFrame {
-            VStack(spacing: 0) {
-                VStack(spacing: 8) {
-                    OnboardingTitle(text: "¿Cómo se llama tu estudio?")
-                    OnboardingSubtitle(text: "Los clientes lo ven en tu espacio. El enlace sale de este nombre, o de un slug al azar.")
-                }
-
-                Spacer().frame(height: 24)
-
-                VStack(alignment: .leading, spacing: 16) {
-                    field(title: "Nombre del estudio", placeholder: "Taller Luna, Alan Cruz…", text: $name)
-                        .textInputAutocapitalization(.words)
-                        .focused($nameFocused)
-                        .onChange(of: name) { _, newName in
-                            if !slugEdited {
-                                applyingName = true
-                                slug = ArtistProfile.makeSlug(from: newName)
-                                applyingName = false
-                            }
-                        }
-
-                    field(title: "Slug del perfil", placeholder: "taller-luna", text: $slug)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
-                        .onChange(of: slug) { _, newValue in
-                            if !applyingName {
-                                slugEdited = true
-                            }
-                            let cleaned = ArtistProfile.makeSlug(from: newValue, keepTrailingDash: true)
-                            if cleaned != newValue {
-                                applyingName = true
-                                slug = cleaned
-                                applyingName = false
-                            }
-                        }
-
-                    Text("Tu espacio: \(slugPreview)")
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
-                        .accessibilityLabel("Vista previa del enlace, \(slugPreview)")
-                }
-                .padding(.horizontal, 24)
-
-                VStack(spacing: 12) {
-                    OnboardingPrimaryButton(title: "Continuar") {
-                        ArtistProfile.shared.save(displayName: name, slug: slug)
-                        store.next()
-                    }
-                }
-                .padding(.top, 18)
-            }
+    private func goalChip(_ goal: OnboardingGoalID) -> some View {
+        let selected = store.selectedGoal == goal
+        return Button {
+            store.selectGoal(goal)
+        } label: {
+            Label(goal.title, systemImage: goal.systemImage)
+                .font(.subheadline.weight(selected ? .semibold : .regular))
+                .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                .padding(.horizontal, 12)
+                .background(
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .fill(selected ? FrameStudioBrand.accent.opacity(0.18) : Color(uiColor: .secondarySystemBackground))
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .stroke(selected ? FrameStudioBrand.accent : .clear, lineWidth: 1.5)
+                )
         }
-        .onAppear {
-            nameFocused = true
-        }
-    }
-
-    private func field(title: String, placeholder: String, text: Binding<String>) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(title)
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(FrameStudioBrand.accent)
-            TextField(placeholder, text: text)
-                .foregroundStyle(.primary)
-                .padding(14)
-                .frame(minHeight: 44)
-                .background(FrameStudioBrand.surface, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(selected ? .isSelected : [])
     }
 }
-

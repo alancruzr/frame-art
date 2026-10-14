@@ -8,11 +8,7 @@ struct RootView: View {
     var body: some View {
         TabView(selection: $router.selectedTab) {
             NavigationStack {
-                if profile.hasStudioName || router.artistPieceID != nil {
-                    ArtworkListView()
-                } else {
-                    StudioNameView()
-                }
+                ArtworkListView()
             }
             .tabItem {
                 Label("Taller", systemImage: "photo.artframe")

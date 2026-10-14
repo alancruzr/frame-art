@@ -99,17 +99,15 @@ enum OnboardingPainID: String, CaseIterable, Equatable {
     }
 }
 
-/// Pantallas del onboarding. Mismo orden que Clarity (welcome → goal → dolor →
-/// permisos → prueba → resultado → prueba social → paywall), con el paso del estudio conservado.
+/// Pantallas del onboarding (7): bienvenida → objetivo y dolor → permisos → prueba →
+/// resultado → prueba social → paywall. El nombre del estudio se pide al compartir por primera vez.
 enum OnboardingStep: Int, CaseIterable {
-    case welcome, goal, pain, studio, permissions, demo, demoResult, socialProof, paywall
+    case welcome, needs, permissions, demo, demoResult, socialProof, paywall
 
     var analyticsName: String {
         switch self {
         case .welcome: return "welcome"
-        case .goal: return "goal"
-        case .pain: return "practical_help"
-        case .studio: return "studio"
+        case .needs: return "needs"
         case .permissions: return "permissions"
         case .demo: return "demo_try"
         case .demoResult: return "demo_result"
@@ -126,7 +124,7 @@ final class OnboardingStore {
     static let userDefaultsKey = "onboardingComplete.v2"
     static let selectedGoalKey = "onboardingSelectedGoal"
     static let selectedPainKey = "onboardingSelectedPain"
-    static let resumeStepKey = "onboardingResumeStep.v4"
+    static let resumeStepKey = "onboardingResumeStep.v5"
 
     var step: Int = 0 {
         didSet { persistResumeStep() }
@@ -214,7 +212,6 @@ final class OnboardingStore {
         selectedGoal = goal
         defaults.set(goal.rawValue, forKey: Self.selectedGoalKey)
         Analytics.log(.onboardingGoalSelected(goal.rawValue))
-        advanceAfterSelection()
     }
 
     func selectPain(_ pain: OnboardingPainID) {
@@ -222,14 +219,10 @@ final class OnboardingStore {
         selectedPain = pain
         defaults.set(pain.rawValue, forKey: Self.selectedPainKey)
         Analytics.log(.onboardingPainSelected(pain.rawValue))
-        advanceAfterSelection()
     }
 
     func complete() {
         pendingAdvance?.cancel()
-        if ArtistProfile.shared.slug.isEmpty {
-            ArtistProfile.shared.save(displayName: ArtistProfile.shared.displayName, slug: "")
-        }
         if !isComplete {
             Analytics.log(.onboardingCompleted)
         }

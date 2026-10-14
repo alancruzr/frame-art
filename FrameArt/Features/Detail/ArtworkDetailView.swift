@@ -26,6 +26,7 @@ struct ArtworkDetailView: View {
     @State private var viewCount: Int?
     @State private var linkCopied = false
     @State private var showQR = false
+    @State private var showStudioName = false
 
     private var publishedLink: URL? {
         let studio = ArtistProfile.shared.slug
@@ -160,6 +161,13 @@ struct ArtworkDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .fullScreenCover(isPresented: $showPaywall) {
             PaywallView(source: .publishLimit) { showPaywall = false }
+        }
+        .sheet(isPresented: $showStudioName) {
+            NavigationStack {
+                StudioNameView {
+                    Task { await publishAndShare() }
+                }
+            }
         }
         .sheet(isPresented: $showQR) {
             if let publishedLink {
@@ -316,6 +324,10 @@ struct ArtworkDetailView: View {
 
     @MainActor
     private func publishAndShare() async {
+        guard ArtistProfile.shared.hasStudioName else {
+            showStudioName = true
+            return
+        }
         let alreadyPublished = !piece.publicSlug.isEmpty
         let publishedCount = (try? modelContext.fetchCount(
             FetchDescriptor<ArtworkPiece>(predicate: #Predicate { !$0.publicSlug.isEmpty })
