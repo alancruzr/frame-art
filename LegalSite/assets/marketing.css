@@ -1,18 +1,18 @@
 :root {
   color-scheme: light;
-  --canvas: #f3f0e8;
-  --surface: #faf8f3;
-  --surface-muted: #e6e0d4;
-  --surface-blue: #d5e0d8;
-  --surface-pink: #ead9b8;
-  --ink: #1a2a20;
-  --muted: #5c675f;
-  --line: #cfc6b4;
-  --accent: #d4b073;
-  --accent-deep: #1f3d2b;
+  --canvas: #f5f2fc;
+  --surface: #ffffff;
+  --surface-muted: #e8e0fa;
+  --surface-blue: #dbe8fc;
+  --surface-pink: #efe3f6;
+  --ink: #1c1730;
+  --muted: #5f5a70;
+  --line: #d6d0e6;
+  --accent: #d1c4fa;
+  --accent-deep: #402e63;
   --radius: 28px;
   --content: min(1280px, calc(100% - 64px));
-  --shadow: 0 24px 70px rgba(31, 61, 43, .14);
+  --shadow: 0 24px 70px rgba(64, 46, 99, .14);
 }
 
 * { box-sizing: border-box; }
@@ -54,7 +54,7 @@ h1, h2, h3, p { margin-top: 0; }
   white-space: nowrap;
   border: 0;
 }
-:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
+:focus-visible { outline: 3px solid var(--accent-deep); outline-offset: 4px; }
 
 .site-nav {
   width: var(--content);
@@ -140,7 +140,7 @@ h1 {
   border-radius: var(--radius);
   background: var(--accent-deep);
   box-shadow: var(--shadow);
-  color: #f7f1e4;
+  color: #f5f2fc;
 }
 
 .phone-placeholder {
@@ -150,8 +150,8 @@ h1 {
   place-items: center;
   padding: 28px 22px;
   border-radius: 36px;
-  border: 1px dashed rgba(247, 241, 228, .45);
-  background: rgba(247, 241, 228, .08);
+  border: 1px dashed rgba(245, 242, 252, .45);
+  background: rgba(245, 242, 252, .08);
   color: inherit;
   text-align: center;
   font-size: 15px;
@@ -208,8 +208,8 @@ h1 {
 .proof-media .phone-placeholder {
   inset: 16px 24px;
   color: var(--ink);
-  border-color: rgba(26, 42, 32, .28);
-  background: rgba(250, 248, 243, .55);
+  border-color: rgba(28, 23, 48, .28);
+  background: rgba(255, 255, 255, .55);
 }
 .proof-secondary .proof-copy h3 { max-width: 11ch; }
 .proof-secondary .proof-copy p { max-width: 38ch; }
@@ -269,7 +269,7 @@ h1 {
   justify-content: center;
 }
 .trust-copy { background: var(--surface); }
-.conversion-copy { background: var(--accent-deep); color: #f7f1e4; }
+.conversion-copy { background: var(--accent-deep); color: #f5f2fc; }
 .trust-copy h2, .conversion-copy h2 {
   margin-bottom: 22px;
   font-size: clamp(42px, 4.7vw, 68px);
@@ -292,7 +292,7 @@ h1 {
   background: var(--accent);
   color: var(--accent-deep);
 }
-.conversion-copy .button:hover { background: #e0c48a; }
+.conversion-copy .button:hover { background: #e8e0fa; }
 .conversion-copy .button[aria-disabled="true"]:hover {
   background: var(--accent);
   transform: none;

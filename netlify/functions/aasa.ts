@@ -4,7 +4,7 @@ const BODY = {
   applinks: {
     details: [
       {
-        appIDs: ["ML4VB5PQ6H.com.alancruzr.frameart"],
+        appIDs: ["ML4VB5PQ6H.app.framestudio.ios"],
         components: [
           { "/": "/api/*", exclude: true, comment: "API is not an app link" },
           { "/": "/.well-known/*", exclude: true },

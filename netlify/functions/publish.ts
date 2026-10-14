@@ -1,11 +1,18 @@
 import type { Config, Context } from "@netlify/functions";
+import { authenticate, canWriteStudio, principalId } from "../lib/auth";
 import {
-  artworksStore,
-  blobKeys,
-  isSlug,
-  publicArtworkURL,
-  requireBearer,
-} from "../lib/store";
+  MAX_ARTWORKS_PER_STUDIO,
+  MAX_BYTES,
+  MAX_TITLE,
+  RATE,
+  allow,
+  checkContentLength,
+  tooLarge,
+  tooMany,
+  validateBody,
+} from "../lib/limits";
+import { parseMeta, sanitizeMeta } from "../lib/artwork-meta";
+import { artworksStore, blobKeys, isSlug, isStudioSlug, publicArtworkURL } from "../lib/store";
 
 const KINDS = new Set(["poster", "usdz", "glb", "meta"]);
 
@@ -49,38 +56,49 @@ async function readPayload(req: Request): Promise<{
     return { studio, artwork, kind, title, body };
   }
 
-  const studio =
-    url.searchParams.get("studio") ||
-    req.headers.get("x-studio") ||
-    "";
-  const artwork =
-    url.searchParams.get("artwork") ||
-    req.headers.get("x-artwork") ||
-    "";
-  const kind = url.searchParams.get("kind") || req.headers.get("x-kind") || "";
-  const title = url.searchParams.get("title") || req.headers.get("x-title") || "";
+  const studio = url.searchParams.get("studio") || "";
+  const artwork = url.searchParams.get("artwork") || "";
+  const kind = url.searchParams.get("kind") || "";
+  const title = url.searchParams.get("title") || "";
   const body = req.body ? await req.arrayBuffer() : null;
   return { studio, artwork, kind, title, body };
 }
 
-export default async (req: Request, _context: Context) => {
+export default async (req: Request, context: Context) => {
   if (req.method !== "POST") {
     return new Response("Method Not Allowed", { status: 405, headers: { Allow: "POST" } });
   }
-  const denied = requireBearer(req);
-  if (denied) return denied;
+  const principal = authenticate(req);
+  if (principal instanceof Response) return principal;
+
+  const ip = context.ip || "unknown";
+  if (!(await allow(`publish-ip:${ip}`, RATE.publishPerIpHour))) return tooMany();
+  if (!(await allow(`publish-${principalId(principal, ip)}`, RATE.publishPerKeyHour))) return tooMany();
+
+  // Rechazo temprano por Content-Length (multipart añade algo de overhead).
+  const hintedKind = (new URL(req.url).searchParams.get("kind") || "").toLowerCase();
+  const early = checkContentLength(req, (MAX_BYTES[hintedKind] ?? MAX_BYTES.usdz) + 16 * 1024);
+  if (early) return early;
 
   const payload = await readPayload(req);
   const studio = payload.studio.trim();
   const artwork = payload.artwork.trim();
   const kind = payload.kind.trim().toLowerCase();
-  const title = payload.title.trim();
+  const title = payload.title.trim().slice(0, MAX_TITLE);
 
-  if (!isSlug(studio) || !isSlug(artwork)) {
+  if (!isStudioSlug(studio) || !isSlug(artwork)) {
     return json(400, { error: "invalid_slug" });
   }
   if (!KINDS.has(kind)) {
     return json(400, { error: "invalid_kind" });
+  }
+  if (!canWriteStudio(principal, studio)) {
+    return json(403, { error: "studio_not_owned" });
+  }
+  if (payload.body && payload.body.byteLength > 0) {
+    const invalid = validateBody(kind, payload.body);
+    if (invalid === "payload_too_large") return tooLarge(MAX_BYTES[kind]);
+    if (invalid) return json(400, { error: invalid });
   }
 
   const keys = blobKeys(studio, artwork);
@@ -93,24 +111,26 @@ export default async (req: Request, _context: Context) => {
   const store = artworksStore();
   const contentType = CONTENT_TYPE[kind];
 
+  // Cuota por estudio: solo cuenta al crear una obra nueva.
+  const isNewArtwork = !(await store.getMetadata(keys.meta)) && !(await store.getMetadata(keys.usdz));
+  if (isNewArtwork) {
+    const { directories } = await store.list({ prefix: `${studio}/`, directories: true });
+    if (directories.length >= MAX_ARTWORKS_PER_STUDIO) {
+      return json(403, { error: "studio_quota_exceeded", max: MAX_ARTWORKS_PER_STUDIO });
+    }
+  }
+
   if (kind === "meta") {
-    let createdAt = new Date().toISOString();
-    let metaTitle = title;
+    let raw: unknown = {};
     if (payload.body && payload.body.byteLength > 0) {
       try {
-        const parsed = JSON.parse(new TextDecoder().decode(payload.body));
-        if (typeof parsed.title === "string" && parsed.title.trim()) {
-          metaTitle = parsed.title.trim();
-        }
-        if (typeof parsed.createdAt === "string" && parsed.createdAt.trim()) {
-          createdAt = parsed.createdAt.trim();
-        }
+        raw = JSON.parse(new TextDecoder().decode(payload.body));
       } catch {
         // raw body is not JSON; keep title from query
       }
     }
-    const meta = JSON.stringify({ title: metaTitle || artwork, createdAt });
-    await store.set(key, meta, { metadata: { contentType } });
+    const meta = sanitizeMeta(raw, { title: title || artwork, createdAt: new Date().toISOString() });
+    await store.set(key, JSON.stringify(meta), { metadata: { contentType } });
   } else {
     if (!payload.body || payload.body.byteLength === 0) {
       return json(400, { error: "missing_file" });
@@ -118,16 +138,9 @@ export default async (req: Request, _context: Context) => {
     await store.set(key, payload.body, { metadata: { contentType } });
     if (title) {
       const existing = await store.get(keys.meta, { type: "text" });
-      let createdAt = new Date().toISOString();
-      if (existing) {
-        try {
-          const parsed = JSON.parse(existing);
-          if (typeof parsed.createdAt === "string") createdAt = parsed.createdAt;
-        } catch {
-          // replace
-        }
-      }
-      await store.set(keys.meta, JSON.stringify({ title, createdAt }), {
+      const meta = existing ? parseMeta(existing, title) : sanitizeMeta({}, { title, createdAt: new Date().toISOString() });
+      meta.title = title;
+      await store.set(keys.meta, JSON.stringify(meta), {
         metadata: { contentType: CONTENT_TYPE.meta },
       });
     }

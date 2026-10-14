@@ -1,3 +1,4 @@
+import { type ArtworkMeta, contactHref, formatSize, quickLookFragment } from "./artwork-meta";
 export function escapeHtml(value: string): string {
   return value.replace(/[&<>"']/g, (ch) => {
     switch (ch) {
@@ -11,8 +12,23 @@ export function escapeHtml(value: string): string {
   });
 }
 
-export function viewerHTML(title: string, posterAbs: string): string {
+/** JSON seguro dentro de <script>. */
+function scriptJSON(value: unknown): string {
+  return JSON.stringify(value ?? null).replace(/</g, "\\u003c").replace(/\u2028|\u2029/g, "");
+}
+
+export function viewerHTML(title: string, posterAbs: string, meta?: ArtworkMeta): string {
   const safeTitle = escapeHtml(title || "Frame Studio");
+  const size = meta ? formatSize(meta) : undefined;
+  const contact = meta ? contactHref(meta.contact, meta.title) : undefined;
+  const qlFragment = meta ? quickLookFragment(meta) : "#allowsContentScaling=0";
+  const card = meta && (meta.artist || size || contact)
+    ? `<section class="card" aria-label="Datos de la obra">
+        ${meta.artist ? `<p class="card-artist">${escapeHtml(meta.artist)}</p>` : ""}
+        ${size ? `<p class="card-size">${escapeHtml(size)}</p>` : ""}
+        ${contact ? `<a class="btn primary card-cta" id="btn-interest" href="${escapeHtml(contact)}" rel="noopener">Me interesa</a>` : ""}
+      </section>`
+    : "";
   const safePoster = escapeHtml(posterAbs);
   const pageTitle = `${safeTitle} — Frame Studio`;
   return `<!DOCTYPE html>
@@ -45,38 +61,38 @@ export function viewerHTML(title: string, posterAbs: string): string {
   <style>
     :root {
       color-scheme: light dark;
-      --hunter: #1f3d2b;
-      --gold: #d4b073;
-      --fg: #1c1916;
-      --muted: #5e584f;
-      --bg: #f3eee6;
-      --stage: #e7e0d4;
+      --brand-deep: #402e63;
+      --brand-accent: #402e63;
+      --fg: #1d1a26;
+      --muted: #5f5a70;
+      --bg: #f5f2fc;
+      --stage: #e8e0fa;
       --btn-fg: #fff;
     }
     @media (prefers-color-scheme: dark) {
       :root:not([data-theme="day"]) {
-        --gold: #d4b073;
-        --fg: #f4efe6;
-        --muted: #c4b8a4;
-        --bg: #0f1712;
-        --stage: #162018;
+        --brand-accent: #d1c4fa;
+        --fg: #f5f2fc;
+        --muted: #b9b0d0;
+        --bg: #0e0c14;
+        --stage: #14121c;
       }
     }
     html[data-theme="day"] {
       color-scheme: light;
-      --gold: #d4b073;
-      --fg: #1c1916;
-      --muted: #5e584f;
-      --bg: #f3eee6;
-      --stage: #e7e0d4;
+      --brand-accent: #402e63;
+      --fg: #1d1a26;
+      --muted: #5f5a70;
+      --bg: #f5f2fc;
+      --stage: #e8e0fa;
     }
     html[data-theme="night"] {
       color-scheme: dark;
-      --gold: #d4b073;
-      --fg: #f4efe6;
-      --muted: #c4b8a4;
-      --bg: #0f1712;
-      --stage: #162018;
+      --brand-accent: #d1c4fa;
+      --fg: #f5f2fc;
+      --muted: #b9b0d0;
+      --bg: #0e0c14;
+      --stage: #14121c;
     }
     * { box-sizing: border-box; }
     html, body {
@@ -101,7 +117,7 @@ export function viewerHTML(title: string, posterAbs: string): string {
       font-weight: 650;
       letter-spacing: 0.14em;
       text-transform: uppercase;
-      color: var(--gold);
+      color: var(--brand-accent);
     }
     header h1 {
       font-size: 1.35rem;
@@ -154,6 +170,18 @@ export function viewerHTML(title: string, posterAbs: string): string {
       overflow: hidden;
       clip: rect(0, 0, 0, 0);
     }
+    .card {
+      margin: 0 16px 8px;
+      padding: 12px 16px;
+      border-radius: 18px;
+      background: color-mix(in srgb, currentColor 6%, transparent);
+      display: grid;
+      gap: 4px;
+    }
+    .card p { margin: 0; }
+    .card-artist { font-weight: 650; }
+    .card-size { opacity: .75; font-variant-numeric: tabular-nums; }
+    .card-cta { margin-top: 8px; text-align: center; text-decoration: none; min-height: 44px; display: grid; place-items: center; }
     .dock {
       background: color-mix(in srgb, var(--bg) 86%, transparent);
       -webkit-backdrop-filter: blur(18px);
@@ -186,7 +214,7 @@ export function viewerHTML(title: string, posterAbs: string): string {
       border: none;
     }
     .btn.primary {
-      background: var(--hunter);
+      background: var(--brand-deep);
       color: var(--btn-fg);
     }
     .btn.secondary {
@@ -199,7 +227,7 @@ export function viewerHTML(title: string, posterAbs: string): string {
       width: 100%;
       margin-top: 0.45rem;
       background: transparent;
-      color: var(--gold);
+      color: var(--brand-accent);
       border: none;
       font-weight: 500;
       font-size: 0.92rem;
@@ -221,6 +249,7 @@ export function viewerHTML(title: string, posterAbs: string): string {
       <h1>Mi espacio</h1>
       <p class="piece" id="title">${safeTitle}</p>
     </header>
+    ${card}
     <div class="hero" id="hero">
       <img id="poster" src="poster.jpg" alt="${safeTitle}">
       <model-viewer
@@ -240,7 +269,7 @@ export function viewerHTML(title: string, posterAbs: string): string {
       >
         <button id="hidden-ar-btn" slot="ar-button" type="button" tabindex="-1" aria-hidden="true"></button>
       </model-viewer>
-      <a id="ios-ar" class="sr-ar" rel="ar" href="model.usdz#allowsContentScaling=0">
+      <a id="ios-ar" class="sr-ar" rel="ar" href="model.usdz${escapeHtml(qlFragment)}">
         <img alt="" width="1" height="1" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=">
       </a>
     </div>
@@ -289,9 +318,19 @@ export function viewerHTML(title: string, posterAbs: string): string {
       var params = new URLSearchParams(location.search);
       var titleEl = document.getElementById("title");
       var title = params.get("title") || (titleEl && titleEl.textContent) || "Frame Studio";
-      var glb = params.get("glb") || "model.glb";
-      var usdz = params.get("usdz") || "model.usdz";
-      var poster = params.get("poster") || "poster.jpg";
+      var QL_FRAGMENT = ${scriptJSON(qlFragment)};
+      var CONTACT_URL = ${scriptJSON(contact)};
+      // Solo rutas relativas o https: evita inyectar javascript: en enlaces vía query string.
+      function safeAsset(value, fallback) {
+        if (!value) return fallback;
+        try {
+          var u = new URL(value, location.href);
+          return u.protocol === "https:" || u.origin === location.origin ? value : fallback;
+        } catch (e) { return fallback; }
+      }
+      var glb = safeAsset(params.get("glb"), "model.glb");
+      var usdz = safeAsset(params.get("usdz"), "model.usdz");
+      var poster = safeAsset(params.get("poster"), "poster.jpg");
 
       document.title = title + " \u2014 Frame Studio";
       if (titleEl) titleEl.textContent = title;
@@ -309,7 +348,13 @@ export function viewerHTML(title: string, posterAbs: string): string {
       applyTheme();
 
       var ios = document.getElementById("ios-ar");
-      ios.href = usdz + "#allowsContentScaling=0";
+      ios.href = usdz + QL_FRAGMENT;
+      // Banner "Me interesa" de AR Quick Look (callToAction): Apple envía este mensaje al <a rel="ar">.
+      ios.addEventListener("message", function (event) {
+        if (event.data === "_apple_ar_quicklook_button_tapped" && CONTACT_URL) {
+          location.href = CONTACT_URL;
+        }
+      }, false);
       var glbURL = new URL(glb, location.href).href;
       var intent =
         "intent://arvr.google.com/scene-viewer/1.2?file=" +
@@ -418,6 +463,26 @@ export function viewerHTML(title: string, posterAbs: string): string {
           }, 1500);
         });
       }
+    })();
+  </script>
+  <script>
+    (function () {
+      try {
+        var parts = location.pathname.split("/").filter(Boolean);
+        if (parts.length < 2) return;
+        var params = new URLSearchParams(location.search);
+        var owner = false;
+        try {
+          if (params.has("owner")) localStorage.setItem("fs-owner:" + parts[0], "1");
+          owner = localStorage.getItem("fs-owner:" + parts[0]) === "1";
+        } catch (e) {}
+        var body = JSON.stringify({ studio: parts[0], artwork: parts[1], owner: owner });
+        if (navigator.sendBeacon) {
+          navigator.sendBeacon("/api/views", new Blob([body], { type: "application/json" }));
+        } else {
+          fetch("/api/views", { method: "POST", headers: { "content-type": "application/json" }, body: body, keepalive: true });
+        }
+      } catch (e) {}
     })();
   </script>
 </body>

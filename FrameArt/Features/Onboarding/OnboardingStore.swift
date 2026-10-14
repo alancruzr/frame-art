@@ -86,6 +86,34 @@ enum OnboardingPainID: String, CaseIterable, Equatable {
         case .chat: return "Ven la obra, no la foto del piso del taller."
         }
     }
+
+    /// Línea personalizada para el paywall, como `paywallHeadline` en Clarity.
+    var paywallHeadline: String {
+        switch self {
+        case .size: return "Que cada cliente vea\nel tamaño real"
+        case .wall: return "Tus obras, colgadas\nen su pared"
+        case .decide: return "Ayuda a tus clientes\na decidir"
+        case .visit: return "Muestra sin moverte\ndel taller"
+        case .chat: return "Tu obra, no una foto\naplastada"
+        }
+    }
+}
+
+/// Pantallas del onboarding (5): bienvenida → prueba (con el momento «ajá» y su valor) →
+/// objetivo y dolor (opcional) → prueba social → paywall. La cámara se pide al empezar la prueba;
+/// las notificaciones, tras guardar la primera obra; el nombre del estudio, al compartir por primera vez.
+enum OnboardingStep: Int, CaseIterable {
+    case welcome, demo, needs, socialProof, paywall
+
+    var analyticsName: String {
+        switch self {
+        case .welcome: return "welcome"
+        case .demo: return "demo_try"
+        case .needs: return "needs"
+        case .socialProof: return "social_proof"
+        case .paywall: return "paywall"
+        }
+    }
 }
 
 @MainActor
@@ -95,29 +123,72 @@ final class OnboardingStore {
     static let userDefaultsKey = "onboardingComplete.v2"
     static let selectedGoalKey = "onboardingSelectedGoal"
     static let selectedPainKey = "onboardingSelectedPain"
+    static let resumeStepKey = "onboardingResumeStep.v6"
 
-    /// 0 welcome, 1 goal, 2 pain, 3 solution, 4 studio, 5 camera
-    var step: Int = 0
+    var step: Int = 0 {
+        didSet { persistResumeStep() }
+    }
     var isComplete: Bool
     var navigationDirection: Int = 1
     var selectedGoal: OnboardingGoalID?
     var selectedPain: OnboardingPainID?
 
+    // Prueba (pantallas 6–7)
+    var demoImage: UIImage?
+    var demoWidthCentimeters: Double = 80
+    var demoUsedSample = true
+
     var resolvedPain: OnboardingPainID { selectedPain ?? .wall }
 
-    private static let lastStep = 5
+    static let lastStep = OnboardingStep.paywall.rawValue
     private var pendingAdvance: Task<Void, Never>?
+    private var trackedSteps: Set<Int> = []
+    private let defaults: UserDefaults
 
-    private init() {
-        isComplete = UserDefaults.standard.bool(forKey: Self.userDefaultsKey)
-        selectedGoal = UserDefaults.standard.string(forKey: Self.selectedGoalKey)
+    init(defaults: UserDefaults = .standard) {
+        self.defaults = defaults
+        isComplete = defaults.bool(forKey: Self.userDefaultsKey)
+        selectedGoal = defaults.string(forKey: Self.selectedGoalKey)
             .flatMap(OnboardingGoalID.init(rawValue:))
-        selectedPain = UserDefaults.standard.string(forKey: Self.selectedPainKey)
+        selectedPain = defaults.string(forKey: Self.selectedPainKey)
             .flatMap(OnboardingPainID.init(rawValue:))
+        if !isComplete {
+            let saved = defaults.integer(forKey: Self.resumeStepKey)
+            // Se reanuda donde quedó; la prueba vuelve a empezar desde elegir obra (la imagen no persiste).
+            step = min(max(saved, 0), Self.lastStep)
+        }
+        #if DEBUG
+        // Capturas/QA: `-OnboardingDebugStep N` abre el onboarding en la pantalla N (0 = bienvenida).
+        if let raw = UserDefaults.standard.string(forKey: "OnboardingDebugStep"), let forced = Int(raw),
+           OnboardingStep(rawValue: forced) != nil {
+            isComplete = false
+            step = forced
+        }
+        #endif
     }
+
+    var currentStep: OnboardingStep { OnboardingStep(rawValue: step) ?? .welcome }
 
     var progress: Double {
         Double(step) / Double(Self.lastStep)
+    }
+
+    /// Barra de progreso solo en las preguntas (tras la prueba).
+    var showsTopBar: Bool { currentStep == .needs }
+
+    /// Tras la prueba no se vuelve atrás (repetirla está en «Probar con otra obra»).
+    var canGoBack: Bool { false }
+
+    /// Las preguntas son opcionales: «Omitir» pasa a la siguiente pantalla sin guardar respuesta.
+    func skipNeeds() {
+        guard currentStep == .needs else { return }
+        Analytics.log(.onboardingNeedsSkipped)
+        next()
+    }
+
+    func trackCurrentStepIfNeeded() {
+        guard trackedSteps.insert(step).inserted else { return }
+        Analytics.log(.onboardingStep(index: step, name: currentStep.analyticsName))
     }
 
     func next() {
@@ -131,35 +202,46 @@ final class OnboardingStore {
 
     func back() {
         pendingAdvance?.cancel()
+        guard canGoBack else { return }
         UIImpactFeedbackGenerator(style: .light).impactOccurred()
         navigationDirection = -1
-        if step > 0 {
-            step -= 1
-        }
+        step -= 1
+    }
+
+    func showPaywall() {
+        navigationDirection = 1
+        step = OnboardingStep.paywall.rawValue
     }
 
     func selectGoal(_ goal: OnboardingGoalID) {
         UISelectionFeedbackGenerator().selectionChanged()
         selectedGoal = goal
-        UserDefaults.standard.set(goal.rawValue, forKey: Self.selectedGoalKey)
-        advanceAfterSelection()
+        defaults.set(goal.rawValue, forKey: Self.selectedGoalKey)
+        Analytics.log(.onboardingGoalSelected(goal.rawValue))
     }
 
     func selectPain(_ pain: OnboardingPainID) {
         UISelectionFeedbackGenerator().selectionChanged()
         selectedPain = pain
-        UserDefaults.standard.set(pain.rawValue, forKey: Self.selectedPainKey)
-        advanceAfterSelection()
+        defaults.set(pain.rawValue, forKey: Self.selectedPainKey)
+        Analytics.log(.onboardingPainSelected(pain.rawValue))
     }
 
     func complete() {
         pendingAdvance?.cancel()
-        if ArtistProfile.shared.slug.isEmpty {
-            ArtistProfile.shared.save(displayName: ArtistProfile.shared.displayName, slug: "")
+        if !isComplete {
+            Analytics.log(.onboardingCompleted)
         }
         UINotificationFeedbackGenerator().notificationOccurred(.success)
         isComplete = true
-        UserDefaults.standard.set(true, forKey: Self.userDefaultsKey)
+        demoImage = nil
+        defaults.set(true, forKey: Self.userDefaultsKey)
+        defaults.removeObject(forKey: Self.resumeStepKey)
+    }
+
+    private func persistResumeStep() {
+        guard !isComplete else { return }
+        defaults.set(step, forKey: Self.resumeStepKey)
     }
 
     private func advanceAfterSelection() {

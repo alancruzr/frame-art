@@ -6,6 +6,12 @@ import UIKit
 
 struct ArtworkDetailView: View {
     @Bindable var piece: ArtworkPiece
+    /// Recién guardada la primera obra: se piden los avisos y se sugiere compartir.
+    var isFirstArtwork = false
+    @AppStorage("shareTipDismissed") private var shareTipDismissed = false
+    @AppStorage("clientPreviewSeen") private var clientPreviewSeen = false
+    @State private var showClientPreview = false
+    @State private var publishAfterPreview = false
     @State private var showAR = false
     @State private var glbURL: URL?
     @State private var isExporting = false
@@ -20,6 +26,20 @@ struct ArtworkDetailView: View {
     @State private var replaceStatus = "Recortando el lienzo…"
     @State private var previewImage: UIImage?
     @State private var photoRevision = 0
+    @State private var showPaywall = false
+    @State private var pendingPushAsk = false
+    @State private var showPushAsk = false
+    @State private var viewCount: Int?
+    @State private var linkCopied = false
+    @State private var showQR = false
+    @State private var showStudioName = false
+
+    private var publishedLink: URL? {
+        let studio = ArtistProfile.shared.slug
+        guard !piece.publicSlug.isEmpty, !studio.isEmpty else { return nil }
+        return ClientViewer.shareURL(studio: studio, artwork: piece.publicSlug)
+    }
+    @Environment(\.modelContext) private var modelContext
 
     var body: some View {
         List {
@@ -79,8 +99,24 @@ struct ArtworkDetailView: View {
                 }
             }
 
+            if piece.publicSlug.isEmpty, !shareTipDismissed {
+                Section {
+                    ShareTipCard(
+                        onShare: {
+                            Analytics.log(.shareTipTapped)
+                            startShare()
+                        },
+                        onDismiss: {
+                            Analytics.log(.shareTipDismissed)
+                            withAnimation { shareTipDismissed = true }
+                        }
+                    )
+                }
+            }
+
             Section {
                 Button {
+                    Analytics.log(.arOpened(source: "artist_detail"))
                     showAR = true
                 } label: {
                     Label("Ver en mi espacio", systemImage: "cube.transparent")
@@ -92,7 +128,7 @@ struct ArtworkDetailView: View {
 
             Section {
                 Button {
-                    Task { await publishAndShare() }
+                    startShare()
                 } label: {
                     if isPublishing {
                         ProgressView("Publicando la obra…")
@@ -103,6 +139,27 @@ struct ArtworkDetailView: View {
                     }
                 }
                 .disabled(isPublishing || isExporting)
+
+                if let link = publishedLink {
+                    LabeledContent("Estado") { PublishedBadge(count: viewCount) }
+                    Button {
+                        UIPasteboard.general.url = link
+                        UINotificationFeedbackGenerator().notificationOccurred(.success)
+                        Analytics.log(.linkCopied)
+                        linkCopied = true
+                    } label: {
+                        Label(linkCopied ? "Enlace copiado" : "Copiar enlace",
+                              systemImage: linkCopied ? "checkmark" : "doc.on.doc")
+                            .frame(minHeight: 44, alignment: .leading)
+                    }
+                    Button {
+                        Analytics.log(.qrShown)
+                        showQR = true
+                    } label: {
+                        Label("Mostrar código QR", systemImage: "qrcode")
+                            .frame(minHeight: 44, alignment: .leading)
+                    }
+                }
 
                 if piece.kind == .scan3D, glbURL == nil {
                     Text("Este escaneo es USDZ (iPhone). Aún no hay GLB para Android.")
@@ -116,11 +173,52 @@ struct ArtworkDetailView: View {
             } header: {
                 Text("Cliente")
             } footer: {
-                Text("WhatsApp recibe un enlace. El cliente abre la obra en su pared, sin instalar Frame Studio.")
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("WhatsApp recibe un enlace. El cliente abre la obra en su pared, sin instalar Frame Studio.")
+                }
             }
         }
         .navigationTitle(piece.title.isEmpty ? "Obra" : piece.title)
         .navigationBarTitleDisplayMode(.inline)
+        .fullScreenCover(isPresented: $showPaywall) {
+            PaywallView(source: .publishLimit) { showPaywall = false }
+        }
+        .sheet(isPresented: $showClientPreview, onDismiss: {
+            if publishAfterPreview {
+                publishAfterPreview = false
+                Task { await publishAndShare() }
+            }
+        }) {
+            ClientLinkPreview(
+                image: previewImage ?? ArtworkFileStore.loadImage(for: piece) ?? UIImage(),
+                title: piece.title.isEmpty ? "Mi obra" : piece.title,
+                widthCentimeters: piece.widthCentimeters
+            ) {
+                clientPreviewSeen = true
+                publishAfterPreview = true
+                showClientPreview = false
+            }
+            .presentationDetents([.large])
+        }
+        .task {
+            // Avisos: se piden tras guardar la primera obra (ya no en el onboarding).
+            guard isFirstArtwork else { return }
+            try? await Task.sleep(for: .milliseconds(700))
+            if await PushNotifications.shared.shouldPrompt() { showPushAsk = true }
+        }
+        .sheet(isPresented: $showStudioName) {
+            NavigationStack {
+                StudioNameView {
+                    Task { await publishAndShare() }
+                }
+            }
+        }
+        .sheet(isPresented: $showQR) {
+            if let publishedLink {
+                QRCodeSheet(url: publishedLink, title: piece.title.isEmpty ? "Obra" : piece.title)
+                    .presentationDetents([.medium, .large])
+            }
+        }
         .fullScreenCover(isPresented: $showAR) {
             ArtworkARContainer(piece: piece)
         }
@@ -135,7 +233,27 @@ struct ArtworkDetailView: View {
         } message: {
             Text(errorMessage ?? "")
         }
-        .sheet(isPresented: $showShareSheet) {
+        .task(id: piece.publicSlug) {
+            guard !piece.publicSlug.isEmpty else { return }
+            viewCount = await ViewCounter.count(studio: ArtistProfile.shared.slug, artwork: piece.publicSlug)
+        }
+        .alert("Te avisamos cuando tu cliente abra la obra", isPresented: $showPushAsk) {
+            Button("Activar avisos") {
+                PushNotifications.shared.markPrompted()
+                Task { await PushNotifications.shared.requestAuthorization() }
+            }
+            Button("Ahora no", role: .cancel) {
+                PushNotifications.shared.markPrompted()
+            }
+        } message: {
+            Text("Recibirás un aviso cuando alguien abra el enlace de una obra (como mucho uno cada 30 minutos por obra). No vemos quién es.")
+        }
+        .sheet(isPresented: $showShareSheet, onDismiss: {
+            if pendingPushAsk {
+                pendingPushAsk = false
+                showPushAsk = true
+            }
+        }) {
             if let publishedURL {
                 ArtworkShareSheet(
                     url: publishedURL,
@@ -248,16 +366,82 @@ struct ArtworkDetailView: View {
         }
     }
 
+    /// La primera vez se enseña qué recibe el cliente; luego se pide el nombre del estudio (si falta) y se publica.
+    private func startShare() {
+        if clientPreviewSeen {
+            Task { await publishAndShare() }
+        } else {
+            showClientPreview = true
+        }
+    }
+
     @MainActor
     private func publishAndShare() async {
+        guard ArtistProfile.shared.hasStudioName else {
+            showStudioName = true
+            return
+        }
+        let alreadyPublished = !piece.publicSlug.isEmpty
+        let publishedCount = (try? modelContext.fetchCount(
+            FetchDescriptor<ArtworkPiece>(predicate: #Predicate { !$0.publicSlug.isEmpty })
+        )) ?? 0
+        guard ProPlan.canPublish(
+            isPro: SubscriptionManager.shared.isPro,
+            publishedCount: publishedCount,
+            alreadyPublished: alreadyPublished
+        ) else {
+            Analytics.log(.publishLimitReached(limit: ProPlan.freePublishedLimit))
+            showPaywall = true
+            return
+        }
         isPublishing = true
         defer { isPublishing = false }
         do {
             let url = try await ArtworkPublisher.publish(piece)
             publishedURL = url
+            Analytics.log(.artworkPublished(isFirst: !alreadyPublished))
+            Analytics.log(.artworkShared)
+            shareTipDismissed = true
+            PushNotifications.shared.syncToken()
+            if !alreadyPublished, await PushNotifications.shared.shouldPrompt() {
+                pendingPushAsk = true
+            }
             showShareSheet = true
         } catch {
             errorMessage = error.localizedDescription
         }
+    }
+}
+
+/// Sugerencia contextual para compartir (sustituye al paso «Compartir» del onboarding).
+private struct ShareTipCard: View {
+    var onShare: () -> Void
+    var onDismiss: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(alignment: .firstTextBaseline) {
+                Label("¿Un cliente interesado?", systemImage: "person.2.wave.2")
+                    .font(.headline)
+                Spacer()
+                Button(action: onDismiss) {
+                    Image(systemName: "xmark")
+                        .font(.footnote.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                        .frame(width: 44, height: 44)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Ocultar sugerencia")
+            }
+            Text("Envíale un enlace: verá esta obra en su pared, a tamaño real, sin instalar nada.")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+            Button(action: onShare) {
+                Label("Enviar a un cliente", systemImage: "paperplane")
+                    .frame(maxWidth: .infinity, minHeight: 44)
+            }
+            .primaryButtonStyle()
+        }
+        .padding(.vertical, 4)
     }
 }

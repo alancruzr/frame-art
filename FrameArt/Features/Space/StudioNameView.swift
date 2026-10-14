@@ -1,7 +1,9 @@
 import SwiftUI
 
-/// Studio name is asked only when someone uses Taller without a name.
+/// Se pide al compartir la primera obra (no en el onboarding): el nombre y el enlace del estudio.
 struct StudioNameView: View {
+    var onSaved: () -> Void = {}
+    @Environment(\.dismiss) private var dismiss
     @State private var profile = ArtistProfile.shared
     @State private var name: String = ArtistProfile.shared.displayName
     @State private var slug: String = ArtistProfile.shared.slug
@@ -11,7 +13,7 @@ struct StudioNameView: View {
 
     private var slugPreview: String {
         let source = slugEdited ? slug : name
-        let made = ArtistProfile.makeSlug(from: source)
+        let made = ArtistProfile.makeStudioSlug(from: source)
         return made.isEmpty ? "se asignará uno al azar" : made
     }
 
@@ -55,7 +57,7 @@ struct StudioNameView: View {
                                 if !applyingName {
                                     slugEdited = true
                                 }
-                                let cleaned = ArtistProfile.makeSlug(from: newValue)
+                                let cleaned = ArtistProfile.makeSlug(from: newValue, keepTrailingDash: true)
                                 if cleaned != newValue {
                                     applyingName = true
                                     slug = cleaned
@@ -74,14 +76,21 @@ struct StudioNameView: View {
 
             Button {
                 profile.save(displayName: name, slug: slug)
+                onSaved()
+                dismiss()
             } label: {
-                Text("Continuar")
+                Text("Guardar y compartir")
                     .frame(maxWidth: .infinity, minHeight: 44)
             }
             .primaryButtonStyle()
             .padding()
         }
-        .navigationTitle("Taller")
+        .navigationTitle("Antes de compartir")
+        .toolbar {
+            ToolbarItem(placement: .cancellationAction) {
+                Button("Cancelar") { dismiss() }
+            }
+        }
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             nameFocused = true
