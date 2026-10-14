@@ -107,6 +107,8 @@ struct DemoTryScreen: View {
     @State private var pickerItem: PhotosPickerItem?
     @State private var loading = false
     @State private var showGuide = false
+    @State private var showPicker = false
+    @State private var startedAt = Date.now
 
     private var usingSample: Bool { store.demoUsedSample || store.demoImage == nil }
 
@@ -114,8 +116,10 @@ struct DemoTryScreen: View {
         OnboardingScreenFrame {
             VStack(spacing: 0) {
                 VStack(spacing: 8) {
-                    OnboardingTitle(text: "Cuelga una obra\nen tu pared")
-                    OnboardingSubtitle(text: "Usa la pintura de ejemplo o elige la foto de una tuya. Te guiamos paso a paso.")
+                    OnboardingTitle(text: "Mírala a tamaño real\nen tu pared")
+                    OnboardingSubtitle(text: usingSample
+                        ? "Empieza con esta obra de ejemplo. Te guiamos: son tres toques."
+                        : "Tu obra, a su tamaño real. Te guiamos: son tres toques.")
                 }
 
                 Spacer().frame(height: 20)
@@ -149,15 +153,18 @@ struct DemoTryScreen: View {
                 }
 
                 VStack(spacing: 12) {
-                    OnboardingPrimaryButton(title: "Probar en mi pared") {
+                    OnboardingPrimaryButton(title: "Pruébalo en tu pared") {
+                        startedAt = .now
                         Analytics.log(.onboardingDemoImage(source: usingSample ? "sample" : "photos"))
                         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
                         showGuide = true
                     }
                     .disabled(loading)
                     HStack(spacing: 20) {
-                        PhotosPicker(selection: $pickerItem, matching: .images) {
-                            Label(usingSample ? "Usar mi obra" : "Otra foto", systemImage: "photo.on.rectangle")
+                        Button {
+                            showPicker = true
+                        } label: {
+                            Label(usingSample ? "Probar con mi obra" : "Otra foto", systemImage: "photo.on.rectangle")
                                 .font(.subheadline.weight(.semibold))
                                 .frame(minHeight: 44)
                         }
@@ -179,6 +186,7 @@ struct DemoTryScreen: View {
         .onAppear {
             if usingSample { store.demoWidthCentimeters = SampleArtworkInfo.widthCentimeters }
         }
+        .photosPicker(isPresented: $showPicker, selection: $pickerItem, matching: .images)
         .onChange(of: pickerItem) { _, item in
             guard let item else { return }
             loading = true
@@ -207,10 +215,21 @@ struct DemoTryScreen: View {
             image: image,
             widthCentimeters: width,
             heightCentimeters: height,
-            title: usingSample ? SampleArtworkInfo.title : "Mi obra"
-        ) {
+            title: usingSample ? SampleArtworkInfo.title : "Mi obra",
+            isOwnArtwork: !usingSample,
+            startedAt: startedAt
+        ) { outcome in
             showGuide = false
-            store.next()
+            switch outcome {
+            case .startGallery, .skipped:
+                store.next()
+            case .tryAnother:
+                // Vuelve a esta pantalla con el selector abierto para elegir otra obra.
+                Task { @MainActor in
+                    try? await Task.sleep(for: .milliseconds(450))
+                    showPicker = true
+                }
+            }
         }
     }
 }

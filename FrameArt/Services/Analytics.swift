@@ -10,6 +10,9 @@ enum AnalyticsEvent: Equatable {
     case onboardingCompleted
     case demoGuideStep(step: String, mode: String)
     case demoGuideSkipped(step: String)
+    case demoAhaReached(mode: String, elapsedSeconds: Double, ownArtwork: Bool)
+    case demoValueCTA(cta: String)
+    case demoFallback(reason: String)
     case permissionResult(kind: String, granted: Bool)
     case paywallViewed(source: String)
     case paywallPlanSelected(productID: String)
@@ -40,6 +43,9 @@ enum AnalyticsEvent: Equatable {
         case .onboardingCompleted: return "onboarding_completed"
         case .demoGuideStep: return "demo_guide_step"
         case .demoGuideSkipped: return "demo_guide_skipped"
+        case .demoAhaReached: return "demo_aha_reached"
+        case .demoValueCTA: return "demo_value_cta"
+        case .demoFallback: return "demo_fallback"
         case .permissionResult: return "permission_result"
         case .paywallViewed: return "paywall_viewed"
         case .paywallPlanSelected: return "paywall_plan_selected"
@@ -72,6 +78,10 @@ enum AnalyticsEvent: Equatable {
         case .onboardingCompleted: return [:]
         case .demoGuideStep(let step, let mode): return ["step": step, "mode": mode]
         case .demoGuideSkipped(let step): return ["step": step]
+        case .demoAhaReached(let mode, let elapsed, let own):
+            return ["mode": mode, "elapsed_seconds": Int(elapsed.rounded()), "own_artwork": own ? 1 : 0]
+        case .demoValueCTA(let cta): return ["cta": cta]
+        case .demoFallback(let reason): return ["reason": reason]
         case .permissionResult(let kind, let granted): return ["kind": kind, "granted": granted ? 1 : 0]
         case .paywallViewed(let source), .paywallDismissed(let source): return ["source": source]
         case .paywallPlanSelected(let id), .paywallPurchaseStarted(let id), .paywallPurchaseCompleted(let id),

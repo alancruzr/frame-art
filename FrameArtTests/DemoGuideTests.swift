@@ -1,39 +1,59 @@
 import Testing
 @testable import FrameArt
 
+private func apply(_ g: inout DemoGuide, _ e: DemoGuideEvent) -> Bool { g.handle(e) }
+
 struct DemoGuideTests {
-    @Test func arHappyPath() {
+    @Test func arHappyPathReachesAha() {
         var g = DemoGuide(mode: .ar)
         #expect(g.step == .choosePainting)
-        let r1 = g.handle(.paintingChosen); #expect(r1); #expect(g.step == .scanWall)
-        let r2 = g.handle(.wallDetected); #expect(r2); #expect(g.step == .tapToPlace)
-        let r3 = g.handle(.placed); #expect(r3); #expect(g.step == .adjust)
-        let r4 = g.handle(.adjusted); #expect(r4); #expect(g.step == .share)
-        let r5 = g.handle(.shareTapped); #expect(r5); #expect(g.isFinished)
+        #expect(apply(&g, .paintingChosen)); #expect(g.step == .scanWall)
+        #expect(apply(&g, .wallDetected)); #expect(g.step == .tapToPlace)
+        #expect(apply(&g, .placed)); #expect(g.step == .pin)
+        #expect(apply(&g, .pinned)); #expect(g.step == .explore)
+        #expect(apply(&g, .ahaReached)); #expect(g.step == .value)
+        #expect(apply(&g, .continueTapped)); #expect(g.isFinished)
     }
 
     @Test func simulatedSkipsScan() {
         var g = DemoGuide(mode: .simulated)
         g.handle(.paintingChosen)
         #expect(g.step == .tapToPlace)
-        let r6 = g.handle(.wallDetected); #expect(!r6)
-        let r7 = g.handle(.wallLost); #expect(!r7)
+        #expect(!apply(&g, .wallDetected))
+        #expect(!apply(&g, .wallLost))
         #expect(g.step == .tapToPlace)
     }
 
     @Test func losingWallGoesBackToScan() {
         var g = DemoGuide(mode: .ar)
         g.handle(.paintingChosen); g.handle(.wallDetected)
-        let r8 = g.handle(.wallLost); #expect(r8)
+        #expect(apply(&g, .wallLost))
         #expect(g.step == .scanWall)
+    }
+
+    @Test func unpinAndMoveGoBack() {
+        var g = DemoGuide(mode: .ar)
+        g.handle(.paintingChosen); g.handle(.wallDetected); g.handle(.placed); g.handle(.pinned)
+        #expect(apply(&g, .unpinned)); #expect(g.step == .pin)
+        #expect(apply(&g, .moved)); #expect(g.step == .scanWall)
+        var s = DemoGuide(mode: .simulated)
+        s.handle(.paintingChosen); s.handle(.placed); s.handle(.pinned)
+        #expect(apply(&s, .moved)); #expect(s.step == .tapToPlace)
+    }
+
+    @Test func ahaOnlyCountsWhilePinned() {
+        var g = DemoGuide(mode: .ar)
+        g.handle(.paintingChosen); g.handle(.wallDetected); g.handle(.placed)
+        #expect(!apply(&g, .ahaReached))
+        #expect(g.step == .pin)
     }
 
     @Test func outOfOrderEventsIgnored() {
         var g = DemoGuide(mode: .ar)
-        let r9 = g.handle(.placed); #expect(!r9)
-        let r10 = g.handle(.shareTapped); #expect(!r10)
+        #expect(!apply(&g, .placed))
+        #expect(!apply(&g, .continueTapped))
         g.handle(.paintingChosen)
-        let r11 = g.handle(.adjusted); #expect(!r11)
+        #expect(!apply(&g, .pinned))
         #expect(g.step == .scanWall)
     }
 
@@ -41,10 +61,11 @@ struct DemoGuideTests {
         var g = DemoGuide(mode: .ar)
         g.handle(.paintingChosen)
         g.handle(.skip); #expect(g.step == .tapToPlace)
-        g.handle(.skip); #expect(g.step == .adjust)
-        g.handle(.skip); #expect(g.step == .share)
+        g.handle(.skip); #expect(g.step == .pin)
+        g.handle(.skip); #expect(g.step == .explore)
+        g.handle(.skip); #expect(g.step == .value)
         g.handle(.skip); #expect(g.isFinished)
-        let r12 = g.handle(.skip); #expect(!r12)
+        #expect(!apply(&g, .skip))
     }
 
     @Test func fallbackFromScanJumpsToTap() {
@@ -55,8 +76,8 @@ struct DemoGuideTests {
         #expect(g.step == .tapToPlace)
     }
 
-    @Test func clampScale() {
-        #expect(ARPlacementState.clampScale(5) == 2)
-        #expect(ARPlacementState.clampScale(0.1) == 0.5)
+    @Test func timings() {
+        #expect(DemoGuide.ahaSeconds == 3)
+        #expect(DemoGuide.wallTimeoutSeconds == 20)
     }
 }

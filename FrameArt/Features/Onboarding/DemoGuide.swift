@@ -1,12 +1,14 @@
 import Foundation
 
-/// Pasos de la prueba guiada del onboarding.
+/// Pasos de la prueba guiada. Reflejan los controles reales de la app:
+/// Colocar aquí → Fijar → mirarla (momento «ajá») → valor.
 enum DemoGuideStep: Int, CaseIterable, Equatable {
     case choosePainting
     case scanWall
     case tapToPlace
-    case adjust
-    case share
+    case pin
+    case explore
+    case value
     case finished
 
     var analyticsName: String {
@@ -14,8 +16,9 @@ enum DemoGuideStep: Int, CaseIterable, Equatable {
         case .choosePainting: return "choose_painting"
         case .scanWall: return "scan_wall"
         case .tapToPlace: return "tap_to_place"
-        case .adjust: return "adjust"
-        case .share: return "share"
+        case .pin: return "pin"
+        case .explore: return "explore"
+        case .value: return "value"
         case .finished: return "finished"
         }
     }
@@ -26,20 +29,29 @@ enum DemoGuideEvent: Equatable {
     case wallDetected
     case wallLost
     case placed
-    case adjusted
-    case shareTapped
+    case pinned
+    case unpinned
+    case moved
+    /// La obra lleva `DemoGuide.ahaSeconds` fijada y a la vista.
+    case ahaReached
+    case continueTapped
     case skip
 }
 
-/// Máquina de estados pura (sin UI) de la prueba guiada. Avanza solo con el evento real que
-/// corresponde a cada paso; `skip` pasa al siguiente.
+/// Máquina de estados pura (sin UI). Avanza solo con el evento real de cada paso;
+/// `skip` pasa al siguiente.
 struct DemoGuide: Equatable {
     enum Mode: String, Equatable {
         /// ARKit real en el dispositivo.
         case ar
-        /// Pared simulada: simulador, sin ARKit o sin permiso de cámara.
+        /// Pared de ejemplo: simulador, sin ARKit, sin permiso de cámara o sin pared en 20 s.
         case simulated
     }
+
+    /// Segundos fijada a la vista para contar el momento «ajá».
+    static let ahaSeconds: TimeInterval = 3
+    /// Sin pared en este tiempo se ofrece la pared de ejemplo.
+    static let wallTimeoutSeconds: TimeInterval = 20
 
     private(set) var mode: Mode
     private(set) var step: DemoGuideStep = .choosePainting
@@ -50,14 +62,13 @@ struct DemoGuide: Equatable {
 
     var isFinished: Bool { step == .finished }
 
-    /// Pasa a la pared simulada (p. ej. si la cámara se niega a mitad). No retrocede.
+    /// Pasa a la pared de ejemplo. No retrocede.
     mutating func fallBackToSimulated() {
         guard mode == .ar else { return }
         mode = .simulated
         if step == .scanWall { step = .tapToPlace }
     }
 
-    /// Aplica un evento. Devuelve true si cambió el paso.
     @discardableResult
     mutating func handle(_ event: DemoGuideEvent) -> Bool {
         let before = step
@@ -69,10 +80,16 @@ struct DemoGuide: Equatable {
         case (.tapToPlace, .wallLost) where mode == .ar:
             step = .scanWall
         case (.scanWall, .placed), (.tapToPlace, .placed):
-            step = .adjust
-        case (.adjust, .adjusted):
-            step = .share
-        case (.share, .shareTapped):
+            step = .pin
+        case (.pin, .pinned):
+            step = .explore
+        case (.explore, .unpinned):
+            step = .pin
+        case (.pin, .moved), (.explore, .moved):
+            step = mode == .ar ? .scanWall : .tapToPlace
+        case (.explore, .ahaReached):
+            step = .value
+        case (.value, .continueTapped):
             step = .finished
         case (_, .skip):
             step = Self.next(after: step, mode: mode)
@@ -86,9 +103,10 @@ struct DemoGuide: Equatable {
         switch step {
         case .choosePainting: return mode == .ar ? .scanWall : .tapToPlace
         case .scanWall: return .tapToPlace
-        case .tapToPlace: return .adjust
-        case .adjust: return .share
-        case .share, .finished: return .finished
+        case .tapToPlace: return .pin
+        case .pin: return .explore
+        case .explore: return .value
+        case .value, .finished: return .finished
         }
     }
 }
