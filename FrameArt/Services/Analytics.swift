@@ -22,6 +22,9 @@ enum AnalyticsEvent: Equatable {
     case artworkAdded(kind: String)
     case artworkPublished(isFirst: Bool)
     case artworkShared
+    case arSnapshotTaken
+    case linkCopied
+    case qrShown
     case publishLimitReached(limit: Int)
     case arOpened(source: String)
     case pushPermissionPrompted
@@ -49,6 +52,9 @@ enum AnalyticsEvent: Equatable {
         case .artworkAdded: return "artwork_added"
         case .artworkPublished: return "artwork_published"
         case .artworkShared: return "artwork_shared"
+        case .arSnapshotTaken: return "ar_snapshot_taken"
+        case .linkCopied: return "link_copied"
+        case .qrShown: return "qr_shown"
         case .publishLimitReached: return "publish_limit_reached"
         case .arOpened: return "ar_opened"
         case .pushPermissionPrompted: return "push_permission_prompted"
@@ -74,7 +80,7 @@ enum AnalyticsEvent: Equatable {
         case .paywallRestore(let success): return ["success": success ? 1 : 0]
         case .artworkAdded(let kind): return ["kind": kind]
         case .artworkPublished(let isFirst): return ["is_first": isFirst ? 1 : 0]
-        case .artworkShared: return [:]
+        case .artworkShared, .arSnapshotTaken, .linkCopied, .qrShown: return [:]
         case .publishLimitReached(let limit): return ["limit": limit]
         case .arOpened(let source): return ["source": source]
         case .pushPermissionPrompted, .pushPermissionGranted, .clientLinkOpenedNotificationTapped: return [:]

@@ -27,6 +27,7 @@ final class ARPlacementState {
     var placeHandler: (() -> Void)?
     var moveHandler: (() -> Void)?
     var pinHandler: (() -> Void)?
+    var snapshotHandler: ((@escaping @MainActor (UIImage?) -> Void) -> Void)?
 
     /// Pellizcar/arrastrar tras colocar (solo la prueba del onboarding lo activa).
     var allowsAdjusting = false
@@ -45,4 +46,12 @@ final class ARPlacementState {
     func place() { placeHandler?() }
     func move() { moveHandler?() }
     func pin() { pinHandler?() }
+
+    /// Captura la vista AR (RealityKit `ARView.snapshot`). nil si no hay sesión.
+    func snapshot() async -> UIImage? {
+        guard let snapshotHandler else { return nil }
+        return await withCheckedContinuation { continuation in
+            snapshotHandler { continuation.resume(returning: $0) }
+        }
+    }
 }
