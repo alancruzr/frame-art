@@ -99,18 +99,17 @@ enum OnboardingPainID: String, CaseIterable, Equatable {
     }
 }
 
-/// Pantallas del onboarding (7): bienvenida → objetivo y dolor → permisos → prueba →
-/// resultado → prueba social → paywall. El nombre del estudio se pide al compartir por primera vez.
+/// Pantallas del onboarding (5): bienvenida → prueba (con el momento «ajá» y su valor) →
+/// objetivo y dolor (opcional) → prueba social → paywall. La cámara se pide al empezar la prueba;
+/// las notificaciones, tras guardar la primera obra; el nombre del estudio, al compartir por primera vez.
 enum OnboardingStep: Int, CaseIterable {
-    case welcome, needs, permissions, demo, demoResult, socialProof, paywall
+    case welcome, demo, needs, socialProof, paywall
 
     var analyticsName: String {
         switch self {
         case .welcome: return "welcome"
-        case .needs: return "needs"
-        case .permissions: return "permissions"
         case .demo: return "demo_try"
-        case .demoResult: return "demo_result"
+        case .needs: return "needs"
         case .socialProof: return "social_proof"
         case .paywall: return "paywall"
         }
@@ -124,7 +123,7 @@ final class OnboardingStore {
     static let userDefaultsKey = "onboardingComplete.v2"
     static let selectedGoalKey = "onboardingSelectedGoal"
     static let selectedPainKey = "onboardingSelectedPain"
-    static let resumeStepKey = "onboardingResumeStep.v5"
+    static let resumeStepKey = "onboardingResumeStep.v6"
 
     var step: Int = 0 {
         didSet { persistResumeStep() }
@@ -155,8 +154,8 @@ final class OnboardingStore {
             .flatMap(OnboardingPainID.init(rawValue:))
         if !isComplete {
             let saved = defaults.integer(forKey: Self.resumeStepKey)
-            // Como Clarity: se reanuda donde quedó, pero nunca dentro de la prueba (la imagen no persiste).
-            step = min(saved, OnboardingStep.permissions.rawValue)
+            // Se reanuda donde quedó; la prueba vuelve a empezar desde elegir obra (la imagen no persiste).
+            step = min(max(saved, 0), Self.lastStep)
         }
         #if DEBUG
         // Capturas/QA: `-OnboardingDebugStep N` abre el onboarding en la pantalla N (0 = bienvenida).
@@ -174,11 +173,18 @@ final class OnboardingStore {
         Double(step) / Double(Self.lastStep)
     }
 
-    /// Barra superior solo antes de la prueba, igual que Clarity (`currentScreen < 5`).
-    var showsTopBar: Bool { step < OnboardingStep.demo.rawValue }
+    /// Barra de progreso solo en las preguntas (tras la prueba).
+    var showsTopBar: Bool { currentStep == .needs }
 
-    /// Atrás solo en las pantallas de preguntas; tras pedir permisos ya no se vuelve.
-    var canGoBack: Bool { step > 0 && step < OnboardingStep.permissions.rawValue }
+    /// Tras la prueba no se vuelve atrás (repetirla está en «Probar con otra obra»).
+    var canGoBack: Bool { false }
+
+    /// Las preguntas son opcionales: «Omitir» pasa a la siguiente pantalla sin guardar respuesta.
+    func skipNeeds() {
+        guard currentStep == .needs else { return }
+        Analytics.log(.onboardingNeedsSkipped)
+        next()
+    }
 
     func trackCurrentStepIfNeeded() {
         guard trackedSteps.insert(step).inserted else { return }

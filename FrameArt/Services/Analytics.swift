@@ -12,6 +12,7 @@ enum AnalyticsEvent: Equatable {
     case demoGuideSkipped(step: String)
     case demoAhaReached(mode: String, elapsedSeconds: Double, ownArtwork: Bool)
     case demoValueCTA(cta: String)
+    case onboardingNeedsSkipped
     case demoFallback(reason: String)
     case permissionResult(kind: String, granted: Bool)
     case paywallViewed(source: String)
@@ -45,6 +46,7 @@ enum AnalyticsEvent: Equatable {
         case .demoGuideSkipped: return "demo_guide_skipped"
         case .demoAhaReached: return "demo_aha_reached"
         case .demoValueCTA: return "demo_value_cta"
+        case .onboardingNeedsSkipped: return "onboarding_needs_skipped"
         case .demoFallback: return "demo_fallback"
         case .permissionResult: return "permission_result"
         case .paywallViewed: return "paywall_viewed"
@@ -75,7 +77,7 @@ enum AnalyticsEvent: Equatable {
         case .onboardingGoalSelected(let goal): return ["goal": goal]
         case .onboardingPainSelected(let pain): return ["pain": pain]
         case .onboardingDemoImage(let source): return ["source": source]
-        case .onboardingCompleted: return [:]
+        case .onboardingCompleted, .onboardingNeedsSkipped: return [:]
         case .demoGuideStep(let step, let mode): return ["step": step, "mode": mode]
         case .demoGuideSkipped(let step): return ["step": step]
         case .demoAhaReached(let mode, let elapsed, let own):

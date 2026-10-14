@@ -11,25 +11,28 @@ struct OnboardingStoreTests {
 
     @Test func stepListHasNoReminders() {
         #expect(OnboardingStep.allCases.map(\.analyticsName) == [
-            "welcome", "needs", "permissions",
-            "demo_try", "demo_result", "social_proof", "paywall"
+            "welcome", "demo_try", "needs", "social_proof", "paywall"
         ])
     }
 
-    @Test func backOnlyOnQuestionScreens() {
+    @Test func demoComesBeforeQuestions() {
+        #expect(OnboardingStep.demo.rawValue < OnboardingStep.needs.rawValue)
         let store = OnboardingStore(defaults: freshDefaults())
         #expect(!store.canGoBack)
         store.step = OnboardingStep.needs.rawValue
-        #expect(store.canGoBack)
-        store.step = OnboardingStep.permissions.rawValue
-        #expect(!store.canGoBack)
+        #expect(store.showsTopBar)
+        store.skipNeeds()
+        #expect(store.currentStep == .socialProof)
+        #expect(store.selectedPain == nil)
     }
 
-    @Test func resumesButNeverInsideDemo() {
+    @Test func resumesWhereItLeft() {
         let defaults = freshDefaults()
         defaults.set(OnboardingStep.socialProof.rawValue, forKey: OnboardingStore.resumeStepKey)
         let store = OnboardingStore(defaults: defaults)
-        #expect(store.step == OnboardingStep.permissions.rawValue)
+        #expect(store.step == OnboardingStep.socialProof.rawValue)
+        defaults.set(99, forKey: OnboardingStore.resumeStepKey)
+        #expect(OnboardingStore(defaults: defaults).step == OnboardingStore.lastStep)
     }
 
     @Test func selectingDoesNotAutoAdvance() {
@@ -38,6 +41,6 @@ struct OnboardingStoreTests {
         store.selectGoal(.painting)
         store.selectPain(.size)
         #expect(store.step == OnboardingStep.needs.rawValue)
-        #expect(OnboardingStep.allCases.count == 7)
+        #expect(OnboardingStep.allCases.count == 5)
     }
 }

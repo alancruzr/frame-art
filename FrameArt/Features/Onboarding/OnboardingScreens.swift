@@ -190,7 +190,7 @@ struct WelcomeScreen: View {
                 }
 
                 VStack(spacing: 12) {
-                    OnboardingPrimaryButton(title: "Probar con una obra") { store.next() }
+                    OnboardingPrimaryButton(title: "Pruébalo en tu pared") { store.next() }
                 }
                 .padding(.top, 34)
             }
@@ -208,7 +208,7 @@ struct NeedsScreen: View {
             VStack(spacing: 0) {
                 VStack(spacing: 8) {
                     OnboardingTitle(text: "¿Qué quieres resolver?")
-                    OnboardingSubtitle(text: "Dos toques y te mostramos cómo.")
+                    OnboardingSubtitle(text: "Opcional: así adaptamos Frame Studio a ti.")
                 }
 
                 Spacer().frame(height: 20)
@@ -244,6 +244,11 @@ struct NeedsScreen: View {
                 OnboardingPrimaryButton(title: "Continuar", enabled: store.selectedPain != nil) {
                     store.next()
                 }
+                Button("Omitir") { store.skipNeeds() }
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .frame(minHeight: 44)
+                    .padding(.top, 4)
             }
         }
     }

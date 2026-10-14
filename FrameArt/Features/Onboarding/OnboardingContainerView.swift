@@ -62,10 +62,8 @@ struct OnboardingContainerView: View {
     private var stepContent: some View {
         switch store.currentStep {
         case .welcome: WelcomeScreen(store: store)
-        case .needs: NeedsScreen(store: store)
-        case .permissions: PermissionsChecklistScreen(store: store)
         case .demo: DemoTryScreen(store: store)
-        case .demoResult: DemoResultScreen(store: store)
+        case .needs: NeedsScreen(store: store)
         case .socialProof: SocialProofScreen(store: store)
         case .paywall: OnboardingPaywallStep(store: store)
         }
