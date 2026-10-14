@@ -46,6 +46,7 @@
 		FA0000000000000000000097 /* MiEspacioView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0000000000000000000096 /* MiEspacioView.swift */; };
 		FA0000000000000000000099 /* DeepLinkRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0000000000000000000098 /* DeepLinkRouter.swift */; };
 		FA000000000000000000009B /* StudioNameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA000000000000000000009A /* StudioNameView.swift */; };
+		FED8BF6E437E45274FEB2398 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE21E816F69E73B66C971734 /* SettingsView.swift */; };
 		FA00000000000000000000AF /* TestSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000AE /* TestSupport.swift */; };
 		FA00000000000000000000B1 /* USDZExporterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000B0 /* USDZExporterTests.swift */; };
 		FA00000000000000000000B3 /* GLBExporterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000000000000000000B2 /* GLBExporterTests.swift */; };
@@ -121,6 +122,7 @@
 		FA0000000000000000000096 /* MiEspacioView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiEspacioView.swift; sourceTree = "<group>"; };
 		FA0000000000000000000098 /* DeepLinkRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeepLinkRouter.swift; sourceTree = "<group>"; };
 		FA000000000000000000009A /* StudioNameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudioNameView.swift; sourceTree = "<group>"; };
+		FE21E816F69E73B66C971734 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		FA000000000000000000009C /* FrameArt.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = FrameArt.entitlements; sourceTree = "<group>"; };
 		FA000000000000000000009D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FB8DEE29A5FD147FF37347A3 /* FrameStudio.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = FrameStudio.storekit; sourceTree = "<group>"; };
@@ -416,6 +418,7 @@
 			children = (
 				FA0000000000000000000096 /* MiEspacioView.swift */,
 				FA000000000000000000009A /* StudioNameView.swift */,
+				FE21E816F69E73B66C971734 /* SettingsView.swift */,
 			);
 			path = Space;
 			sourceTree = "<group>";
@@ -630,6 +633,7 @@
 				FA0000000000000000000097 /* MiEspacioView.swift in Sources */,
 				FA0000000000000000000099 /* DeepLinkRouter.swift in Sources */,
 				FA000000000000000000009B /* StudioNameView.swift in Sources */,
+				FED8BF6E437E45274FEB2398 /* SettingsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

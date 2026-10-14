@@ -4,6 +4,7 @@ import SwiftUI
 struct ArtworkListView: View {
     @State private var subscriptions = SubscriptionManager.shared
     @State private var showPaywall = false
+    @State private var showSettings = false
     @Environment(\.openURL) private var openURL
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \ArtworkPiece.createdAt, order: .reverse) private var pieces: [ArtworkPiece]
@@ -67,16 +68,11 @@ struct ArtworkListView: View {
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 Button {
-                    if subscriptions.isPro, let url = subscriptions.managementURL {
-                        openURL(url)
-                    } else {
-                        showPaywall = true
-                    }
+                    showSettings = true
                 } label: {
-                    Label(subscriptions.isPro ? "Pro activo" : "Mejorar a Pro",
-                          systemImage: subscriptions.isPro ? "checkmark.seal.fill" : "sparkles")
+                    Image(systemName: "gearshape")
                 }
-                .accessibilityLabel(subscriptions.isPro ? "Gestionar Frame Studio Pro" : "Mejorar a Frame Studio Pro")
+                .accessibilityLabel("Ajustes")
             }
             ToolbarItem(placement: .primaryAction) {
                 Button {
@@ -116,6 +112,9 @@ struct ArtworkListView: View {
             Button("Aceptar", role: .cancel) {}
         } message: {
             Text(deleteError ?? "")
+        }
+        .sheet(isPresented: $showSettings) {
+            SettingsView()
         }
         .confirmationDialog(
             "¿Eliminar esta obra?",

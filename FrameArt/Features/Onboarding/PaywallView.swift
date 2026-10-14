@@ -141,21 +141,49 @@ struct PaywallView: View {
         return (pain ?? .wall).paywallHeadline
     }
 
+    /// Gratis vs Pro (Guideline 3.1.2(c): decir claramente qué se obtiene por el precio).
     private var benefits: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            benefit("Obras publicadas ilimitadas (gratis: \(ProPlan.freePublishedLimit))")
-            benefit("Enlaces para WhatsApp que abren en AR")
-            benefit("Tu espacio público con todo el catálogo")
+        Grid(alignment: .leading, horizontalSpacing: 12, verticalSpacing: 10) {
+            GridRow {
+                Text("")
+                Text("Gratis").font(.footnote.weight(.semibold)).foregroundStyle(.secondary)
+                    .gridColumnAlignment(.center)
+                Text("Pro").font(.footnote.weight(.bold)).foregroundStyle(FrameStudioBrand.accent)
+                    .gridColumnAlignment(.center)
+            }
+            Divider().gridCellUnsizedAxes(.horizontal)
+            comparisonRow("Enlaces publicados para clientes", free: "\(ProPlan.freePublishedLimit)", pro: "Ilimitados")
+            comparisonRow("Obras en tu taller", free: "Ilimitadas", pro: "Ilimitadas")
+            comparisonRow("Prueba en AR a tamaño real", free: nil, pro: nil)
+            comparisonRow("Aviso cuando tu cliente abre", free: nil, pro: nil)
         }
-        .frame(maxWidth: 340, alignment: .leading)
+        .frame(maxWidth: 360)
         .padding(.horizontal, 24)
+        .accessibilityElement(children: .contain)
     }
 
-    private func benefit(_ text: String) -> some View {
-        Label {
-            Text(text).font(.system(size: 14))
-        } icon: {
-            Image(systemName: "checkmark").font(.system(size: 12, weight: .bold)).foregroundStyle(FrameStudioBrand.accent)
+    /// `nil` = incluido (✓).
+    private func comparisonRow(_ title: String, free: String?, pro: String?) -> some View {
+        GridRow {
+            Text(title).font(.subheadline).fixedSize(horizontal: false, vertical: true)
+            cell(free, emphasized: false)
+            cell(pro, emphasized: true)
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("\(title). Gratis: \(free ?? "incluido"). Pro: \(pro ?? "incluido").")
+    }
+
+    @ViewBuilder
+    private func cell(_ value: String?, emphasized: Bool) -> some View {
+        if let value {
+            Text(value)
+                .font(emphasized ? .subheadline.weight(.semibold) : .subheadline)
+                .foregroundStyle(emphasized ? FrameStudioBrand.accent : .secondary)
+                .multilineTextAlignment(.center)
+        } else {
+            Image(systemName: "checkmark")
+                .font(.subheadline.weight(.bold))
+                .foregroundStyle(emphasized ? FrameStudioBrand.accent : .secondary)
         }
     }
 
