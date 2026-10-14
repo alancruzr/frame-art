@@ -408,6 +408,14 @@ struct GuidedDemoView: View {
         }
         state.snapshotHandler = nil
         becomeReady()
+        #if DEBUG
+        if UserDefaults.standard.bool(forKey: "DemoAutoplay") {
+            Task { @MainActor in
+                try? await Task.sleep(for: .seconds(4)); state.place()
+                try? await Task.sleep(for: .seconds(4)); state.pin()
+            }
+        }
+        #endif
     }
 
     private func cleanup() {

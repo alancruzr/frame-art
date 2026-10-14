@@ -87,6 +87,10 @@ struct DemoTryScreen: View {
         }
         .onAppear {
             if usingSample { store.demoWidthCentimeters = SampleArtworkInfo.widthCentimeters }
+            #if DEBUG
+            // Capturas/QA: `-DemoAutoplay YES` abre la prueba y la recorre sola (pared de ejemplo).
+            if UserDefaults.standard.bool(forKey: "DemoAutoplay") { showGuide = true }
+            #endif
         }
         .photosPicker(isPresented: $showPicker, selection: $pickerItem, matching: .images)
         .onChange(of: pickerItem) { _, item in
