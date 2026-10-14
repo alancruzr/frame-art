@@ -154,11 +154,21 @@ extension ArtworkARView.Coordinator {
         hideScanIndicators()
         ghost.isEnabled = true
         PaintingEntityFactory.setOpacity(ghost, 1)
-        UINotificationFeedbackGenerator().notificationOccurred(.success)
-        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        // El háptico de éxito lo da FijarButton (igual en AR real y pared simulada).
         placement.phase = .pinned
-        placement.message = "Obra colgada. Pulsa Mover para otra pared."
+        placement.message = pinnedCopy
         arLog.info("AR pinned \(self.piece.id.uuidString, privacy: .public)")
+    }
+
+    /// Tocar «Fijada»: la obra queda colocada pero vuelve a seguir la mirada para recolocarla.
+    func unpinFromWall() {
+        guard isPinned, let ghost else { return }
+        isPinned = false
+        PaintingEntityFactory.setOpacity(ghost, 0.82)
+        placement.followsCamera = true
+        placement.phase = .aiming
+        placement.message = placedCopy
+        arLog.info("AR unpinned \(self.piece.id.uuidString, privacy: .public)")
     }
 
     func wallHits(in arView: ARView) -> [ARRaycastResult] {

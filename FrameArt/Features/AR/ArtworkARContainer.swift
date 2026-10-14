@@ -6,7 +6,6 @@ struct ArtworkARContainer: View {
     @Environment(\.dismiss) private var dismiss
     @State private var placement = ARPlacementState()
     @State private var snapshot: UIImage?
-    @State private var isCapturing = false
 
     var body: some View {
         NavigationStack {
@@ -22,23 +21,11 @@ struct ArtworkARContainer: View {
                     ArtworkARView(piece: piece, placement: placement)
                         .ignoresSafeArea()
 
-                    VStack(spacing: 8) {
-                        if placement.phase == .aiming || placement.phase == .pinned {
-                            TrueSizeLabel(widthCentimeters: piece.widthCentimeters, heightCentimeters: piece.heightCentimeters)
-                                .padding(.top, 8)
-                        }
-                        Spacer()
-                        if let message = placement.message {
-                            Text(message)
-                                .font(.subheadline)
-                                .multilineTextAlignment(.center)
-                                .padding(.horizontal)
-                                .padding(.vertical, 10)
-                                .frame(maxWidth: .infinity)
-                                .background(.regularMaterial)
-                        }
-                        controls
-                    }
+                    ARPlacementOverlay(
+                        placement: placement,
+                        widthCentimeters: piece.widthCentimeters,
+                        heightCentimeters: piece.heightCentimeters
+                    ) { snapshot = $0 }
                 }
 #endif
             }
@@ -61,74 +48,5 @@ struct ArtworkARContainer: View {
                 }
             }
         }
-    }
-
-    @ViewBuilder
-    private var controls: some View {
-        switch placement.phase {
-        case .searching:
-            Button {
-                placement.place()
-            } label: {
-                Text("Colocar aquí")
-                    .frame(maxWidth: .infinity, minHeight: 44)
-            }
-            .primaryButtonStyle()
-            .disabled(!placement.canPlace)
-            .padding()
-        case .aiming:
-            HStack(spacing: 12) {
-                Button {
-                    placement.move()
-                } label: {
-                    Text("Mover")
-                        .frame(maxWidth: .infinity, minHeight: 44)
-                }
-                .secondaryGlassButtonStyle()
-                Button {
-                    placement.pin()
-                } label: {
-                    Text("Fijar")
-                        .frame(maxWidth: .infinity, minHeight: 44)
-                }
-                .primaryButtonStyle()
-                shutterButton
-            }
-            .padding()
-        case .pinned:
-            HStack(spacing: 12) {
-                Button {
-                    placement.move()
-                } label: {
-                    Text("Mover a otra pared")
-                        .frame(maxWidth: .infinity, minHeight: 44)
-                }
-                .secondaryGlassButtonStyle()
-                shutterButton
-            }
-            .padding()
-        case .failed:
-            EmptyView()
-        }
-    }
-
-    private var shutterButton: some View {
-        Button {
-            Task {
-                isCapturing = true
-                defer { isCapturing = false }
-                UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                if let image = await placement.snapshot() {
-                    Analytics.log(.arSnapshotTaken)
-                    snapshot = image
-                }
-            }
-        } label: {
-            Image(systemName: "camera.fill")
-                .frame(width: 44, height: 44)
-        }
-        .secondaryGlassButtonStyle()
-        .disabled(isCapturing)
-        .accessibilityLabel("Tomar foto de la obra en la pared")
     }
 }

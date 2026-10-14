@@ -35,6 +35,7 @@ extension ArtworkARView {
             placement.placeHandler = { [weak self] in self?.placeOnWall() }
             placement.moveHandler = { [weak self] in self?.moveToNewWall() }
             placement.pinHandler = { [weak self] in self?.pinToWall() }
+            placement.unpinHandler = { [weak self] in self?.unpinFromWall() }
             placement.snapshotHandler = { [weak self] done in
                 guard let arView = self?.arView else { done(nil); return }
                 arView.snapshot(saveToHDR: false) { image in

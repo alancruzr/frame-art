@@ -9,6 +9,7 @@ let searchCopy = "Apunta a una pared y deja el teléfono quieto unos segundos."
 let measuringCopy = "Sigue quieto. Midiendo la pared…"
 let readyCopy = "Pared lista. Pulsa Colocar aquí."
 let placedCopy = "Así se ve colgada. Fíjala, o pulsa Mover para otra pared."
+let pinnedCopy = "Fijada a tamaño real. Acércate y aléjate para verla."
 
 
 @MainActor
@@ -27,6 +28,7 @@ final class ARPlacementState {
     var placeHandler: (() -> Void)?
     var moveHandler: (() -> Void)?
     var pinHandler: (() -> Void)?
+    var unpinHandler: (() -> Void)?
     var snapshotHandler: ((@escaping @MainActor (UIImage?) -> Void) -> Void)?
 
     /// Pellizcar/arrastrar tras colocar (solo la prueba del onboarding lo activa).
@@ -46,6 +48,7 @@ final class ARPlacementState {
     func place() { placeHandler?() }
     func move() { moveHandler?() }
     func pin() { pinHandler?() }
+    func unpin() { unpinHandler?() }
 
     /// Captura la vista AR (RealityKit `ARView.snapshot`). nil si no hay sesión.
     func snapshot() async -> UIImage? {
